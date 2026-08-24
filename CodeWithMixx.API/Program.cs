@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using CodeWithMixx.API.Common.Markers;
 using CodeWithMixx.API.Infrastructure;
 using Scalar.AspNetCore;
 using Serilog;
@@ -8,10 +9,11 @@ builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(conte
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
 await app.MapSeeders();
+app.MapEndpoints();
 
 
 if (app.Environment.IsDevelopment())
@@ -19,7 +21,6 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
     app.MapOpenApi();
 }
-
 app.UseForwardedHeaders();
 
 app.UseSerilogRequestLogging(options =>

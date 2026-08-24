@@ -10,7 +10,6 @@ public static class DependencyInjection
     public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")!;
-
         services.AddHttpContextAccessor();
         services.AddPersistence(connectionString);
         services.AddSecurity(configuration);
