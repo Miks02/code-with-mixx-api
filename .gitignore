@@ -1,0 +1,52 @@
+# Binary files
+**/*.pdb
+**/*.dll
+**/*.exe
+**/*.cache
+**/*.obj
+**/*.o
+**/*.user
+**/*.project
+**/*.log
+**/*.bak
+**/*.nupkg
+**/*.snk
+
+# Build / Output directories
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+[Tt]emp/
+[Tt]mp/
+.vs/
+.history/
+
+# IDE / Editor files
+*.suo
+*.user
+*.userprefs
+*.DS_Store
+Thumbs.db
+Rider.Backend.log
+*.iml
+
+# Rider / JetBrains specific files
+.idea/
+*.iws
+*.bak
+
+# NuGet
+/packages/
+/src/packages/
+/tools/packages/
+/artifacts/
+
+# Local configuration files
+appsettings.Development.json
+connectionstrings.json
+
+# Test results
+TestResults/
+.trx
+*.http
