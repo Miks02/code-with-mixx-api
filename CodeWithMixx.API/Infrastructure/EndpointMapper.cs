@@ -1,4 +1,5 @@
 using CodeWithMixx.API.Common.Interfaces;
+using CodeWithMixx.API.Infrastructure.Filters;
 
 namespace CodeWithMixx.API.Infrastructure;
 
@@ -6,7 +7,9 @@ public static class EndpointMapper
 {
     public static void MapEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("api/");
+        var group = app.MapGroup("api/")
+            .AddEndpointFilter<ValidationFilter>()
+            .AddEndpointFilter<ProblemDetailsFilter>();
 
         var endpoints = typeof(Program).Assembly
             .GetTypes()
