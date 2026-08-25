@@ -12,6 +12,7 @@ public class LogoutEndpoint : IEndpoint
                 var result = await logoutHandler.Handle(ct);
                 return result.ToTypedResult();
             })
+            .RequireRateLimiting("AuthLimiter")
             .WithTags("Authentication")
             .Produces(StatusCodes.Status200OK);
     }

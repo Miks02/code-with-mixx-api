@@ -1,6 +1,7 @@
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Infrastructure.Exceptions.Handlers;
 using CodeWithMixx.API.Infrastructure.Persistence;
+using CodeWithMixx.API.Infrastructure.RateLimiting;
 using CodeWithMixx.API.Infrastructure.Security;
 using FluentValidation;
 
@@ -12,6 +13,8 @@ public static class DependencyInjection
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")!;
         services.AddHttpContextAccessor();
+        services.AddGlobalRateLimiter();
+        services.AddAuthRateLimiter();
         services.AddPersistence(connectionString);
         services.AddSecurity(configuration);
         services.AddValidatorsFromAssembly(typeof(Program).Assembly);

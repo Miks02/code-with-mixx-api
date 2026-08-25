@@ -14,6 +14,7 @@ public class ChangePasswordEndpoint : IEndpoint
             var result = await changePasswordHandler.Handle(request);
             return result.ToTypedResult();
         })
+        .RequireRateLimiting("AuthLimiter")
         .RequireAuthorization()
         .WithTags("Authentication")
         .Produces(StatusCodes.Status200OK)

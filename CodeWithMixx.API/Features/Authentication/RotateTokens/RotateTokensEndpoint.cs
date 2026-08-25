@@ -12,6 +12,7 @@ public class RotateTokensEndpoint : IEndpoint
             var result = await rotateTokensHandler.Handle();
             return result.ToTypedResult();
         })
+        .RequireRateLimiting("AuthLimiter")
         .WithTags("Authentication")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status400BadRequest)
