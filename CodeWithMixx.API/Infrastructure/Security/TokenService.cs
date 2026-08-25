@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -9,8 +10,8 @@ using CodeWithMixx.API.Infrastructure.Exceptions;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 namespace CodeWithMixx.API.Infrastructure.Security;
 
@@ -71,9 +72,8 @@ public class TokenService(
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("lastName", user.LastName)
             ]),
-            Expires = DateTime.UtcNow.AddMinutes(15),
+            Expires = DateTime.UtcNow.AddMinutes(configuration.GetValue<int>("JwtConfig:ExpirationInMinutes")),
             SigningCredentials = signingCreds,
             Issuer = configuration["JwtConfig:Issuer"],
             Audience = configuration["JwtConfig:Audience"]
@@ -82,7 +82,7 @@ public class TokenService(
         var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role));
         tokenDescriptor.Subject.AddClaims(roleClaims);
         
-        var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+        var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
