@@ -1,4 +1,6 @@
+using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Domain.Entities.Users;
+using CodeWithMixx.API.Features.Authentication.Common;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -45,8 +47,22 @@ public static class SecurityRegistration
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(issuerSigningKey))
             };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = ctx =>
+                {
+                    ctx.Request.Cookies.TryGetValue("AccessToken", out var accessToken);
+                    if (!string.IsNullOrWhiteSpace(accessToken))
+                        ctx.Token = accessToken;
+                    return Task.CompletedTask;
+                }
+            };
         });
     
         services.AddAuthorization();
+        services.AddScoped<ICookieProvider, CookieProvider>();
+        services.AddScoped<IUserProvider, UserProvider>();
+        services.AddScoped<ITokenService, TokenService>();
     }
 }

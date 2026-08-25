@@ -1,4 +1,5 @@
-using CodeWithMixx.API.Common.Markers;
+using CodeWithMixx.API.Common.Interfaces;
+using CodeWithMixx.API.Infrastructure.Exceptions.Handlers;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using CodeWithMixx.API.Infrastructure.Security;
 using FluentValidation;
@@ -13,13 +14,16 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         services.AddPersistence(connectionString);
         services.AddSecurity(configuration);
-        services.AddHandlers();
         services.AddValidatorsFromAssembly(typeof(Program).Assembly);
         services.AddProblemDetails();
+        services.AddHandlers();
+        services.AddExceptionHandler<TokensRevokedExceptionHandler>();
+        services.AddExceptionHandler<SecurityDbUpdateExceptionHandler>();
+        services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddOpenApi();
     }
 
-    public static void AddHandlers(this IServiceCollection services)
+    private static void AddHandlers(this IServiceCollection services)
     {
         var handlers = typeof(Program).Assembly
             .GetTypes()
