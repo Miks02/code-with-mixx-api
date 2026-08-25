@@ -31,12 +31,10 @@ public class AuthError
 
     public static Error AccountLocked(string message = "Account is locked")
         => new("Auth.AccountLocked", message, ErrorType.Unauthorized);
-
-    public static Error JwtError(string message = "Error happened while trying to assign refresh token to the user")
-        => new("Auth.JwtError", message, ErrorType.Unauthorized);
-
+    
     public static Error ExpiredToken(string message = "Refresh token has expired")
         => new("Auth.ExpiredToken", message, ErrorType.Unauthorized);
-    public static Error SecurityBreach(string message = "Possible security breach detected")
-        => new("Auth.SecurityBreach", "Possible security breach detected. All tokens have been revoked", ErrorType.Unauthorized);
+    public static Error MissingToken(string message = "Refresh token is missing")
+        => new("Auth.MissingToken", message, ErrorType.Unauthorized);
+    
 }
