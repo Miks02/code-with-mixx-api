@@ -9,11 +9,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace CodeWithMixx.API.Migrations
+namespace CodeWithMixx.API.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260824210732_Initial")]
-    partial class Initial
+    [Migration("20260825072245_AddRefreshTokens")]
+    partial class AddRefreshTokens
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,7 +32,53 @@ namespace CodeWithMixx.API.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Admin");
+                    b.ToTable("Admins");
+                });
+
+            modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.RefreshTokens.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedByIp")
+                        .IsRequired()
+                        .HasMaxLength(45)
+                        .HasColumnType("character varying(45)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReplacedByTokenHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "TokenHash");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Students.Student", b =>
@@ -46,7 +92,7 @@ namespace CodeWithMixx.API.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Student");
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Users.User", b =>
@@ -113,7 +159,7 @@ namespace CodeWithMixx.API.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserName")
@@ -269,6 +315,17 @@ namespace CodeWithMixx.API.Migrations
                     b.HasOne("CodeWithMixx.API.Domain.Entities.Users.User", "User")
                         .WithOne()
                         .HasForeignKey("CodeWithMixx.API.Domain.Entities.Admins.Admin", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.RefreshTokens.RefreshToken", b =>
+                {
+                    b.HasOne("CodeWithMixx.API.Domain.Entities.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
