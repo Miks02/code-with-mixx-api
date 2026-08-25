@@ -14,6 +14,7 @@ var app = builder.Build();
 await app.MapSeeders();
 app.MapEndpoints();
 
+app.UseRateLimiter();
 
 if (app.Environment.IsDevelopment())
 {
@@ -35,7 +36,6 @@ app.UseSerilogRequestLogging(options =>
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.UseHttpsRedirection();
 
 app.Run();
