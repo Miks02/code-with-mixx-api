@@ -37,7 +37,7 @@ public class TokenService(
         try
         {
             await context.RefreshTokens
-                .Where(rt => rt.UserId == userId && rt.IsActive)
+                .Where(rt => rt.UserId == userId && DateTime.UtcNow < rt.ExpiresAt && !rt.RevokedAt.HasValue)
                 .ExecuteUpdateAsync(rt => rt
                     .SetProperty(r => r.RevokedAt, DateTime.UtcNow)
                     .SetProperty(r => r.UpdatedAt, DateTime.UtcNow));
@@ -46,6 +46,14 @@ public class TokenService(
         {
             throw new SecurityDbUpdateException(userId, "An error occurred while revoking user tokens in the database.", ex);
         }
+    }
+    
+    public string HashRefreshToken(string refreshToken)
+    {
+        using var sha256 = SHA256.Create();
+        var bytes = Encoding.UTF8.GetBytes(refreshToken);
+        var hash = sha256.ComputeHash(bytes);
+        return Convert.ToBase64String(hash);
     }
     
     private async Task<string> GenerateAccessToken(User user)
@@ -80,14 +88,6 @@ public class TokenService(
     }
     
     private string CreateRawRefreshToken() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-    
-    private string HashRefreshToken(string refreshToken)
-    {
-        using var sha256 = SHA256.Create();
-        var bytes = Encoding.UTF8.GetBytes(refreshToken);
-        var hash = sha256.ComputeHash(bytes);
-        return Convert.ToBase64String(hash);
-    }
 
     private async Task<string> AssignRefreshToken(User user)
     {

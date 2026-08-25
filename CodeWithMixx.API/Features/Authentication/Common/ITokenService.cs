@@ -6,4 +6,5 @@ public interface ITokenService
 {
     Task<TokenResponseDto> AssignAuthTokens(User user);
     Task RevokeAllUserTokensAsync(string userId);
+    string HashRefreshToken(string refreshToken);
 }

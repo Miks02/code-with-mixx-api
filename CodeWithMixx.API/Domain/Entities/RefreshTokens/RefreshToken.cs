@@ -17,8 +17,6 @@ public class RefreshToken : IAuditable
 
     public User User { get; set; } = null!;
     public string UserId { get; set; } = null!;
-
-    public bool IsActive => DateTime.UtcNow < ExpiresAt && !RevokedAt.HasValue;
     
     public static RefreshToken CreateRefreshToken(string tokenHash, string userId, string userIp, DateTime expiresAt)
     {
@@ -34,7 +32,7 @@ public class RefreshToken : IAuditable
         };
     }
 
-    public void Revoke(string? replacedByTokenHash)
+    public void Revoke(string? replacedByTokenHash = null)
     {
         RevokedAt = DateTime.UtcNow;
         ReplacedByTokenHash = replacedByTokenHash;
