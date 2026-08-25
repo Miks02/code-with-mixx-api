@@ -12,6 +12,8 @@ public static class GlobalRateLimiter
         {
             options.OnRejected = async (context, cancellationToken) =>
             {
+                context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                
                 var problem = new ProblemDetails
                 {
                     Title = "Too many requests",
