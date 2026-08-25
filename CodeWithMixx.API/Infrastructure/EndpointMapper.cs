@@ -1,4 +1,4 @@
-using CodeWithMixx.API.Common.Markers;
+using CodeWithMixx.API.Common.Interfaces;
 
 namespace CodeWithMixx.API.Infrastructure;
 

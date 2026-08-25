@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using CodeWithMixx.API.Common.Markers;
 using CodeWithMixx.API.Infrastructure;
 using Scalar.AspNetCore;
 using Serilog;
