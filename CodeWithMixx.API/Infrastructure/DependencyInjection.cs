@@ -14,6 +14,7 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("DefaultConnection")!;
         services.AddHttpContextAccessor();
         services.AddGlobalRateLimiter();
+        services.AddAuthRateLimiter();
         services.AddPersistence(connectionString);
         services.AddSecurity(configuration);
         services.AddValidatorsFromAssembly(typeof(Program).Assembly);

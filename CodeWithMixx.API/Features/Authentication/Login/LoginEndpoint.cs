@@ -13,6 +13,7 @@ public class LoginEndpoint : IEndpoint
             var result = await loginHandler.Handle(request, ct);
             return result.ToTypedResult();
         })
+        .RequireRateLimiting("AuthLimiter")
         .WithTags("Authentication")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status400BadRequest)
