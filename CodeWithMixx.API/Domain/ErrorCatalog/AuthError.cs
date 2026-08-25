@@ -4,10 +4,10 @@ namespace CodeWithMixx.API.Domain.ErrorCatalog;
 
 public class AuthError
 {
-    public static Error RegistrationFailed(string message = "Unexpected error happened during registration")
+    public static Error RegistrationFailed(string message = "Unexpected error happened during registration. Check the provided data and try again")
         => new("Auth.RegistrationFailed", message, ErrorType.Unauthorized);
         
-    public static Error LoginFailed(string message = "Unexpected error happened during login")
+    public static Error LoginFailed(string message = "Invalid username or password")
         => new("Auth.LoginFailed", message, ErrorType.Unauthorized);
         
     public static Error PasswordError(string message = "Error occurred while trying to assign password to the user")
