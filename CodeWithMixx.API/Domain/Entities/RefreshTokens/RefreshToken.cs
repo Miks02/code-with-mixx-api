@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using CodeWithMixx.API.Domain.Entities.Users;
 
 namespace CodeWithMixx.API.Domain.Entities.RefreshTokens;
@@ -17,11 +18,13 @@ public class RefreshToken : IAuditable
     public User User { get; set; } = null!;
     public string UserId { get; set; } = null!;
 
-    public bool IsRevoked => RevokedAt.HasValue;
-    public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
+    public bool IsActive => DateTime.UtcNow < ExpiresAt && !RevokedAt.HasValue;
     
     public static RefreshToken CreateRefreshToken(string tokenHash, string userId, string userIp, DateTime expiresAt)
     {
+        if (string.IsNullOrWhiteSpace(tokenHash) || tokenHash.Length != 44)
+            throw new ArgumentException("Token hash must be a valid 44-character SHA-256 Base64 string.", nameof(tokenHash));
+        
         return new RefreshToken
         {
             UserId = userId,
