@@ -31,7 +31,7 @@ public static class GlobalRateLimiter
 
                 return RateLimitPartition.GetTokenBucketLimiter(partitionKey, _ => new TokenBucketRateLimiterOptions
                 {
-                    TokenLimit = 10,
+                    TokenLimit = 100,
                     ReplenishmentPeriod = TimeSpan.FromSeconds(15),
                     TokensPerPeriod = 10
                 });
