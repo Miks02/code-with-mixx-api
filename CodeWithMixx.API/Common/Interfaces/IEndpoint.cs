@@ -1,4 +1,4 @@
-namespace CodeWithMixx.API.Common.Markers;
+namespace CodeWithMixx.API.Common.Interfaces;
 
 public interface IEndpoint
 {

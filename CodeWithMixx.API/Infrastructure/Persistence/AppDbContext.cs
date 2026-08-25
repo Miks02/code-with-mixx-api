@@ -1,3 +1,6 @@
+using CodeWithMixx.API.Domain.Entities.Admins;
+using CodeWithMixx.API.Domain.Entities.RefreshTokens;
+using CodeWithMixx.API.Domain.Entities.Students;
 using CodeWithMixx.API.Domain.Entities.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -7,6 +10,9 @@ namespace CodeWithMixx.API.Infrastructure.Persistence;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<User>(options)
 {
+    public DbSet<Admin> Admins { get; set; }
+    public DbSet<Student> Students { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }  
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

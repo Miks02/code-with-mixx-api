@@ -1,4 +1,6 @@
+using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Domain.Entities.Users;
+using CodeWithMixx.API.Features.Authentication.Common;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -16,9 +18,9 @@ public static class SecurityRegistration
         services.AddIdentity<User, IdentityRole>(options =>
             {
                 options.User.RequireUniqueEmail = true;
-                options.Password.RequireDigit = true;
+                options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 8;
-                options.Password.RequireLowercase = true;
+                options.Password.RequireLowercase = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.SignIn.RequireConfirmedEmail = false;
@@ -45,8 +47,22 @@ public static class SecurityRegistration
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(issuerSigningKey))
             };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = ctx =>
+                {
+                    ctx.Request.Cookies.TryGetValue("AccessToken", out var accessToken);
+                    if (!string.IsNullOrWhiteSpace(accessToken))
+                        ctx.Token = accessToken;
+                    return Task.CompletedTask;
+                }
+            };
         });
     
         services.AddAuthorization();
+        services.AddScoped<ICookieProvider, CookieProvider>();
+        services.AddScoped<IUserProvider, UserProvider>();
+        services.AddScoped<ITokenService, TokenService>();
     }
 }

@@ -4,10 +4,10 @@ namespace CodeWithMixx.API.Domain.ErrorCatalog;
 
 public class AuthError
 {
-    public static Error RegistrationFailed(string message = "Unexpected error happened during registration")
+    public static Error RegistrationFailed(string message = "Unexpected error happened during registration. Check the provided data and try again")
         => new("Auth.RegistrationFailed", message, ErrorType.Unauthorized);
         
-    public static Error LoginFailed(string message = "Unexpected error happened during login")
+    public static Error LoginFailed(string message = "Invalid username or password")
         => new("Auth.LoginFailed", message, ErrorType.Unauthorized);
         
     public static Error PasswordError(string message = "Error occurred while trying to assign password to the user")
@@ -31,12 +31,10 @@ public class AuthError
 
     public static Error AccountLocked(string message = "Account is locked")
         => new("Auth.AccountLocked", message, ErrorType.Unauthorized);
-
-    public static Error JwtError(string message = "Error happened while trying to assign refresh token to the user")
-        => new("Auth.JwtError", message, ErrorType.Unauthorized);
-
+    
     public static Error ExpiredToken(string message = "Refresh token has expired")
         => new("Auth.ExpiredToken", message, ErrorType.Unauthorized);
-    public static Error SecurityBreach(string message = "Possible security breach detected")
-        => new("Auth.SecurityBreach", "Possible security breach detected. All tokens have been revoked", ErrorType.Unauthorized);
+    public static Error MissingToken(string message = "Refresh token is missing")
+        => new("Auth.MissingToken", message, ErrorType.Unauthorized);
+    
 }
