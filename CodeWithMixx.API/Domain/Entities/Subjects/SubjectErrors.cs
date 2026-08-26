@@ -2,7 +2,7 @@ using CodeWithMixx.API.Common.Result;
 
 namespace CodeWithMixx.API.Domain.Entities.Subjects;
 
-public class SubjectErrors
+public static class SubjectError
 {
     public static Error NotFound(int? identifier = null)
     {
