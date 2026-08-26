@@ -1,4 +1,5 @@
 using CodeWithMixx.API.Common.Interfaces;
+using CodeWithMixx.API.Infrastructure.Decorators;
 using CodeWithMixx.API.Infrastructure.Exceptions.Handlers;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using CodeWithMixx.API.Infrastructure.RateLimiting;
@@ -19,23 +20,17 @@ public static class DependencyInjection
         services.AddSecurity(configuration);
         services.AddValidatorsFromAssembly(typeof(Program).Assembly);
         services.AddProblemDetails();
-        services.AddHandlers();
         services.AddExceptionHandler<TokensRevokedExceptionHandler>();
         services.AddExceptionHandler<SecurityDbUpdateExceptionHandler>();
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddOpenApi();
-    }
-
-    private static void AddHandlers(this IServiceCollection services)
-    {
-        var handlers = typeof(Program).Assembly
-            .GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract && typeof(IHandler).IsAssignableFrom(t));
         
-        foreach (var handler in handlers)
-        {
-            services.AddScoped(handler);
-        }
+        services.Scan(scan => scan.FromAssemblyOf<Program>()
+            .AddClasses(classes => classes.AssignableTo(typeof(IHandler<,>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+        
+        services.Decorate(typeof(IHandler<,>), typeof(LoggingDecorator<,>));
     }
     
     public static async Task MapSeeders(this WebApplication app)
