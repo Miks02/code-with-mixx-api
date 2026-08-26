@@ -60,7 +60,12 @@ public static class SecurityRegistration
             };
         });
     
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+            options.AddPolicy("StudentOnly", policy => policy.RequireRole("Student"));
+        });
+        
         services.AddScoped<ICookieProvider, CookieProvider>();
         services.AddScoped<IUserProvider, UserProvider>();
         services.AddScoped<ITokenService, TokenService>();
