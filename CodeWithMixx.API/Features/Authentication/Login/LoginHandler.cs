@@ -12,9 +12,10 @@ public class LoginHandler(
     UserManager<User> userManager,
     ITokenService tokenService,
     AppDbContext context,
-    ICookieProvider cookieProvider) : IHandler
+    ICookieProvider cookieProvider) : IHandler<LoginRequest, Result>
 {
-    public async Task<Result> Handle(LoginRequest request, CancellationToken ct = default)
+
+    public async Task<Result> HandleAsync(LoginRequest request, CancellationToken ct = default)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(ct);
 
@@ -22,7 +23,7 @@ public class LoginHandler(
         {
             var user = await userManager.FindByEmailAsync(request.Email);
             if (user is null)
-                return Result.Failure(AuthError.LoginFailed("User not found."));
+                return Result.Failure(AuthError.LoginFailed($"User with email {request.Email} has not been found."));
 
             var isPasswordValid = await userManager.CheckPasswordAsync(user, request.Password);
             if (!isPasswordValid)

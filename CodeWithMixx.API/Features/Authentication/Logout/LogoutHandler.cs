@@ -9,9 +9,9 @@ namespace CodeWithMixx.API.Features.Authentication.Logout;
 public class LogoutHandler(
     AppDbContext context,
     ICookieProvider cookieProvider, 
-    ITokenService tokenService) : IHandler
+    ITokenService tokenService) : IHandler<LogoutRequest, Result>
 {
-    public async Task<Result> Handle(CancellationToken ct = default)
+    public async Task<Result> HandleAsync(LogoutRequest emptyRequest, CancellationToken ct = default)
     {
         var refreshToken = cookieProvider.GetRefreshTokenCookie();
 

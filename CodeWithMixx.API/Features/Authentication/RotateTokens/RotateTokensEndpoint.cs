@@ -7,9 +7,9 @@ public class RotateTokensEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("auth/rotate-tokens", async (RotateTokensHandler rotateTokensHandler, CancellationToken ct = default) =>
+        app.MapPost("auth/rotate-tokens", async (IHandler<RotateTokensRequest, Result> rotateTokensHandler, CancellationToken ct = default) =>
         {
-            var result = await rotateTokensHandler.Handle();
+            var result = await rotateTokensHandler.HandleAsync(new RotateTokensRequest(), ct);
             return result.ToTypedResult();
         })
         .RequireRateLimiting("AuthLimiter")

@@ -9,9 +9,9 @@ public class ChangePasswordEndpoint : IEndpoint
     {
         app.MapPost("auth/change-password", async (
                 ChangePasswordRequest request,
-                ChangePasswordHandler changePasswordHandler) =>
+                IHandler<ChangePasswordRequest, Result> changePasswordHandler) =>
         {
-            var result = await changePasswordHandler.Handle(request);
+            var result = await changePasswordHandler.HandleAsync(request);
             return result.ToTypedResult();
         })
         .RequireRateLimiting("AuthLimiter")

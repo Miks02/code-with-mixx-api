@@ -8,9 +8,9 @@ public class LoginEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("auth/login", async (LoginRequest request, LoginHandler loginHandler, CancellationToken ct = default) =>
+        app.MapPost("auth/login", async (LoginRequest request, IHandler<LoginRequest, Result> loginHandler, CancellationToken ct) =>
         {
-            var result = await loginHandler.Handle(request, ct);
+            var result = await loginHandler.HandleAsync(request, ct);
             return result.ToTypedResult();
         })
         .RequireRateLimiting("AuthLimiter")

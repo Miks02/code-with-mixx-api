@@ -10,9 +10,9 @@ namespace CodeWithMixx.API.Features.Authentication.RotateTokens;
 public class RotateTokensHandler(
     ICookieProvider cookieProvider,
     ITokenService tokenService,
-    AppDbContext context) : IHandler
+    AppDbContext context) : IHandler<RotateTokensRequest, Result>
 {
-    public async Task<Result> Handle()
+    public async Task<Result> HandleAsync(RotateTokensRequest request, CancellationToken ct = default)
     {
         var currentRefreshToken = cookieProvider.GetRefreshTokenCookie();
         if (string.IsNullOrEmpty(currentRefreshToken))
@@ -23,7 +23,7 @@ public class RotateTokensHandler(
         var oldToken = await context.RefreshTokens
             .Include(rt => rt.User)
             .Where(rt => rt.TokenHash == hashedRefreshToken && DateTime.UtcNow < rt.ExpiresAt && !rt.RevokedAt.HasValue)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(ct);
 
         if (oldToken is null)
         {
@@ -36,7 +36,7 @@ public class RotateTokensHandler(
         var newHashedRefreshToken = tokenService.HashRefreshToken(tokens.RefreshToken);
         
         oldToken.Revoke(newHashedRefreshToken);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(ct);
         
         cookieProvider.SetAccessTokenCookie(tokens.AccessToken);
         cookieProvider.SetRefreshTokenCookie(tokens.RefreshToken);
