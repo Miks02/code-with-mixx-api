@@ -11,9 +11,9 @@ public class ChangePasswordHandler(
     UserManager<User> userManager,
     ITokenService tokenService,
     ICookieProvider cookieProvider,
-    IUserProvider userProvider) : IHandler
+    IUserProvider userProvider) : IHandler<ChangePasswordRequest, Result>
 {
-    public async Task<Result> Handle(ChangePasswordRequest request)
+    public async Task<Result> HandleAsync(ChangePasswordRequest request, CancellationToken ct = default)
     {
         var user = await userManager.FindByIdAsync(userProvider.GetUserId());
         if (user is null)

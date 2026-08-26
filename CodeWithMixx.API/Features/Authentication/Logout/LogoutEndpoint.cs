@@ -7,9 +7,9 @@ public class LogoutEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("auth/logout", async (LogoutHandler logoutHandler, CancellationToken ct = default) =>
+        app.MapPost("auth/logout", async (IHandler<LogoutRequest, Result> logoutHandler, CancellationToken ct = default) =>
             {
-                var result = await logoutHandler.Handle(ct);
+                var result = await logoutHandler.HandleAsync(new LogoutRequest(), ct);
                 return result.ToTypedResult();
             })
             .RequireRateLimiting("AuthLimiter")
