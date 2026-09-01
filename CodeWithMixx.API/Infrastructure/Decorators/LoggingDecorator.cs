@@ -28,9 +28,6 @@ public class LoggingDecorator<TRequest, TResponse>(
                 var logLevel = hasFailureErrors ? LogLevel.Warning : LogLevel.Information;
                 var errors = string.Join(", ", result.Errors.Select(e => new {e.Code, e.Description}));
 
-                // logger.LogWarning(
-                //     "{RequestName} failed in {ElapsedMs}ms — {ErrorCount} error(s): {ErrorCodes}",
-                //     requestName, stopwatch.ElapsedMilliseconds, result.Errors.Count, errors);
                 logger.Log(logLevel, "{RequestName} failed in {ElapsedMs}ms — {ErrorCount} error(s): {errors}",
                     requestName, stopwatch.ElapsedMilliseconds, result.Errors.Count, errors);
             }
