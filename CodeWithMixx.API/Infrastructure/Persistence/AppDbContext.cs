@@ -1,3 +1,5 @@
+using System.Reflection;
+using CodeWithMixx.API.Domain;
 using CodeWithMixx.API.Domain.Entities.Admins;
 using CodeWithMixx.API.Domain.Entities.RefreshTokens;
 using CodeWithMixx.API.Domain.Entities.Students;
@@ -29,5 +31,22 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
         
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (typeof(ISoftDeletable).IsAssignableFrom(entityType.ClrType))
+            {
+                var method = typeof(AppDbContext)
+                    .GetMethod(nameof(SetSoftDeleteFilter), BindingFlags.NonPublic | BindingFlags.Static)!
+                    .MakeGenericMethod(entityType.ClrType);
+
+                method.Invoke(null, [modelBuilder]);
+            }
+        }
+    }
+
+    private static void SetSoftDeleteFilter<TEntity>(ModelBuilder modelBuilder) where TEntity : class, ISoftDeletable
+    {
+        modelBuilder.Entity<TEntity>().HasQueryFilter(e => !e.IsDeleted);
     }
 }
