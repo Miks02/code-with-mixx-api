@@ -11,9 +11,10 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
         builder.HasKey(x => x.UserId);
 
         builder.HasOne(x => x.User)
-            .WithOne()
+            .WithOne(x => x.Student)
             .HasForeignKey<Student>(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
 
         builder.Property(x => x.University)
             .HasMaxLength(100);
