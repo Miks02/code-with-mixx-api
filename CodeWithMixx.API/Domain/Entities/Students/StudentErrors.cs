@@ -1,5 +1,4 @@
 using CodeWithMixx.API.Common.Result;
-using CodeWithMixx.API.Common.Results;
 
 namespace CodeWithMixx.API.Domain.Entities.Students;
 
