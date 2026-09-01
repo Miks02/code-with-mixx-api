@@ -8,11 +8,11 @@ namespace CodeWithMixx.API.Features.Students.CreateStudent
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("/students", async (CreateStudentRequest request, IHandler<CreateStudentRequest, Result> handler, CancellationToken ct) =>
+            app.MapPost("/students", async (CreateStudentRequest request, IHandler<CreateStudentRequest, Result<CreateStudentResponse>> handler, CancellationToken ct) =>
                 {
                     var result = await handler.HandleAsync(request, ct);
 
-                    return result.ToTypedResult(HttpStatusCode.Created);
+                    return result.ToTypedResult(HttpStatusCode.Created, $"/api/students/{result.Payload?.Id}");
                 })
             .WithTags("Students")
             .RequireAuthorization("AdminOnly")
