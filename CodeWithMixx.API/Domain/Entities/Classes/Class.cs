@@ -6,6 +6,7 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
     public class Class 
     {
         public int Id { get; set; }
+        public decimal Price { get; set; }
         public DateTime StartsAt { get; set; }
         public DateTime EndsAt { get; set; }
 

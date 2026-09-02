@@ -1,7 +1,9 @@
 using System.Reflection;
 using CodeWithMixx.API.Domain;
 using CodeWithMixx.API.Domain.Entities.Admins;
+using CodeWithMixx.API.Domain.Entities.Classes;
 using CodeWithMixx.API.Domain.Entities.RefreshTokens;
+using CodeWithMixx.API.Domain.Entities.Reservations;
 using CodeWithMixx.API.Domain.Entities.Students;
 using CodeWithMixx.API.Domain.Entities.Subjects;
 using CodeWithMixx.API.Domain.Entities.Users;
@@ -17,6 +19,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<Student> Students { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }  
     public DbSet<Subject> Subjects { get; set; }
+    public DbSet<Reservation> Reservations { get; set; }
+    public DbSet<Class> Classes { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

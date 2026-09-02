@@ -1,3 +1,5 @@
+using CodeWithMixx.API.Domain.Entities.Classes;
+
 namespace CodeWithMixx.API.Domain.Entities.Subjects;
 
 public class Subject : IAuditable, ISoftDeletable
@@ -10,6 +12,7 @@ public class Subject : IAuditable, ISoftDeletable
     public DateTime? UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }
+    public ICollection<Class> Classes { get; set; } = [];
     
     private Subject() {}
     

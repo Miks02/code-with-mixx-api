@@ -1,3 +1,4 @@
+using CodeWithMixx.API.Domain.Entities.Reservations;
 using CodeWithMixx.API.Domain.Entities.Users;
 
 namespace CodeWithMixx.API.Domain.Entities.Students;
@@ -11,6 +12,8 @@ public class Student : ISoftDeletable
 
     public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }
+
+    public ICollection<Reservation> Reservations { get; set; } = [];
 
     public static Student Create(string userId, string? university)
     {

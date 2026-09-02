@@ -1,4 +1,5 @@
 ﻿using CodeWithMixx.API.Domain.Entities.Admins;
+using CodeWithMixx.API.Domain.Entities.Classes;
 using CodeWithMixx.API.Domain.Entities.Students;
 
 namespace CodeWithMixx.API.Domain.Entities.Reservations
@@ -10,6 +11,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
 
         public decimal TotalPrice { get; set; }
+        public decimal PaidAmount { get; set; }
         public decimal DiscountRate { get; set; }
         public decimal Bonus { get; set; }
 
@@ -23,6 +25,8 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
         public Student Student { get; set; } = null!;
         public string StudentId { get; set; } = null!;
+
+        public ICollection<Class> Classes { get; set; } = [];
 
 
     }
