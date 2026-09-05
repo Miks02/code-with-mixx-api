@@ -13,6 +13,12 @@ public static class SubjectError
         return new Error("Subject.NotFound", message, ErrorType.NotFound);
     }
     
+    public static Error MultipleSubjectsMissing(IReadOnlyList<int> identifiers)
+    {
+        string message = $"Subjects with identifiers '{string.Join(", ", identifiers)}' are not found";
+        return new Error("Subject.MultipleSubjectsMissing", message, ErrorType.NotFound);
+    }
+    
     public static Error AlreadyExists(string identifier = "")
     {
         string message = string.IsNullOrWhiteSpace(identifier)

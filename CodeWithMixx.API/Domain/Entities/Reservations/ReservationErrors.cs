@@ -23,6 +23,9 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         }
 
         public static Error InvalidAmount(decimal amount)
-            => new("Reservation.InvalidAmount", $"Amount '{amount}' must be greater than zero", ErrorType.Validation);
+            => new("Reservation.InvalidAmount", $"Amount '{amount}' must be positive", ErrorType.Validation);
+        
+        public static Error InvalidTotalPrice(decimal totalPrice)
+            => new("Reservation.InvalidTotalPrice", $"Total price '{totalPrice}' must be positive", ErrorType.Validation);
     }
 }
