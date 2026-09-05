@@ -12,6 +12,9 @@ builder.Services.AddInfrastructure(builder.Configuration);
 var app = builder.Build();
 
 await app.MapSeeders();
+app.UseCors("DevCors");
+
+
 app.MapEndpoints();
 
 app.UseRateLimiter();

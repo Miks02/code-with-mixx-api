@@ -1,4 +1,5 @@
 using CodeWithMixx.API.Common.Interfaces;
+using CodeWithMixx.API.Infrastructure.Cors;
 using CodeWithMixx.API.Infrastructure.Decorators;
 using CodeWithMixx.API.Infrastructure.Exceptions.Handlers;
 using CodeWithMixx.API.Infrastructure.Persistence;
@@ -24,6 +25,7 @@ public static class DependencyInjection
         services.AddExceptionHandler<SecurityDbUpdateExceptionHandler>();
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddOpenApi();
+        services.RegisterCors();
         
         services.Scan(scan => scan.FromAssemblyOf<Program>()
             .AddClasses(classes => classes.AssignableTo(typeof(IHandler<,>)))
