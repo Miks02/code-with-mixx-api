@@ -15,5 +15,8 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
 
         public static Error InvalidSchedule(DateTime startsAt, DateTime endsAt)
             => new("Class.InvalidSchedule", $"Class schedule is invalid: starts at '{startsAt:u}' and ends at '{endsAt:u}'", ErrorType.Validation);
+        
+        public static Error InvalidPrice(decimal price)
+            => new("Class.InvalidPrice", $"Price '{price}' must be positive", ErrorType.Validation);
     }
 }

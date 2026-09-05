@@ -29,7 +29,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Admins");
+                    b.ToTable("Admins", (string)null);
                 });
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Classes.Class", b =>
@@ -66,7 +66,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("Classes", t =>
+                    b.ToTable("Classes", null, t =>
                         {
                             t.HasCheckConstraint("CK_Classes_Price_Positive", "\"Price\" >= 0");
                         });
@@ -115,7 +115,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasIndex("UserId", "TokenHash");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Reservations.Reservation", b =>
@@ -178,7 +178,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Reservations", t =>
+                    b.ToTable("Reservations", null, t =>
                         {
                             t.HasCheckConstraint("CK_Reservations_Bonus_Positive", "\"Bonus\" >= 0");
 
@@ -207,7 +207,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Students");
+                    b.ToTable("Students", (string)null);
                 });
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Subjects.Subject", b =>
@@ -245,7 +245,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Subjects");
+                    b.ToTable("Subjects", (string)null);
                 });
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Users.User", b =>
