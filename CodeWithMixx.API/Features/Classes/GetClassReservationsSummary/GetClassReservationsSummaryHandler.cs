@@ -52,6 +52,8 @@ public class GetClassReservationsSummaryHandler(AppDbContext context)
                 .OrderBy(c => c.StartsAt)
                 .Select(c => new GetClassReservationsSummaryResponse.ClassReservationDto.ClassDto
                 {
+                    Id = c.Id,
+                    SubjectId = c.SubjectId,
                     SubjectName = c.Subject.Name,
                     Price = c.Price,
                     StartsAt = c.StartsAt,

@@ -50,6 +50,8 @@ public class GetPagedClassReservationsHandler(AppDbContext context)
                 .OrderBy(c => c.StartsAt)
                 .Select(c => new GetPagedClassReservationsResponse.ClassDto
                 {
+                    Id = c.Id,
+                    SubjectId = c.SubjectId,
                     SubjectName = c.Subject.Name,
                     Price = c.Price,
                     StartsAt = c.StartsAt,
