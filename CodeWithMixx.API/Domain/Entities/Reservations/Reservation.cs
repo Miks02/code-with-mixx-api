@@ -5,7 +5,7 @@ using CodeWithMixx.API.Domain.Entities.Students;
 
 namespace CodeWithMixx.API.Domain.Entities.Reservations
 {
-    public class Reservation : IAuditable
+    public class Reservation : IAuditable, ISoftDeletable
     {
         public int Id { get; private set; }
         public ReservationStatus ReservationStatus { get; private set; } = ReservationStatus.Confirmed;
@@ -20,6 +20,8 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
 
         public Admin Admin { get; private set; } = null!;
         public string AdminId { get; private set; } = null!;
@@ -78,6 +80,15 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result<Reservation>.Success(reservation);
         }
 
+        public bool RequiresHistoryRetention()
+            => ReservationStatus == ReservationStatus.Completed
+               || PaymentStatus != PaymentStatus.Pending
+               || Classes.Any(c => c.StartsAt <= DateTime.UtcNow);
 
+        public void Delete()
+        {
+            IsDeleted = true;
+            DeletedAt = DateTime.UtcNow;
+        }
     }
 }
