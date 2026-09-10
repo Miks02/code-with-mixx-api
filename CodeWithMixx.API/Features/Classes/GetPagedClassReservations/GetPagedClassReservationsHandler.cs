@@ -44,11 +44,13 @@ public class GetPagedClassReservationsHandler(AppDbContext context)
             PaymentStatus = r.PaymentStatus,
             TotalPrice = r.TotalPrice,
             PaidAmount = r.PaidAmount,
+            DiscountRate = r.DiscountRate,
+            Bonus = r.Bonus,
             CreatedAt = r.CreatedAt,
             StartsAt = r.Classes.Min(c => c.StartsAt),
             Classes = r.Classes
                 .OrderBy(c => c.StartsAt)
-                .Select(c => new GetPagedClassReservationsResponse.ClassDto
+                .Select(c => new ClassItem
                 {
                     Id = c.Id,
                     SubjectId = c.SubjectId,

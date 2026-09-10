@@ -1,4 +1,5 @@
 using CodeWithMixx.API.Domain.Entities.Reservations;
+using CodeWithMixx.API.Features.Classes.Common;
 
 namespace CodeWithMixx.API.Features.Classes.GetPagedClassReservations;
 
@@ -11,17 +12,10 @@ public record GetPagedClassReservationsResponse
     public PaymentStatus PaymentStatus { get; init; }
     public decimal TotalPrice { get; init; }
     public decimal PaidAmount { get; init; }
+    public decimal DiscountRate { get; init; }
+    public decimal Bonus { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime StartsAt { get; init; }
-    public IReadOnlyList<ClassDto> Classes { get; init; } = [];
+    public IReadOnlyList<ClassItem> Classes { get; init; } = [];
 
-    public record ClassDto
-    {
-        public int Id { get; init; }
-        public int SubjectId { get; init; }
-        public string SubjectName { get; init; } = null!;
-        public decimal Price { get; init; }
-        public DateTime StartsAt { get; init; }
-        public DateTime EndsAt { get; init; }
-    }
 }

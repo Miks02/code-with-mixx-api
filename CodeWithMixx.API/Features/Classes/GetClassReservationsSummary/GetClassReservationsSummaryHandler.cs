@@ -37,7 +37,7 @@ public class GetClassReservationsSummaryHandler(AppDbContext context)
             _ => reservationsQuery.OrderBy(r => r.Classes.Min(c => c.StartsAt))
         };
 
-        var projectedQuery = reservationsQuery.Select(r => new GetClassReservationsSummaryResponse.ClassReservationDto
+        var projectedQuery = reservationsQuery.Select(r => new GetClassReservationsSummaryResponse.ClassReservation
         {
             Id = r.Id,
             StudentId = r.StudentId,
@@ -47,10 +47,12 @@ public class GetClassReservationsSummaryHandler(AppDbContext context)
             TotalPrice = r.TotalPrice,
             PaidAmount = r.PaidAmount,
             CreatedAt = r.CreatedAt,
+            DiscountRate = r.DiscountRate,
+            Bonus = r.Bonus,
             StartsAt = r.Classes.Min(c => c.StartsAt),
             Classes = r.Classes
                 .OrderBy(c => c.StartsAt)
-                .Select(c => new GetClassReservationsSummaryResponse.ClassReservationDto.ClassDto
+                .Select(c => new ClassItem
                 {
                     Id = c.Id,
                     SubjectId = c.SubjectId,
@@ -62,7 +64,7 @@ public class GetClassReservationsSummaryHandler(AppDbContext context)
                 .ToList()
         });
 
-        var pagedResult = await PagedResult<GetClassReservationsSummaryResponse.ClassReservationDto>.CreateAsync(
+        var pagedResult = await PagedResult<GetClassReservationsSummaryResponse.ClassReservation>.CreateAsync(
             projectedQuery, request.PageNumber, request.PageSize, ct);
         
         var statusCounts = await context.Classes
@@ -80,7 +82,7 @@ public class GetClassReservationsSummaryHandler(AppDbContext context)
 
         var nextClass = await nextClassQuery
             .OrderBy(c => c.StartsAt)
-            .Select(c => new GetClassReservationsSummaryResponse.NextClassDto
+            .Select(c => new GetClassReservationsSummaryResponse.NextClass
             {
                 ReservationId = c.ReservationId,
                 StudentFullName = c.Reservation.Student.User.FirstName + " " + c.Reservation.Student.User.LastName,
@@ -97,7 +99,7 @@ public class GetClassReservationsSummaryHandler(AppDbContext context)
             HeldClassesCount = heldClassesCount,
             ScheduledClassesCount = scheduledClassesCount,
             CancelledClassesCount = cancelledClassesCount,
-            NextClass = nextClass
+            NextClassItem = nextClass
         };
 
         return Result<GetClassReservationsSummaryResponse>.Success(response);
