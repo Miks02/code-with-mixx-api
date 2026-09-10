@@ -34,8 +34,4 @@
         <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Features\Classes\GetClassReservationById\" />
-    </ItemGroup>
-
 </Project>
