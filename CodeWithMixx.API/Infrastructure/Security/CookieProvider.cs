@@ -11,10 +11,10 @@ public class CookieProvider(IConfiguration configuration, IHttpContextAccessor h
     public string? GetAccessTokenCookie() => Context.Request.Cookies["AccessToken"];
 
     public void SetAccessTokenCookie(string token) =>
-        AppendCookie("AccessToken", token, DateTime.UtcNow.AddMinutes(configuration.GetValue<int>("JwtConfig:ExpirationInMinutes")));
+        AppendCookie("AccessToken", token, DateTimeOffset.UtcNow.AddMinutes(configuration.GetValue<int>("JwtConfig:ExpirationInMinutes")));
 
     public void SetRefreshTokenCookie(string token) =>
-        AppendCookie("RefreshToken", token, DateTime.UtcNow.AddDays(configuration.GetValue<int>("RefreshConfig:ExpirationInDays")));
+        AppendCookie("RefreshToken", token, DateTimeOffset.UtcNow.AddDays(configuration.GetValue<int>("RefreshConfig:ExpirationInDays")));
 
     public void RemoveAuthCookies()
     {
@@ -22,12 +22,12 @@ public class CookieProvider(IConfiguration configuration, IHttpContextAccessor h
         Context.Response.Cookies.Delete("RefreshToken");
     }
 
-    private void AppendCookie(string name, string value, DateTime expires)
+    private void AppendCookie(string name, string value, DateTimeOffset expires)
     {
         Context.Response.Cookies.Append(name, value, GetCookieOptions(expires));
     }
     
-    private CookieOptions GetCookieOptions(DateTime expires)
+    private CookieOptions GetCookieOptions(DateTimeOffset expires)
     {
         var domain = configuration.GetValue<string?>("CookieConfig:Domain");
 
