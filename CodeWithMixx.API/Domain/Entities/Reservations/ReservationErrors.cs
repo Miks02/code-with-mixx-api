@@ -22,8 +22,8 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return new Error("Reservation.AlreadyPaid", message, ErrorType.Validation);
         }
 
-        public static Error InvalidAmount(decimal amount)
-            => new("Reservation.InvalidAmount", $"Amount '{amount}' must be positive", ErrorType.Validation);
+        public static Error InvalidAmount(decimal amount, string message = "Amount must be positive")
+            => new("Reservation.InvalidAmount", $"Amount '{amount}' is invalid: {message}", ErrorType.Validation);
         
         public static Error InvalidTotalPrice(decimal totalPrice)
             => new("Reservation.InvalidTotalPrice", $"Total price '{totalPrice}' must be positive", ErrorType.Validation);

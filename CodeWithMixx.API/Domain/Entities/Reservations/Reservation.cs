@@ -43,14 +43,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             
             if(data.PaidAmount < 0)
                 return Result<Reservation>.Failure(ReservationError.InvalidAmount(data.PaidAmount));
-
-            var paymentStatus = data switch
-            {
-                var d when d.PaidAmount >= d.TotalPrice => PaymentStatus.Paid,
-                var d when d.PaidAmount < d.TotalPrice && d.Classes.Select(c => c.EndsAt).Last() < DateTime.UtcNow => PaymentStatus.Overdue,
-                var d when d.PaidAmount > 0 && d.PaidAmount < d.TotalPrice => PaymentStatus.PartiallyPaid,
-                _ => PaymentStatus.Pending
-            };
             
             var totalPrice = data.TotalPrice is null
                 ? data.Classes.Sum(c => c.Price) 
@@ -61,11 +53,14 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 AdminId = data.AdminId,
                 StudentId = data.StudentId,
                 ReservationStatus = data.ReservationStatus,
-                PaymentStatus = paymentStatus,
                 TotalPrice = totalPrice,
                 PaidAmount = data.PaidAmount,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
             };
+            
+            reservation.DiscountRate = reservation.CalculateDiscountRate(totalPrice);
+            reservation.Bonus = reservation.CalculateBonus(totalPrice, data.PaidAmount);
+            reservation.PaymentStatus = reservation.DeterminePaymentStatus(data.PaidAmount, totalPrice);
             
             foreach (var c in data.Classes)
             {
@@ -78,6 +73,114 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             }
             
             return Result<Reservation>.Success(reservation);
+        }
+        
+        public Result UpdateReservationStatus(ReservationStatus newStatus)
+        {
+            ReservationStatus = newStatus;
+            UpdatedAt = DateTime.UtcNow;
+
+            return Result.Success();
+        }
+
+        public Result UpdateTotalPrice(decimal totalPrice)
+        {
+            if (totalPrice < 0)
+                return Result.Failure(ReservationError.InvalidTotalPrice(totalPrice));
+
+            TotalPrice = totalPrice;
+            DiscountRate = CalculateDiscountRate(totalPrice);
+            Bonus = CalculateBonus(totalPrice, PaidAmount);
+            UpdatedAt = DateTime.UtcNow;
+
+            return Result.Success();
+        }
+
+        public Result RegisterPayment(decimal paidAmount)
+        {
+            if (paidAmount < 0)
+                return Result.Failure(ReservationError.InvalidAmount(paidAmount));
+
+            PaidAmount += paidAmount;
+
+            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
+            
+            DiscountRate = CalculateDiscountRate(TotalPrice);
+            Bonus = CalculateBonus(TotalPrice, PaidAmount);
+
+            UpdatedAt = DateTime.UtcNow;
+
+            return Result.Success();
+        }
+        
+        public Result SubtractPayment(decimal amount)
+        {
+            if (amount < 0)
+                return Result.Failure(ReservationError.InvalidAmount(amount, "Amount to subtract cannot be negative."));
+
+            if (amount > PaidAmount)
+                return Result.Failure(ReservationError.InvalidAmount(amount, "Cannot subtract more than the paid amount."));
+
+            PaidAmount -= amount;
+
+            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
+
+            DiscountRate = CalculateDiscountRate(TotalPrice);
+            Bonus = CalculateBonus(TotalPrice, PaidAmount);
+
+            UpdatedAt = DateTime.UtcNow;
+
+            return Result.Success();
+        }
+        
+        public Result UpdateNotes(string? notes)
+        {
+            Notes = notes;
+            UpdatedAt = DateTime.UtcNow;
+
+            return Result.Success();
+        }
+        
+        public void ChangeStudent(string studentId)
+        {
+            StudentId = studentId;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        
+        private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice)
+        {
+            return paidAmount switch
+            {
+                var amount when amount >= totalPrice => PaymentStatus.Paid,
+                var amount when amount < totalPrice && Classes.Select(c => c.EndsAt).Last() < DateTime.UtcNow => PaymentStatus.Overdue,
+                var amount when amount > 0 && amount < totalPrice => PaymentStatus.PartiallyPaid,
+                _ => PaymentStatus.Pending
+            };
+        }
+        
+        private decimal SumDefaultPriceOfClasses()
+        {
+            return Classes.Sum(c => c.Price);
+        }
+        
+        private decimal CalculateDiscountRate(decimal requestedTotalPrice)
+        {
+            var defaultTotal = SumDefaultPriceOfClasses();
+            if (defaultTotal <= 0 || defaultTotal < requestedTotalPrice)
+                return 0;
+        
+            var discountRate = (defaultTotal - requestedTotalPrice) / defaultTotal * 100;
+            return Math.Round(discountRate, 2);
+        }
+
+        private decimal CalculateBonus(decimal totalPrice, decimal paidAmount)
+        {
+            if (totalPrice >= paidAmount)
+                return 0;
+
+            var bonus = paidAmount - totalPrice;
+        
+            return Math.Round(bonus, 2);
         }
 
         public bool RequiresHistoryRetention()
