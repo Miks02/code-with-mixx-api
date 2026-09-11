@@ -12,10 +12,10 @@ public class LoginHandler(
     UserManager<User> userManager,
     ITokenService tokenService,
     AppDbContext context,
-    ICookieProvider cookieProvider) : IHandler<LoginRequest, Result>
+    ICookieProvider cookieProvider) : IHandler<LoginRequest, Result<LoginResponse>>
 {
 
-    public async Task<Result> HandleAsync(LoginRequest request, CancellationToken ct = default)
+    public async Task<Result<LoginResponse>> HandleAsync(LoginRequest request, CancellationToken ct = default)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(ct);
 
@@ -23,11 +23,11 @@ public class LoginHandler(
         {
             var user = await userManager.FindByEmailAsync(request.Email);
             if (user is null)
-                return Result.Failure(AuthError.LoginFailed($"User with email {request.Email} has not been found."));
+                return Result<LoginResponse>.Failure(AuthError.LoginFailed($"User with email {request.Email} has not been found."));
 
             var isPasswordValid = await userManager.CheckPasswordAsync(user, request.Password);
             if (!isPasswordValid)
-                return Result.Failure(AuthError.LoginFailed("Invalid password."));
+                return Result<LoginResponse>.Failure(AuthError.LoginFailed("Invalid password."));
 
             var tokens = await tokenService.AssignAuthTokens(user);
             
@@ -36,9 +36,18 @@ public class LoginHandler(
             
             user.UpdateLastLogin();
             await userManager.UpdateAsync(user);
-
+            
+            var userRoles = (await userManager.GetRolesAsync(user)).ToList();
             await transaction.CommitAsync(ct);
-            return Result.Success();
+            
+            return Result<LoginResponse>.Success(new LoginResponse
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email!,
+                PhoneNumber = user.PhoneNumber!,
+                Roles = userRoles
+            });
         }
         catch (Exception)
         {
