@@ -75,12 +75,10 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result<Reservation>.Success(reservation);
         }
         
-        public Result UpdateReservationStatus(ReservationStatus newStatus)
+        public void UpdateReservationStatus(ReservationStatus newStatus)
         {
             ReservationStatus = newStatus;
             UpdatedAt = DateTime.UtcNow;
-
-            return Result.Success();
         }
 
         public Result UpdateTotalPrice(decimal totalPrice)
@@ -91,6 +89,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             TotalPrice = totalPrice;
             DiscountRate = CalculateDiscountRate(totalPrice);
             Bonus = CalculateBonus(totalPrice, PaidAmount);
+            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
             UpdatedAt = DateTime.UtcNow;
 
             return Result.Success();
@@ -133,12 +132,10 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
         
-        public Result UpdateNotes(string? notes)
+        public void UpdateNotes(string? notes)
         {
             Notes = notes;
             UpdatedAt = DateTime.UtcNow;
-
-            return Result.Success();
         }
         
         public void ChangeStudent(string studentId)
