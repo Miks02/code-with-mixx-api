@@ -4,4 +4,5 @@ public interface IUserProvider
 {
     string GetUserId();
     string GetUserIpAddress();
+    IReadOnlyList<string> GetUserRoles();
 }

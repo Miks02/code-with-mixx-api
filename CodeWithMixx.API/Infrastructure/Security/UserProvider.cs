@@ -12,5 +12,7 @@ public class UserProvider(IHttpContextAccessor http) : IUserProvider
     public string GetUserIpAddress() 
         => http.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown IP";
 
+    public IReadOnlyList<string> GetUserRoles() 
+        => http.HttpContext?.User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList() ?? throw new UnauthorizedAccessException("User is not authenticated");
 
 }
