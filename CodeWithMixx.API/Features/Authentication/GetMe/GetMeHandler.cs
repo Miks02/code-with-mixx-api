@@ -1,9 +1,6 @@
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Domain.Entities.Users;
-using CodeWithMixx.API.Domain.ErrorCatalog;
-using CodeWithMixx.API.Features.Authentication.Common;
-using CodeWithMixx.API.Infrastructure.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,15 +11,17 @@ public class GetMeHandler(UserManager<User> userManager, IUserProvider userProvi
 {
     public async Task<Result<GetMeResponse>> HandleAsync(GetMeRequest request, CancellationToken ct = default)
     {
-        var userDetails = await userManager.Users.Select(u => new GetMeResponse 
-        {
-            FirstName = u.FirstName,
-            LastName = u.LastName,
-            Email = u.Email!,
-            PhoneNumber = u.PhoneNumber!,
-            Roles = userProvider.GetUserRoles()
-        })
-        .FirstOrDefaultAsync(ct);
+        var userDetails = await userManager.Users
+            .Where(u => u.Id == userProvider.GetUserId())
+            .Select(u => new GetMeResponse 
+            {
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Email = u.Email!,
+                PhoneNumber = u.PhoneNumber!,
+                Roles = userProvider.GetUserRoles()
+            })
+            .FirstOrDefaultAsync(ct);
         
         if(userDetails is null)
             return Result<GetMeResponse>.Failure(UserError.NotFound(userProvider.GetUserId()));
