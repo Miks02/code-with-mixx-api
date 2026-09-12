@@ -1,4 +1,4 @@
-using CodeWithMixx.API.Common.Interfaces;
+ using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Features.Authentication.Common;
 using CodeWithMixx.API.Infrastructure.Persistence;
@@ -14,11 +14,11 @@ public class LogoutHandler(
     public async Task<Result> HandleAsync(LogoutRequest emptyRequest, CancellationToken ct = default)
     {
         var refreshToken = cookieProvider.GetRefreshTokenCookie();
+        cookieProvider.RemoveAuthCookies();
 
         if (string.IsNullOrWhiteSpace(refreshToken))
             return Result.Success();
         
-        cookieProvider.RemoveAuthCookies();
         var hashedRefreshToken = tokenService.HashRefreshToken(refreshToken);
         
         var oldRefreshToken = await context.RefreshTokens

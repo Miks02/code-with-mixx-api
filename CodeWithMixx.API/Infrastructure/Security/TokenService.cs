@@ -73,7 +73,7 @@ public class TokenService(
                 new Claim(JwtRegisteredClaimNames.Email, user.Email!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             ]),
-            Expires = DateTime.UtcNow.AddMinutes(configuration.GetValue<int>("JwtConfig:ExpirationInMinutes")),
+            Expires = DateTimeOffset.UtcNow.AddMinutes(configuration.GetValue<int>("JwtConfig:ExpirationInMinutes")).UtcDateTime,
             SigningCredentials = signingCreds,
             Issuer = configuration["JwtConfig:Issuer"],
             Audience = configuration["JwtConfig:Audience"]
