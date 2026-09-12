@@ -3,8 +3,9 @@ namespace CodeWithMixx.API.Features.Authentication.Common;
 public interface ICookieProvider
 {
     string? GetRefreshTokenCookie();
-    string? GetAccessTokenCookie(); 
+    string? GetAccessTokenCookie();
     void SetRefreshTokenCookie(string refreshToken);
     void SetAccessTokenCookie(string accessToken);
+    void SetSessionCookie();
     void RemoveAuthCookies();
 }

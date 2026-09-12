@@ -33,6 +33,7 @@ public class LoginHandler(
             
             cookieProvider.SetAccessTokenCookie(tokens.AccessToken);
             cookieProvider.SetRefreshTokenCookie(tokens.RefreshToken);
+            cookieProvider.SetSessionCookie();
             
             user.UpdateLastLogin();
             await userManager.UpdateAsync(user);
