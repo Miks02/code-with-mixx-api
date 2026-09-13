@@ -8,17 +8,11 @@ namespace CodeWithMixx.API.Features.Subjects.GetPagedSubjects;
 public class GetPagedSubjectsHandler(AppDbContext context)
     : IHandler<GetPagedSubjectsRequest, Result<PagedResult<GetPagedSubjectsResponse>>>
 {
-    private const int MaxPageSize = 100;
-    private const int DefaultPageSize = 10;
-    private const int DefaultPageNumber = 1;
 
     public async Task<Result<PagedResult<GetPagedSubjectsResponse>>> HandleAsync(
         GetPagedSubjectsRequest request,
         CancellationToken ct = default)
     {
-        var pageNumber = request.PageNumber <= 0 ? DefaultPageNumber : request.PageNumber;
-        var pageSize = request.PageSize <= 0 ? DefaultPageSize : (request.PageSize > MaxPageSize ? MaxPageSize : request.PageSize);
-
         var query = context.Subjects
             .Where(s => !s.IsDeleted);
 
@@ -38,7 +32,7 @@ public class GetPagedSubjectsHandler(AppDbContext context)
             Description = s.Description
         });
 
-        var pagedResult = await PagedResult<GetPagedSubjectsResponse>.CreateAsync(projectedQuery, pageNumber, pageSize, ct);
+        var pagedResult = await PagedResult<GetPagedSubjectsResponse>.CreateAsync(projectedQuery, request.PageNumber, request.PageSize, ct);
 
         return Result<PagedResult<GetPagedSubjectsResponse>>.Success(pagedResult);
     }

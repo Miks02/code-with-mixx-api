@@ -9,6 +9,7 @@ public class DatabaseSeeder(
     RoleManager<IdentityRole> roleManager, 
     UserManager<User> userManager,
     ILogger<DatabaseSeeder> logger,
+    AppDbContext context,
     IConfiguration configuration)
 {
     public async Task SeedRolesAsync()
@@ -82,6 +83,14 @@ public class DatabaseSeeder(
             var errors = roleResult.Errors.Select(e => e.Description).ToArray();
             throw new InvalidOperationException($"Failed to add an administrator to the 'Admin' role. Errors: {string.Join(", ", errors)}");
         }
+
+        var newAdmin = new Admin
+        {
+            UserId = admin.Id,
+        };
+
+        context.Admins.Add(newAdmin);
+        await context.SaveChangesAsync();
         
         logger.LogInformation("An administrator with email '{email}' has been created successfully", adminEmail);
         
