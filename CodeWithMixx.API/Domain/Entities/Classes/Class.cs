@@ -35,5 +35,22 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
             
             return Result<Class>.Success(newClass);
         }
+        
+        public Result<Class> Update(int subjectId, decimal price, DateTime startsAt, DateTime endsAt)
+        {
+            if(subjectId <= 0)
+                return Result<Class>.Failure(SubjectError.NotFound(subjectId));
+            if(price <= 0)
+                return Result<Class>.Failure(ClassError.InvalidPrice(price));
+            if(startsAt >= endsAt)
+                return Result<Class>.Failure(ClassError.InvalidSchedule(startsAt, endsAt));
+
+            SubjectId = subjectId;
+            Price = price;
+            StartsAt = startsAt;
+            EndsAt = endsAt;
+
+            return Result<Class>.Success(this);
+        }
     }
 }
