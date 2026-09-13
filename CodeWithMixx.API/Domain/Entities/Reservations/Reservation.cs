@@ -143,6 +143,51 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             StudentId = studentId;
             UpdatedAt = DateTime.UtcNow;
         }
+
+        public Result UpdateClasses(IReadOnlyList<ClassUpdateData> classesToUpdate)
+        {
+            var invalidClassIds = classesToUpdate.Where(c => Classes.All(existingClass => existingClass.Id != c.Id)).Select(c => c.Id).ToList();
+            if (invalidClassIds.Count != 0)
+                return Result.Failure(ClassError.NotFound(invalidClassIds[0]));
+
+            foreach (var classUpdate in classesToUpdate)
+            {
+                var existingClass = Classes.First(c => c.Id == classUpdate.Id);
+                var updateResult = existingClass.Update(classUpdate.SubjectId, classUpdate.Price, classUpdate.StartsAt, classUpdate.EndsAt);
+
+                if (!updateResult.IsSuccess)
+                    return Result.Failure(updateResult.Errors[0]);
+            }
+            
+            TotalPrice = SumDefaultPriceOfClasses();
+            DiscountRate = CalculateDiscountRate(TotalPrice);
+            Bonus = CalculateBonus(TotalPrice, PaidAmount);
+            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
+            UpdatedAt = DateTime.UtcNow;
+
+            return Result.Success();
+        }
+        
+        public Result AddClasses(IReadOnlyList<ClassCreateData> classesToAdd)
+        {
+            foreach (var classData in classesToAdd)
+            {
+                var classResult = Class.Create(classData.SubjectId, classData.Price, classData.StartsAt, classData.EndsAt);
+
+                if (!classResult.IsSuccess)
+                    return Result.Failure(classResult.Errors[0]);
+
+                Classes.Add(classResult.Payload!);
+            }
+
+            TotalPrice = SumDefaultPriceOfClasses();
+            DiscountRate = CalculateDiscountRate(TotalPrice);
+            Bonus = CalculateBonus(TotalPrice, PaidAmount);
+            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
+            UpdatedAt = DateTime.UtcNow;
+
+            return Result.Success();
+        }
         
         private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice)
         {
