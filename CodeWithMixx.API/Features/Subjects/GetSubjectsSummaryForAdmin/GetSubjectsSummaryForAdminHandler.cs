@@ -21,8 +21,14 @@ public class GetSubjectsSummaryForAdminHandler(AppDbContext context) : IHandler<
             _ => subjectsQuery
         };
         
-        if(!string.IsNullOrWhiteSpace(request.SearchTerm))
-            subjectsQuery = subjectsQuery.Where(s => s.Name.Contains(request.SearchTerm));
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            var search = request.SearchTerm.Trim();
+            subjectsQuery = subjectsQuery
+                .Where(s => EF.Functions.ILike(s.Name, $"%{search}%")
+                            || EF.Functions.ILike(s.Description, $"%{search}%"))
+                .OrderByDescending(s => s.Name);
+        }
         
         var projectedPageQuery = subjectsQuery
             .Select(s => new GetSubjectsSummaryForAdminResponse.SubjectItem
