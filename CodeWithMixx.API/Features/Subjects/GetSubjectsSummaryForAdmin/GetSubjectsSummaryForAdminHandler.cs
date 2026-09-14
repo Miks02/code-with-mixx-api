@@ -44,7 +44,8 @@ public class GetSubjectsSummaryForAdminHandler(AppDbContext context) : IHandler<
                 CreatedAt = s.CreatedAt
             });
         
-        var pagedSubjects = await PagedResult<GetSubjectsSummaryForAdminResponse.SubjectItem>.CreateAsync(projectedPageQuery, request.PageNumber, request.PageSize, ct);
+        var pagedSubjects = await PagedResult<GetSubjectsSummaryForAdminResponse.SubjectItem>
+            .CreateAsync(projectedPageQuery, request.PageNumber, request.PageSize, ct);
         
         var mostPopularSubject = await context.Subjects
             .Select(s => new GetSubjectsSummaryForAdminResponse.SubjectItem

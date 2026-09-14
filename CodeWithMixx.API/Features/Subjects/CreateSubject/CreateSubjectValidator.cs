@@ -10,7 +10,7 @@ public class CreateSubjectValidator : AbstractValidator<CreateSubjectRequest>
             .NotEmpty().WithMessage("Subject name is required.")
             .MaximumLength(100).WithMessage("Subject name must not exceed 100 characters.");
         
-        RuleFor(x => x.Description)
+        RuleFor(x => x.SubjectDescription)
             .NotEmpty().WithMessage("Subject description is required.")
             .MaximumLength(500).WithMessage("Subject description must not exceed 500 characters.");
     }

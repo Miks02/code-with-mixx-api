@@ -10,12 +10,12 @@ public class CreateSubjectHandler(AppDbContext context) : IHandler<CreateSubject
 {
     public async Task<Result<CreateSubjectResponse>> HandleAsync(CreateSubjectRequest request, CancellationToken ct = default)
     {
-        var subjectExists = await context.Subjects.AnyAsync(s => s.Name == request.SubjectName, ct);
+        var subjectExists = await context.Subjects.AnyAsync(s => EF.Functions.ILike(s.Name, request.SubjectName), ct);
         
         if(subjectExists)
             return Result<CreateSubjectResponse>.Failure(SubjectError.AlreadyExists(request.SubjectName));
         
-        var newSubject = Subject.Create(request.SubjectName, request.Description);
+        var newSubject = Subject.Create(request.SubjectName, request.SubjectDescription);
 
         context.Add(newSubject);
         await context.SaveChangesAsync(ct);
@@ -24,7 +24,7 @@ public class CreateSubjectHandler(AppDbContext context) : IHandler<CreateSubject
         {
             Id = newSubject.Id,
             SubjectName = newSubject.Name,
-            Description = newSubject.Description,
+            SubjectDescription = newSubject.Description,
             CreatedAt = newSubject.CreatedAt
         };
         return Result<CreateSubjectResponse>.Success(response);

@@ -7,7 +7,7 @@ public class CreateSubjectEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/subjects", async (CreateSubjectRequest request, IHandler<CreateSubjectRequest, Result<CreateSubjectResponse>> createSubjectHandler) =>
+        app.MapPost("/admin/subjects", async (CreateSubjectRequest request, IHandler<CreateSubjectRequest, Result<CreateSubjectResponse>> createSubjectHandler) =>
         {
             var result = await createSubjectHandler.HandleAsync(request);
             return result.ToTypedResult();
