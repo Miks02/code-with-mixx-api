@@ -5,7 +5,7 @@ namespace CodeWithMixx.API.Features.Subjects.GetSubjectsSummaryForAdmin;
 public class GetSubjectsSummaryForAdminResponse
 {
     public PagedResult<SubjectItem> PagedSubjects { get; init; } = null!;
-    public int SubjectsCount { get; init; }
+    public int TotalSubjects { get; init; }
     public int TaughtSubjects { get; init; }
     public int UntaughtSubjects { get; init; } 
     public SubjectItem? MostPopularSubject { get; init; }

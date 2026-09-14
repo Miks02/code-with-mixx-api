@@ -44,7 +44,8 @@ public class GetPagedSubjectsForAdminHandler(AppDbContext context) : IHandler<Ge
                 CreatedAt = s.CreatedAt
             });
 
-        var pagedSubjects = await PagedResult<GetPagedSubjectsForAdminResponse.SubjectItem>.CreateAsync(projectedPageQuery, request.PageNumber, request.PageSize, ct);
+        var pagedSubjects = await PagedResult<GetPagedSubjectsForAdminResponse.SubjectItem>
+            .CreateAsync(projectedPageQuery, request.PageNumber, request.PageSize, ct);
 
         return new GetPagedSubjectsForAdminResponse
         {

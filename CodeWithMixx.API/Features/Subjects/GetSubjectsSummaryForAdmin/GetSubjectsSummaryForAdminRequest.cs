@@ -12,5 +12,5 @@ public record GetSubjectsSummaryForAdminRequest
     [FromQuery(Name = "searchTerm")]
     public string? SearchTerm { get; init; }
     [FromQuery(Name = "sortBy")]
-    public SubjectsSortBy SortBy { get; init; } = SubjectsSortBy.CreatedAtDescending;
+    public SubjectsSortBy? SortBy { get; init; } = SubjectsSortBy.CreatedAtDescending;
 };

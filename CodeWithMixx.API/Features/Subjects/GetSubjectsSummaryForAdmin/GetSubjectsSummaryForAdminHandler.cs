@@ -82,7 +82,7 @@ public class GetSubjectsSummaryForAdminHandler(AppDbContext context) : IHandler<
         return new GetSubjectsSummaryForAdminResponse
         {
             PagedSubjects = pagedSubjects,
-            SubjectsCount = statsResult.TotalSubjects,
+            TotalSubjects = statsResult.TotalSubjects,
             TaughtSubjects = statsResult.TaughtSubjects,
             UntaughtSubjects = statsResult.UntaughtSubjects,
             MostPopularSubject = mostPopularSubject
