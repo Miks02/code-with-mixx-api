@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Subjects.GetPagedSubjectsForAdmin;
 
-public class GetPagedSubjectsForAdminHandler(AppDbContext context) : IHandler<GetPagedSubjectsForAdminRequest, GetPagedSubjectsForAdminResponse>
+public class GetPagedSubjectsForAdminHandler(AppDbContext context) : IHandler<GetPagedSubjectsForAdminRequest, PagedResult<SubjectItem>>
 {
-    public async Task<GetPagedSubjectsForAdminResponse> HandleAsync(GetPagedSubjectsForAdminRequest request, CancellationToken ct = default)
+    public async Task<PagedResult<SubjectItem>> HandleAsync(GetPagedSubjectsForAdminRequest request, CancellationToken ct = default)
     {
         var subjectsQuery = context.Subjects.AsQueryable();
 
@@ -31,7 +31,7 @@ public class GetPagedSubjectsForAdminHandler(AppDbContext context) : IHandler<Ge
         }
 
         var projectedPageQuery = subjectsQuery
-            .Select(s => new GetPagedSubjectsForAdminResponse.SubjectItem
+            .Select(s => new SubjectItem
             {
                 Id = s.Id,
                 SubjectName = s.Name,
@@ -44,12 +44,14 @@ public class GetPagedSubjectsForAdminHandler(AppDbContext context) : IHandler<Ge
                 CreatedAt = s.CreatedAt
             });
 
-        var pagedSubjects = await PagedResult<GetPagedSubjectsForAdminResponse.SubjectItem>
+        var pagedSubjects = await PagedResult<SubjectItem>
             .CreateAsync(projectedPageQuery, request.PageNumber, request.PageSize, ct);
 
-        return new GetPagedSubjectsForAdminResponse
+        foreach (var item in pagedSubjects.Items)
         {
-            PagedSubjects = pagedSubjects
-        };
+            Console.WriteLine(">" + item.SubjectName + "" + item.ClassesCount + " " + item.StudentsCount);
+        }
+
+        return pagedSubjects;
     }
 }
