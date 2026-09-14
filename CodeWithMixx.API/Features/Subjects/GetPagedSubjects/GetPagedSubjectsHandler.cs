@@ -16,9 +16,9 @@ public class GetPagedSubjectsHandler(AppDbContext context)
         var query = context.Subjects
             .Where(s => !s.IsDeleted);
 
-        if (!string.IsNullOrWhiteSpace(request.Search))
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
-            var search = request.Search.Trim();
+            var search = request.SearchTerm.Trim();
             query = query
                 .Where(s => EF.Functions.ILike(s.Name, $"%{search}%")
                             || EF.Functions.ILike(s.Description, $"%{search}%"))
