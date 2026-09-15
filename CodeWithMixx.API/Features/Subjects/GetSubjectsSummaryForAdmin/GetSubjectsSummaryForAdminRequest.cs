@@ -13,4 +13,6 @@ public record GetSubjectsSummaryForAdminRequest
     public string? SearchTerm { get; init; }
     [FromQuery(Name = "sortBy")]
     public SubjectsSortBy? SortBy { get; init; } = SubjectsSortBy.CreatedAtDescending;
+    [FromQuery(Name = "onlyDeleted")]
+    public bool OnlyDeleted { get; init; } = false;
 };

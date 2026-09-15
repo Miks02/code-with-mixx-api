@@ -12,15 +12,9 @@ public class GetPagedSubjectsForAdminHandler(AppDbContext context) : IHandler<Ge
     {
         var subjectsQuery = context.Subjects.AsQueryable();
 
-        subjectsQuery = request.SortBy switch
-        {
-            SubjectsSortBy.CreatedAtDescending => subjectsQuery.OrderByDescending(s => s.CreatedAt),
-            SubjectsSortBy.CreatedAtAscending => subjectsQuery.OrderBy(s => s.CreatedAt),
-            SubjectsSortBy.SubjectNameAscending => subjectsQuery.OrderBy(s => s.Name),
-            SubjectsSortBy.SubjectNameDescending => subjectsQuery.OrderByDescending(s => s.Name),
-            _ => subjectsQuery
-        };
-
+        if (request.OnlyDeleted)
+            subjectsQuery = subjectsQuery.IgnoreQueryFilters().Where(s => s.IsDeleted == true);
+            
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
             var search = request.SearchTerm.Trim();
@@ -29,6 +23,15 @@ public class GetPagedSubjectsForAdminHandler(AppDbContext context) : IHandler<Ge
                             || EF.Functions.ILike(s.Description, $"%{search}%"))
                 .OrderByDescending(s => s.Name);
         }
+        
+        subjectsQuery = request.SortBy switch
+        {
+            SubjectsSortBy.CreatedAtDescending => subjectsQuery.OrderByDescending(s => s.CreatedAt),
+            SubjectsSortBy.CreatedAtAscending => subjectsQuery.OrderBy(s => s.CreatedAt),
+            SubjectsSortBy.SubjectNameAscending => subjectsQuery.OrderBy(s => s.Name),
+            SubjectsSortBy.SubjectNameDescending => subjectsQuery.OrderByDescending(s => s.Name),
+            _ => subjectsQuery.OrderBy(s => s.CreatedAt)
+        };
 
         var projectedPageQuery = subjectsQuery
             .Select(s => new SubjectItem

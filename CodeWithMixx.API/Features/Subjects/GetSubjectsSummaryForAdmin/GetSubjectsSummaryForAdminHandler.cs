@@ -11,15 +11,9 @@ public class GetSubjectsSummaryForAdminHandler(AppDbContext context) : IHandler<
     public async Task<GetSubjectsSummaryForAdminResponse> HandleAsync(GetSubjectsSummaryForAdminRequest request, CancellationToken ct = default)
     {
         var subjectsQuery = context.Subjects.AsQueryable();
-        
-        subjectsQuery = request.SortBy switch
-        {
-            SubjectsSortBy.CreatedAtDescending => subjectsQuery.OrderByDescending(s => s.CreatedAt),
-            SubjectsSortBy.CreatedAtAscending => subjectsQuery.OrderBy(s => s.CreatedAt),
-            SubjectsSortBy.SubjectNameAscending => subjectsQuery.OrderBy(s => s.Name),
-            SubjectsSortBy.SubjectNameDescending => subjectsQuery.OrderByDescending(s => s.Name),
-            _ => subjectsQuery.OrderByDescending(s => s.CreatedAt)
-        };
+
+        if (request.OnlyDeleted)
+            subjectsQuery = subjectsQuery.IgnoreQueryFilters().Where(s => s.IsDeleted == true);
         
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
@@ -29,6 +23,15 @@ public class GetSubjectsSummaryForAdminHandler(AppDbContext context) : IHandler<
                             || EF.Functions.ILike(s.Description, $"%{search}%"))
                 .OrderByDescending(s => s.Name);
         }
+        
+        subjectsQuery = request.SortBy switch
+        {
+            SubjectsSortBy.CreatedAtDescending => subjectsQuery.OrderByDescending(s => s.CreatedAt),
+            SubjectsSortBy.CreatedAtAscending => subjectsQuery.OrderBy(s => s.CreatedAt),
+            SubjectsSortBy.SubjectNameAscending => subjectsQuery.OrderBy(s => s.Name),
+            SubjectsSortBy.SubjectNameDescending => subjectsQuery.OrderByDescending(s => s.Name),
+            _ => subjectsQuery.OrderBy(s => s.CreatedAt)
+        };
         
         var projectedPageQuery = subjectsQuery
             .Select(s => new GetSubjectsSummaryForAdminResponse.SubjectItem
