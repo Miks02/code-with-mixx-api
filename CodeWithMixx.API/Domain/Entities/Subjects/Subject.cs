@@ -28,8 +28,19 @@ public class Subject : IAuditable, ISoftDeletable
 
     public void Delete()
     {
+        Archive();
+    }
+
+    public void Archive()
+    {
         IsDeleted = true;
         DeletedAt = DateTime.UtcNow;
+    }
+
+    public void Restore()
+    {
+        IsDeleted = false;
+        DeletedAt = null;
     }
 
     public void Update(string name, string description)
