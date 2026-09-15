@@ -13,6 +13,6 @@ public record GetPagedSubjectsForAdminRequest
     public string? SearchTerm { get; init; }
     [FromQuery(Name = "sortBy")]
     public SubjectsSortBy? SortBy { get; init; } = SubjectsSortBy.CreatedAtDescending;
-    [FromQuery(Name = "onlyDeleted")]
-    public bool OnlyDeleted { get; init; } = false;
+    [FromQuery(Name = "onlyArchived")]
+    public bool OnlyArchived { get; init; } = false;
 };

@@ -18,10 +18,9 @@ public class DeleteSubjectHandler(AppDbContext context) : IHandler<DeleteSubject
             return Result.Failure(SubjectError.NotFound(request.Id));
 
         if (subject.Classes.Any())
-            subject.Delete();
-        else 
-            context.Subjects.Remove(subject);
+            return Result.Failure(SubjectError.HasAssociatedClasses(request.Id));
         
+        context.Subjects.Remove(subject);
         await context.SaveChangesAsync(ct);
 
         return Result.Success();

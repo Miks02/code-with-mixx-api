@@ -12,7 +12,7 @@ public class GetSubjectsSummaryForAdminHandler(AppDbContext context) : IHandler<
     {
         var subjectsQuery = context.Subjects.AsQueryable();
 
-        if (request.OnlyDeleted)
+        if (request.OnlyArchived)
             subjectsQuery = subjectsQuery.IgnoreQueryFilters().Where(s => s.IsDeleted == true);
         
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))

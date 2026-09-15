@@ -45,4 +45,13 @@ public static class SubjectError
 
         return new Error("Subject.NotArchived", message, ErrorType.Conflict);
     }
+    
+    public static Error HasAssociatedClasses(int? identifier = null)
+    {
+        string message = identifier == null
+            ? "Subject has classes associated with it"
+            : $"Subject with identifier '{identifier}' has classes associated with it";
+
+        return new Error("Subject.HasClasses", message, ErrorType.Conflict);
+    }
 }
