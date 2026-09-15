@@ -18,7 +18,7 @@ public class GetSubjectsSummaryForAdminHandler(AppDbContext context) : IHandler<
             SubjectsSortBy.CreatedAtAscending => subjectsQuery.OrderBy(s => s.CreatedAt),
             SubjectsSortBy.SubjectNameAscending => subjectsQuery.OrderBy(s => s.Name),
             SubjectsSortBy.SubjectNameDescending => subjectsQuery.OrderByDescending(s => s.Name),
-            _ => subjectsQuery
+            _ => subjectsQuery.OrderByDescending(s => s.CreatedAt)
         };
         
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
@@ -41,7 +41,10 @@ public class GetSubjectsSummaryForAdminHandler(AppDbContext context) : IHandler<
                     .Select(c => c.Reservation.Student)
                     .Distinct()
                     .Count(),
-                CreatedAt = s.CreatedAt
+                CreatedAt = s.CreatedAt,
+                UpdatedAt = s.UpdatedAt,
+                DeletedAt = s.DeletedAt
+                
             });
         
         var pagedSubjects = await PagedResult<GetSubjectsSummaryForAdminResponse.SubjectItem>
@@ -56,8 +59,7 @@ public class GetSubjectsSummaryForAdminHandler(AppDbContext context) : IHandler<
                 ClassesCount = s.Classes.Count,
                 StudentsCount = s.Classes.Select(c => c.Reservation.Student)
                     .Distinct()
-                    .Count(),
-                CreatedAt = s.CreatedAt
+                    .Count()
             })
             .OrderByDescending(s => s.ClassesCount)
             .ThenByDescending(s => s.StudentsCount)

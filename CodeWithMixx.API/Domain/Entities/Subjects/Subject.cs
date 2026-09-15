@@ -5,8 +5,8 @@ namespace CodeWithMixx.API.Domain.Entities.Subjects;
 public class Subject : IAuditable, ISoftDeletable
 {
     public int Id { get; init; }
-    public string Name { get; init; } = null!;
-    public string Description { get; init; } = null!;
+    public string Name { get; set; } = null!;
+    public string Description { get; set; } = null!;
     
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
@@ -30,5 +30,12 @@ public class Subject : IAuditable, ISoftDeletable
     {
         IsDeleted = true;
         DeletedAt = DateTime.UtcNow;
+    }
+
+    public void Update(string name, string description)
+    {
+        Name = name;
+        Description = description;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

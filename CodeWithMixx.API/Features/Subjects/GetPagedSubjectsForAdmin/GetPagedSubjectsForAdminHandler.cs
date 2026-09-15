@@ -41,17 +41,14 @@ public class GetPagedSubjectsForAdminHandler(AppDbContext context) : IHandler<Ge
                     .Select(c => c.Reservation.Student)
                     .Distinct()
                     .Count(),
-                CreatedAt = s.CreatedAt
+                CreatedAt = s.CreatedAt,
+                UpdatedAt = s.UpdatedAt,
+                DeletedAt = s.DeletedAt
             });
 
         var pagedSubjects = await PagedResult<SubjectItem>
             .CreateAsync(projectedPageQuery, request.PageNumber, request.PageSize, ct);
-
-        foreach (var item in pagedSubjects.Items)
-        {
-            Console.WriteLine(">" + item.SubjectName + "" + item.ClassesCount + " " + item.StudentsCount);
-        }
-
+        
         return pagedSubjects;
     }
 }
