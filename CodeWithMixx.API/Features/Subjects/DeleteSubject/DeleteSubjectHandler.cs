@@ -11,12 +11,17 @@ public class DeleteSubjectHandler(AppDbContext context) : IHandler<DeleteSubject
     public async Task<Result> HandleAsync(DeleteSubjectRequest request, CancellationToken ct = default)
     {
         var subject = await context.Subjects
+            .Include(s => s.Classes)
             .FirstOrDefaultAsync(s => s.Id == request.Id, ct);
 
         if (subject is null)
             return Result.Failure(SubjectError.NotFound(request.Id));
 
-        subject.Delete();
+        if (subject.Classes.Any())
+            subject.Delete();
+        else 
+            context.Subjects.Remove(subject);
+        
         await context.SaveChangesAsync(ct);
 
         return Result.Success();
