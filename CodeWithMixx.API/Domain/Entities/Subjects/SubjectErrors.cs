@@ -27,4 +27,31 @@ public static class SubjectError
 
         return new Error("Subject.AlreadyExists", message, ErrorType.Conflict);
     }
+
+    public static Error AlreadyArchived(int? identifier = null)
+    {
+        string message = identifier == null
+            ? "Subject is already archived"
+            : $"Subject with identifier '{identifier}' is already archived";
+
+        return new Error("Subject.AlreadyArchived", message, ErrorType.Conflict);
+    }
+
+    public static Error NotArchived(int? identifier = null)
+    {
+        string message = identifier == null
+            ? "Subject is not archived"
+            : $"Subject with identifier '{identifier}' is not archived";
+
+        return new Error("Subject.NotArchived", message, ErrorType.Conflict);
+    }
+    
+    public static Error HasAssociatedClasses(int? identifier = null)
+    {
+        string message = identifier == null
+            ? "Subject has classes associated with it"
+            : $"Subject with identifier '{identifier}' has classes associated with it";
+
+        return new Error("Subject.HasClasses", message, ErrorType.Conflict);
+    }
 }

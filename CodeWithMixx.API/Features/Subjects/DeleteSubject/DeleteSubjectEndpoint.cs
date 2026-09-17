@@ -9,7 +9,7 @@ public class DeleteSubjectEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapDelete("subjects/{id:int}", async (
+        app.MapDelete("/admin/subjects/{id:int}", async (
                 [AsParameters] DeleteSubjectRequest request,
                 IHandler<DeleteSubjectRequest, Result> deleteSubjectHandler,
                 CancellationToken ct) =>

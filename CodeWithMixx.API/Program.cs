@@ -1,10 +1,15 @@
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 using CodeWithMixx.API.Infrastructure;
+using Microsoft.AspNetCore.Http.Json;
 using Scalar.AspNetCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration));
+
+builder.Services.Configure<JsonOptions>(options =>
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.Services.AddInfrastructure(builder.Configuration);
 

@@ -4,23 +4,24 @@ using CodeWithMixx.API.Domain.Entities.Subjects;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace CodeWithMixx.API.Features.Subjects.DeleteSubject;
+namespace CodeWithMixx.API.Features.Subjects.ArchiveSubject;
 
-public class DeleteSubjectHandler(AppDbContext context) : IHandler<DeleteSubjectRequest, Result>
+public class ArchiveSubjectHandler(AppDbContext context) : IHandler<ArchiveSubjectRequest, Result>
 {
-    public async Task<Result> HandleAsync(DeleteSubjectRequest request, CancellationToken ct = default)
+    public async Task<Result> HandleAsync(ArchiveSubjectRequest request, CancellationToken ct = default)
     {
         var subject = await context.Subjects
-            .Include(s => s.Classes)
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync(s => s.Id == request.Id, ct);
 
         if (subject is null)
             return Result.Failure(SubjectError.NotFound(request.Id));
 
-        if (subject.Classes.Any())
-            return Result.Failure(SubjectError.HasAssociatedClasses(request.Id));
-        
-        context.Subjects.Remove(subject);
+        if (subject.IsDeleted)
+            return Result.Failure(SubjectError.AlreadyArchived(request.Id));
+
+        subject.Archive();
+
         await context.SaveChangesAsync(ct);
 
         return Result.Success();
