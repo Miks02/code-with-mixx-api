@@ -27,5 +27,12 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         
         public static Error InvalidTotalPrice(decimal totalPrice)
             => new("Reservation.InvalidTotalPrice", $"Total price '{totalPrice}' must be positive", ErrorType.Validation);
+        
+        public static Error NoClassesProvided()
+            => new("Reservation.NoClassesProvided", "No classes have been provided for a class reservation", ErrorType.Validation);
+        
+        public static Error NoProjectsProvided()
+            => new("Reservation.NoProjectsProvided", "No projects have been provided for a project reservation", ErrorType.Validation);
+        
     }
 }
