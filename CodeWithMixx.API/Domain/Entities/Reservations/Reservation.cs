@@ -1,6 +1,7 @@
 ﻿using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Domain.Entities.Admins;
 using CodeWithMixx.API.Domain.Entities.Classes;
+using CodeWithMixx.API.Domain.Entities.Projects;
 using CodeWithMixx.API.Domain.Entities.Students;
 
 namespace CodeWithMixx.API.Domain.Entities.Reservations
@@ -30,6 +31,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         public string StudentId { get; private set; } = null!;
 
         public ICollection<Class> Classes { get; private set; } = [];
+        public ICollection<Project> Projects { get; private set; } = [];
         
         private Reservation() {}
 

@@ -29,8 +29,6 @@ public class Project : IAuditable, ISoftDeletable
     
     private readonly List<ProjectNote> _projectNotes = [];
     public IReadOnlyCollection<ProjectNote> ProjectNotes => _projectNotes.AsReadOnly();
-
-    private Project() {}
-
+    
     
 }
