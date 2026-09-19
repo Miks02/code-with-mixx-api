@@ -29,4 +29,10 @@ public static class ProjectError
     
     public static Error AlreadyDeleted(int identifier)
         => new Error("Project.AlreadyDeleted", $"The project with identifier '{identifier}' has already been deleted.", ErrorType.Conflict);
+
+    public static Error NotArchived(int identifier)
+        => new Error("Project.NotArchived", $"The project with identifier '{identifier}' is not archived.", ErrorType.Conflict);
+
+    public static Error ReservationArchived(int identifier, int reservationIdentifier)
+        => new Error("Project.ReservationArchived", $"The project with identifier '{identifier}' cannot be restored because its reservation '{reservationIdentifier}' is archived. Restore the reservation instead.", ErrorType.Conflict);
 }

@@ -276,6 +276,26 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
         
+        public Result RestoreProjectReservation()
+        {
+            if(ReservationType != ReservationType.Project)
+                return Result.Failure(ReservationError.NotAProjectReservation(Id));
+
+            var result = Restore();
+            if(!result.IsSuccess)
+                return result;
+
+            foreach (var project in Projects.Where(p => p.IsDeleted))
+            {
+                var restoreProjectResult = project.Restore();
+
+                if(!restoreProjectResult.IsSuccess)
+                    return restoreProjectResult;
+            }
+
+            return Result.Success();
+        }
+
         public bool RequiresHistoryRetention()
             => ReservationStatus == ReservationStatus.Completed
                || PaymentStatus != PaymentStatus.Pending
@@ -337,6 +357,16 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
             IsDeleted = true;
             DeletedAt = DateTime.UtcNow;
+            return Result.Success();
+        }
+
+        private Result Restore()
+        {
+            if(!IsDeleted)
+                return Result.Failure(ReservationError.NotArchived(Id));
+
+            IsDeleted = false;
+            DeletedAt = null;
             return Result.Success();
         }
     }

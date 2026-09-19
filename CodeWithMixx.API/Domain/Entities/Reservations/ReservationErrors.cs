@@ -57,5 +57,11 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             string message = $"Reservation with identifier '{identifier}' is already deleted";
             return new Error("Reservation.AlreadyDeleted", message, ErrorType.Conflict);
         }
+
+        public static Error NotArchived(int identifier)
+        {
+            string message = $"Reservation with identifier '{identifier}' is not archived";
+            return new Error("Reservation.NotArchived", message, ErrorType.Conflict);
+        }
     }
 }

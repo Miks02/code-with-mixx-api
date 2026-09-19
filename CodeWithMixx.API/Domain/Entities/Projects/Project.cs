@@ -89,6 +89,14 @@ public class Project : IAuditable, ISoftDeletable
         DeletedAt = DateTime.UtcNow;
         return Result.Success();
     }
-    
-    
+
+    public Result Restore()
+    {
+        if(!IsDeleted)
+            return Result.Failure(ProjectError.NotArchived(Id));
+
+        IsDeleted = false;
+        DeletedAt = null;
+        return Result.Success();
+    }
 }
