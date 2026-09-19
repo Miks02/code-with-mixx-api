@@ -135,8 +135,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             PaidAmount += paidAmount;
 
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
-            
-            DiscountRate = CalculateDiscountRate(TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
 
             UpdatedAt = DateTime.UtcNow;
@@ -155,8 +153,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             PaidAmount -= amount;
 
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
-
-            DiscountRate = CalculateDiscountRate(TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
 
             UpdatedAt = DateTime.UtcNow;
