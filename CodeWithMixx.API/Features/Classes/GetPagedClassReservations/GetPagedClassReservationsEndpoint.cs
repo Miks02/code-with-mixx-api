@@ -8,7 +8,7 @@ public class GetPagedClassReservationsEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("classes", async (
+        app.MapGet("/admin/classes", async (
                 [AsParameters] GetPagedClassReservationsRequest request,
                 IHandler<GetPagedClassReservationsRequest, Result<PagedResult<GetPagedClassReservationsResponse>>> handler,
                 CancellationToken ct) =>

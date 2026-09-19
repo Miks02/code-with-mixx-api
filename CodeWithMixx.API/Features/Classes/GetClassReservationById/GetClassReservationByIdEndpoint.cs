@@ -8,7 +8,7 @@ public class GetClassReservationByIdEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("classes/{reservationId:int}", async (
+        app.MapGet("/admin/classes/{reservationId:int}", async (
                 [AsParameters] GetClassReservationByIdRequest request,
                 IHandler<GetClassReservationByIdRequest, Result<GetClassReservationByIdResponse>> handler,
                 CancellationToken ct) =>

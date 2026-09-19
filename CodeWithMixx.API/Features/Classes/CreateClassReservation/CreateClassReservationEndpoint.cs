@@ -9,13 +9,13 @@ public class CreateClassReservationEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/classes", async (
+        app.MapPost("/admin/classes", async (
                 CreateClassReservationRequest request,
                 IHandler<CreateClassReservationRequest, Result<CreateClassReservationResponse>> handler,
                 CancellationToken ct) =>
         {
             var result = await handler.HandleAsync(request, ct);
-            return result.ToTypedResult(HttpStatusCode.Created, $"/api/classes/{result.Payload?.Id}");
+            return result.ToTypedResult(HttpStatusCode.Created, $"/api/admin/classes/{result.Payload?.Id}");
         })
         .RequireAuthorization("AdminOnly")
         .WithTags("Classes")

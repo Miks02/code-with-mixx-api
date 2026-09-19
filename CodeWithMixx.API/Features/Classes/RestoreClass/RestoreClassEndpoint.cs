@@ -8,7 +8,7 @@ public class RestoreClassEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("classes/items/{classId:int}/restore", async (
+        app.MapPost("/admin/classes/items/{classId:int}/restore", async (
                 [AsParameters] RestoreClassRequest request,
                 IHandler<RestoreClassRequest, Result> handler,
                 CancellationToken ct) =>

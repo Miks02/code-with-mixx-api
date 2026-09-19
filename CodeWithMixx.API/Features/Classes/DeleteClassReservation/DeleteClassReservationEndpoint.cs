@@ -8,7 +8,7 @@ public class DeleteClassReservationEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapDelete("classes/{reservationId:int}", async (
+        app.MapDelete("/admin/classes/{reservationId:int}", async (
                 [AsParameters] DeleteClassReservationRequest request,
                 IHandler<DeleteClassReservationRequest, Result> handler,
                 CancellationToken ct) =>

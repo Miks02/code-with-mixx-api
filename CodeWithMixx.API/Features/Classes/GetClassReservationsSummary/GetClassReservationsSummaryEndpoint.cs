@@ -8,7 +8,7 @@ public class GetClassReservationsSummaryEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("classes/summary", async (
+        app.MapGet("/admin/classes/summary", async (
                 [AsParameters] GetClassReservationsSummaryRequest request,
                 IHandler<GetClassReservationsSummaryRequest, Result<GetClassReservationsSummaryResponse>> handler,
                 CancellationToken ct) =>
