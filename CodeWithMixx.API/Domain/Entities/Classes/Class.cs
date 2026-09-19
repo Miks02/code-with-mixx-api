@@ -4,7 +4,7 @@ using CodeWithMixx.API.Domain.Entities.Subjects;
 
 namespace CodeWithMixx.API.Domain.Entities.Classes
 {
-    public class Class 
+    public class Class : IAuditable, ISoftDeletable
     {
         public int Id { get; set; }
         public decimal Price { get; set; }
@@ -15,6 +15,13 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
         public int ReservationId { get; set; } 
         public Subject Subject { get; set; } = null!;
         public int SubjectId { get; set; }
+        
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
+        
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        
         
         public static Result<Class> Create(int subjectId, decimal price, DateTime startsAt, DateTime endsAt)
         {
@@ -30,7 +37,8 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
                 SubjectId = subjectId,
                 Price = price,
                 StartsAt = startsAt,
-                EndsAt = endsAt
+                EndsAt = endsAt,
+                CreatedAt = DateTime.UtcNow
             };
             
             return Result<Class>.Success(newClass);
@@ -49,8 +57,31 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
             Price = price;
             StartsAt = startsAt;
             EndsAt = endsAt;
+            UpdatedAt = DateTime.UtcNow;
 
             return Result<Class>.Success(this);
+        }
+
+        public Result Delete()
+        {
+            if(IsDeleted)
+                return Result.Failure(ClassError.AlreadyDeleted(Id));
+            
+            IsDeleted = true;
+            DeletedAt = DateTime.UtcNow;
+
+            return Result.Success();
+        }
+
+        public Result Restore()
+        {
+            if(!IsDeleted)
+                return Result.Failure(ClassError.NotArchived(Id));
+
+            IsDeleted = false;
+            DeletedAt = null;
+
+            return Result.Success();
         }
     }
 }

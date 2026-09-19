@@ -1,4 +1,5 @@
 using CodeWithMixx.API.Domain.Entities.Classes;
+using CodeWithMixx.API.Domain.Entities.Projects;
 
 namespace CodeWithMixx.API.Domain.Entities.Subjects;
 
@@ -13,6 +14,7 @@ public class Subject : IAuditable, ISoftDeletable
     public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }
     public ICollection<Class> Classes { get; set; } = [];
+    public ICollection<Project> Projects { get; set; } = [];
     
     private Subject() {}
     

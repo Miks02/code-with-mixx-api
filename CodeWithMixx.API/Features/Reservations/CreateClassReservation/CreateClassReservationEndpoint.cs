@@ -1,0 +1,25 @@
+using System.Net;
+using CodeWithMixx.API.Common.Interfaces;
+using CodeWithMixx.API.Common.Results;
+using Microsoft.AspNetCore.Mvc;
+
+namespace CodeWithMixx.API.Features.Reservations.CreateClassReservation;
+
+public class CreateClassReservationEndpoint : IEndpoint
+{
+    public void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapPost("/admin/reservations/classes", async (
+                CreateClassReservationRequest request,
+                IHandler<CreateClassReservationRequest, Result<CreateClassReservationResponse>> handler,
+                CancellationToken ct) =>
+        {
+            var result = await handler.HandleAsync(request, ct);
+            return result.ToTypedResult(HttpStatusCode.Created, $"/api/admin/reservations/classes/{result.Payload?.Id}");
+        })
+        .RequireAuthorization("AdminOnly")
+        .WithTags("Reservations")
+        .ProducesValidationProblem()
+        .Produces<Result<CreateClassReservationResponse>>();
+    }
+}

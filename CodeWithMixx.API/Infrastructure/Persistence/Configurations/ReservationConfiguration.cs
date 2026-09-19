@@ -30,6 +30,9 @@ namespace CodeWithMixx.API.Infrastructure.Persistence.Configurations
             
             builder.Property(r => r.ReservationStatus)
                 .HasConversion<string>();
+            
+            builder.Property(r => r.ReservationType)
+                .HasConversion<string>();
 
             builder.Property(r => r.Notes)
                 .HasMaxLength(500);
