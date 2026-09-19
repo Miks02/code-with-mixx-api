@@ -178,16 +178,16 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
         public Result UpdateClasses(IReadOnlyList<ClassUpdateData> classesToUpdate)
         {
-            if(ReservationType != ReservationType.Project)
+            if(ReservationType != ReservationType.Class)
                 return Result.Failure(ReservationError.NotAClassReservation(Id));
-
-            var invalidClassIds = classesToUpdate.Where(c => Classes.All(existingClass => existingClass.Id != c.Id)).Select(c => c.Id).ToList();
-            if (invalidClassIds.Count != 0)
-                return Result.Failure(ClassError.NotFound(invalidClassIds[0]));
 
             foreach (var classUpdate in classesToUpdate)
             {
-                var existingClass = Classes.First(c => c.Id == classUpdate.Id);
+                var existingClass = Classes.FirstOrDefault(c => c.Id == classUpdate.Id);
+
+                if (existingClass is null)
+                    return Result.Failure(ClassError.NotFound(classUpdate.Id));
+
                 var updateResult = existingClass.Update(classUpdate.SubjectId, classUpdate.Price, classUpdate.StartsAt, classUpdate.EndsAt);
 
                 if (!updateResult.IsSuccess)
@@ -203,6 +203,32 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
         
+        public Result UpdateProjects(IReadOnlyList<ProjectUpdateData> projectsToUpdate)
+        {
+            if(ReservationType != ReservationType.Project)
+                return Result.Failure(ReservationError.NotAProjectReservation(Id));
+
+            foreach (var projectUpdate in projectsToUpdate)
+            {
+                var existingProject = Projects.FirstOrDefault(p => p.Id == projectUpdate.Id);
+
+                if (existingProject is null)
+                    return Result.Failure(ProjectError.NotFound(projectUpdate.Id));
+
+                var updateResult = existingProject.Update(projectUpdate);
+
+                if (!updateResult.IsSuccess)
+                    return updateResult;
+            }
+
+            DiscountRate = CalculateDiscountRate(TotalPrice);
+            Bonus = CalculateBonus(TotalPrice, PaidAmount);
+            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
+            UpdatedAt = DateTime.UtcNow;
+
+            return Result.Success();
+        }
+
         public Result AddClasses(IReadOnlyList<ClassCreateData> classesToAdd)
         {
             if(ReservationType != ReservationType.Class)

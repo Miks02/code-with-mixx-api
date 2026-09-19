@@ -33,26 +33,11 @@ public class Project : IAuditable, ISoftDeletable
 
     public static Result<Project> Create(ProjectCreateData data)
     {
-        if(data.SubjectId <= 0)
-            return Result<Project>.Failure(SubjectError.NotFound(data.SubjectId)); 
-        
-        if(data.Price < 0)
-            return Result<Project>.Failure(ProjectError.NegativePrice());
-        
-        if(data.Progress < 0 || data.Progress > 100)
-            return Result<Project>.Failure(ProjectError.InvalidProgress(data.Progress));
-        
-        if(data.StartDate <= DateTime.MinValue || data.StartDate > data.EndDate)
-            return Result<Project>.Failure(ProjectError.InvalidDateRange(data.StartDate, data.EndDate));
-        
-        if(data.ReservedAt <= DateTime.MinValue || data.ReservedAt > DateTime.UtcNow)
-            return Result<Project>.Failure(ProjectError.InvalidReservationDate(data.ReservedAt));
-        
-        if(data.GithubLink is not null && data.GithubLink.Length > 200)
-            return Result<Project>.Failure(ProjectError.GithubLinkIsTooLong(data.GithubLink));
-        
-        if(data.DownloadLink is not null && data.DownloadLink.Length > 200)
-            return Result<Project>.Failure(ProjectError.DownloadLinkIsTooLong(data.DownloadLink));
+        var validationResult = Validate(data.SubjectId, data.Price, data.Progress, data.StartDate, data.EndDate,
+            data.ReservedAt, data.GithubLink, data.DownloadLink);
+
+        if(!validationResult.IsSuccess)
+            return Result<Project>.Failure(validationResult.Errors[0]);
 
         var newProject = new Project
         {
@@ -80,6 +65,28 @@ public class Project : IAuditable, ISoftDeletable
         return Result<Project>.Success(newProject);   
     }
     
+    public Result Update(ProjectUpdateData data)
+    {
+        var validationResult = Validate(data.SubjectId, data.Price, data.Progress, data.StartDate, data.EndDate,
+            data.ReservedAt, data.GithubLink, data.DownloadLink);
+
+        if(!validationResult.IsSuccess)
+            return validationResult;
+
+        SubjectId = data.SubjectId;
+        ProjectType = data.ProjectType;
+        Price = data.Price;
+        Progress = data.Progress;
+        ReservedAt = data.ReservedAt;
+        StartDate = data.StartDate;
+        EndDate = data.EndDate;
+        GithubLink = data.GithubLink;
+        DownloadLink = data.DownloadLink;
+        UpdatedAt = DateTime.UtcNow;
+
+        return Result.Success();
+    }
+
     public Result Delete()
     {
         if(DeletedAt is not null)
@@ -97,6 +104,33 @@ public class Project : IAuditable, ISoftDeletable
 
         IsDeleted = false;
         DeletedAt = null;
+        return Result.Success();
+    }
+
+    private static Result Validate(int subjectId, decimal price, decimal progress, DateTime startDate, DateTime endDate,
+        DateTime reservedAt, string? githubLink, string? downloadLink)
+    {
+        if(subjectId <= 0)
+            return Result.Failure(SubjectError.NotFound(subjectId));
+
+        if(price < 0)
+            return Result.Failure(ProjectError.NegativePrice());
+
+        if(progress < 0 || progress > 100)
+            return Result.Failure(ProjectError.InvalidProgress(progress));
+
+        if(startDate <= DateTime.MinValue || startDate > endDate)
+            return Result.Failure(ProjectError.InvalidDateRange(startDate, endDate));
+
+        if(reservedAt <= DateTime.MinValue || reservedAt > DateTime.UtcNow)
+            return Result.Failure(ProjectError.InvalidReservationDate(reservedAt));
+
+        if(githubLink is not null && githubLink.Length > 200)
+            return Result.Failure(ProjectError.GithubLinkIsTooLong(githubLink));
+
+        if(downloadLink is not null && downloadLink.Length > 200)
+            return Result.Failure(ProjectError.DownloadLinkIsTooLong(downloadLink));
+
         return Result.Success();
     }
 }
