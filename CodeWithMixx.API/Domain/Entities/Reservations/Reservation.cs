@@ -276,6 +276,26 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
         
+        public Result RestoreClassReservation()
+        {
+            if(ReservationType != ReservationType.Class)
+                return Result.Failure(ReservationError.NotAClassReservation(Id));
+
+            var result = Restore();
+            if(!result.IsSuccess)
+                return result;
+
+            foreach (var @class in Classes.Where(c => c.IsDeleted))
+            {
+                var restoreClassResult = @class.Restore();
+
+                if(!restoreClassResult.IsSuccess)
+                    return restoreClassResult;
+            }
+
+            return Result.Success();
+        }
+
         public Result RestoreProjectReservation()
         {
             if(ReservationType != ReservationType.Project)

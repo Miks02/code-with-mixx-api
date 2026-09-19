@@ -73,5 +73,15 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
             return Result.Success();
         }
 
+        public Result Restore()
+        {
+            if(!IsDeleted)
+                return Result.Failure(ClassError.NotArchived(Id));
+
+            IsDeleted = false;
+            DeletedAt = null;
+
+            return Result.Success();
+        }
     }
 }

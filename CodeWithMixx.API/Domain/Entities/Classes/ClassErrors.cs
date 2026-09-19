@@ -24,5 +24,17 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
             string message = $"Class with identifier '{identifier}' is already deleted";
             return new Error("Class.AlreadyDeleted", message, ErrorType.Conflict);
         }
+
+        public static Error NotArchived(int identifier)
+        {
+            string message = $"Class with identifier '{identifier}' is not archived";
+            return new Error("Class.NotArchived", message, ErrorType.Conflict);
+        }
+
+        public static Error ReservationArchived(int identifier, int reservationIdentifier)
+        {
+            string message = $"Class with identifier '{identifier}' cannot be restored because its reservation '{reservationIdentifier}' is archived. Restore the reservation instead";
+            return new Error("Class.ReservationArchived", message, ErrorType.Conflict);
+        }
     }
 }
