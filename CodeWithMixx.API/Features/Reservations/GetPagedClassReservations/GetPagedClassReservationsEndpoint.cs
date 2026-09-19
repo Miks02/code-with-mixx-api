@@ -17,7 +17,7 @@ public class GetPagedClassReservationsEndpoint : IEndpoint
             return result.ToTypedResult();
         })
         .RequireAuthorization("AdminOnly")
-        .WithTags("Classes")
+        .WithTags("Reservations")
         .Produces<PagedResult<GetPagedClassReservationsResponse>>();
     }
 }

@@ -17,7 +17,7 @@ public class GetClassReservationsSummaryEndpoint : IEndpoint
             return result.ToTypedResult();
         })
         .RequireAuthorization("AdminOnly")
-        .WithTags("Classes")
+        .WithTags("Reservations")
         .Produces<GetClassReservationsSummaryResponse>();
     }
 }

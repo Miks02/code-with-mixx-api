@@ -17,7 +17,7 @@ public class DeleteProjectReservationEndpoint : IEndpoint
             return result.ToTypedResult(HttpStatusCode.NoContent);
         })
         .RequireAuthorization("AdminOnly")
-        .WithTags("Projects")
+        .WithTags("Reservations")
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status400BadRequest)
         .Produces(StatusCodes.Status404NotFound);

@@ -18,7 +18,7 @@ public class CreateClassReservationEndpoint : IEndpoint
             return result.ToTypedResult(HttpStatusCode.Created, $"/api/admin/reservations/classes/{result.Payload?.Id}");
         })
         .RequireAuthorization("AdminOnly")
-        .WithTags("Classes")
+        .WithTags("Reservations")
         .ProducesValidationProblem()
         .Produces<Result<CreateClassReservationResponse>>();
     }

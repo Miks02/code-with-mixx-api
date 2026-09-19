@@ -17,7 +17,7 @@ public class GetClassReservationByIdEndpoint : IEndpoint
             return result.ToTypedResult();
         })
         .RequireAuthorization("AdminOnly")
-        .WithTags("Classes")
+        .WithTags("Reservations")
         .Produces<GetClassReservationByIdResponse>()
         .Produces(StatusCodes.Status404NotFound);
     }

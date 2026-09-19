@@ -17,7 +17,7 @@ public class UpdateClassReservationEndpoint : IEndpoint
             return result.ToTypedResult();
         })
         .RequireAuthorization("AdminOnly")
-        .WithTags("Classes")
+        .WithTags("Reservations")
         .ProducesValidationProblem()
         .Produces<UpdateClassReservationResponse>()
         .Produces(StatusCodes.Status404NotFound);

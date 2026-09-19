@@ -17,7 +17,7 @@ public class CreateProjectReservationEndpoint : IEndpoint
             var result = await handler.HandleAsync(request, ct);
             return result.ToTypedResult();
         })
-        .WithTags("Projects")
+        .WithTags("Reservations")
         .RequireAuthorization("AdminOnly")
         .Produces<CreateProjectReservationResponse>()
         .Produces<ValidationProblemDetails>(StatusCodes.Status400BadRequest);

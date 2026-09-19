@@ -17,7 +17,7 @@ public class UpdateProjectReservationEndpoint : IEndpoint
             return result.ToTypedResult();
         })
         .RequireAuthorization("AdminOnly")
-        .WithTags("Projects")
+        .WithTags("Reservations")
         .ProducesValidationProblem()
         .Produces<UpdateProjectReservationResponse>()
         .Produces(StatusCodes.Status404NotFound);
