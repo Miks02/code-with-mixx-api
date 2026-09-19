@@ -10,8 +10,6 @@ public class ArchiveProjectReservationHandler(AppDbContext context) : IHandler<A
 {
     public async Task<Result> HandleAsync(ArchiveProjectReservationRequest request, CancellationToken ct = default)
     {
-        // Filters are ignored so an already archived reservation yields 409 instead of 404;
-        // projects archived earlier on their own are left out so the domain doesn't fail on them.
         var reservation = await context.Reservations
             .IgnoreQueryFilters()
             .Include(r => r.Projects.Where(p => !p.IsDeleted))

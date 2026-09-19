@@ -10,8 +10,6 @@ public class ArchiveClassReservationHandler(AppDbContext context) : IHandler<Arc
 {
     public async Task<Result> HandleAsync(ArchiveClassReservationRequest request, CancellationToken ct = default)
     {
-        // Filters are ignored so an already archived reservation yields 409 instead of 404;
-        // classes archived earlier on their own are left out so the domain doesn't fail on them.
         var reservation = await context.Reservations
             .IgnoreQueryFilters()
             .Include(r => r.Classes.Where(c => !c.IsDeleted))
