@@ -48,22 +48,20 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             if(data.PaidAmount < 0)
                 return Result<Reservation>.Failure(ReservationError.InvalidAmount(data.PaidAmount));
             
-            var totalPrice = data.TotalPrice ?? data.Classes.Sum(c => c.Price);
-            
             var reservation = new Reservation
             {
                 AdminId = data.AdminId,
                 StudentId = data.StudentId,
                 ReservationStatus = data.ReservationStatus,
-                TotalPrice = totalPrice,
                 PaidAmount = data.PaidAmount,
                 CreatedAt = DateTime.UtcNow,
                 ReservationType = ReservationType.Class
             };
 
-            reservation.DiscountRate = reservation.CalculateDiscountRate(totalPrice);
-            reservation.Bonus = reservation.CalculateBonus(totalPrice, data.PaidAmount);
-            reservation.PaymentStatus = reservation.DeterminePaymentStatus(data.PaidAmount, totalPrice);
+            reservation.TotalPrice = reservation.CalculateTotalPrice(data.TotalPrice);
+            reservation.DiscountRate = reservation.CalculateDiscountRate(reservation.TotalPrice);
+            reservation.Bonus = reservation.CalculateBonus(reservation.TotalPrice, reservation.PaidAmount);
+            reservation.PaymentStatus = reservation.DeterminePaymentStatus(reservation.PaidAmount, reservation.TotalPrice);
             
             var classesResult = reservation.AddClasses(data.Classes);
             
@@ -100,9 +98,11 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             if (!addProjectsResult.IsSuccess)
                 return Result<Reservation>.Failure(addProjectsResult.Errors[0]);
             
+            reservation.TotalPrice = reservation.CalculateTotalPrice(data.TotalPrice);
             reservation.DiscountRate = reservation.CalculateDiscountRate(reservation.TotalPrice);
             reservation.Bonus = reservation.CalculateBonus(reservation.TotalPrice, data.PaidAmount);
             reservation.PaymentStatus = reservation.DeterminePaymentStatus(data.PaidAmount, reservation.TotalPrice);
+
             
             return Result<Reservation>.Success(reservation);
         }
@@ -194,7 +194,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                     return Result.Failure(updateResult.Errors[0]);
             }
             
-            TotalPrice = Classes.Sum(c => c.Price);
+            TotalPrice = CalculateTotalPrice(TotalPrice);
             DiscountRate = CalculateDiscountRate(TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
@@ -218,12 +218,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 Classes.Add(classResult.Payload!);
             }
 
-            TotalPrice = Classes.Sum(c => c.Price);
-            DiscountRate = CalculateDiscountRate(TotalPrice);
-            Bonus = CalculateBonus(TotalPrice, PaidAmount);
-            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
-            UpdatedAt = DateTime.UtcNow;
-
             return Result.Success();
         }
 
@@ -241,12 +235,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 Projects.Add(projectResult.Payload!);
             }
             
-            TotalPrice = Projects.Sum(p => p.Price);
-            DiscountRate = CalculateDiscountRate(TotalPrice);
-            Bonus = CalculateBonus(TotalPrice, PaidAmount);
-            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
-            UpdatedAt = DateTime.UtcNow;
-            
             return Result.Success();
         }
         
@@ -263,6 +251,16 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 var amount when amount > 0 && amount < totalPrice => PaymentStatus.PartiallyPaid,
                 _ => PaymentStatus.Pending
             };
+        }
+
+        private decimal CalculateTotalPrice(decimal? totalPrice)
+        {
+            if (totalPrice is not null)
+                return totalPrice.Value;
+
+            return ReservationType == ReservationType.Class 
+                ? Classes.Sum(c => c.Price) 
+                : Projects.Sum(p => p.Price);
         }
         
         private decimal CalculateDiscountRate(decimal requestedTotalPrice)
