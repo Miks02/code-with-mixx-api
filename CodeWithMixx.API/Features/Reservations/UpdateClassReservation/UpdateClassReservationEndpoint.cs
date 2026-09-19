@@ -7,7 +7,7 @@ public class UpdateClassReservationEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut("/admin/classes/{reservationId:int}", async (
+        app.MapPut("/admin/reservations/classes/{reservationId:int}", async (
                 int reservationId,
                 UpdateClassReservationRequest request,
                 IHandler<UpdateClassReservationRequest, Result<UpdateClassReservationResponse>> handler,

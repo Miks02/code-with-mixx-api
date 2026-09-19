@@ -8,7 +8,7 @@ public class ArchiveClassReservationEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/admin/classes/{reservationId:int}/archive", async (
+        app.MapPost("/admin/reservations/classes/{reservationId:int}/archive", async (
                 [AsParameters] ArchiveClassReservationRequest request,
                 IHandler<ArchiveClassReservationRequest, Result> handler,
                 CancellationToken ct) =>

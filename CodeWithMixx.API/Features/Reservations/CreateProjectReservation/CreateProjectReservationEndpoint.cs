@@ -8,7 +8,7 @@ public class CreateProjectReservationEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/admin/projects", async 
+        app.MapPost("/admin/reservations/projects", async 
             (
                 CreateProjectReservationRequest request,
                 IHandler<CreateProjectReservationRequest, Result<CreateProjectReservationResponse>> handler,

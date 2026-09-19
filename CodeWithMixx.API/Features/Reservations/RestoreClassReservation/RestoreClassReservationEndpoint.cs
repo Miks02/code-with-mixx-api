@@ -8,7 +8,7 @@ public class RestoreClassReservationEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/admin/classes/{reservationId:int}/restore", async (
+        app.MapPost("/admin/reservations/classes/{reservationId:int}/restore", async (
                 [AsParameters] RestoreClassReservationRequest request,
                 IHandler<RestoreClassReservationRequest, Result> handler,
                 CancellationToken ct) =>
