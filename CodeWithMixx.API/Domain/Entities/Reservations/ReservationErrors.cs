@@ -34,5 +34,22 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         public static Error NoProjectsProvided()
             => new("Reservation.NoProjectsProvided", "No projects have been provided for a project reservation", ErrorType.Validation);
         
+        public static Error NotAClassReservation(int? identifier = null)
+        {
+            string message = identifier is null
+                ? "Reservation is not a class reservation"
+                : $"Reservation with identifier '{identifier}' is not a class reservation";
+
+            return new Error("Reservation.NotAClassReservation", message, ErrorType.Validation);
+        }
+        
+        public static Error NotAProjectReservation(int? identifier = null)
+        {
+            string message = identifier is null
+                ? "Reservation is not a project reservation"
+                : $"Reservation with identifier '{identifier}' is not a project reservation";
+
+            return new Error("Reservation.NotAProjectReservation", message, ErrorType.Validation);
+        }
     }
 }

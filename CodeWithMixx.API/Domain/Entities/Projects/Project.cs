@@ -56,6 +56,7 @@ public class Project : IAuditable, ISoftDeletable
 
         var newProject = new Project
         {
+            SubjectId = data.SubjectId,
             Price = data.Price,
             ProjectType = data.ProjectType,
             GithubLink = data.GithubLink,

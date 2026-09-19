@@ -29,6 +29,8 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
         public Student Student { get; private set; } = null!;
         public string StudentId { get; private set; } = null!;
+        
+        public ReservationType ReservationType { get; private set; }
 
         public ICollection<Class> Classes { get; private set; } = [];
         public ICollection<Project> Projects { get; private set; } = [];
@@ -37,7 +39,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
         public static Result<Reservation> CreateClassReservation(ReservationCreateData data)
         {
-            if (data.Classes.Count <= 0)
+            if (data.Classes.Count == 0)
                 return Result<Reservation>.Failure(ReservationError.NoClassesProvided());
             
             if(data.TotalPrice is not null && data.TotalPrice < 0)
@@ -46,9 +48,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             if(data.PaidAmount < 0)
                 return Result<Reservation>.Failure(ReservationError.InvalidAmount(data.PaidAmount));
             
-            var totalPrice = data.TotalPrice is null
-                ? data.Classes.Sum(c => c.Price) 
-                : data.TotalPrice.Value;
+            var totalPrice = data.TotalPrice ?? data.Classes.Sum(c => c.Price);
             
             var reservation = new Reservation
             {
@@ -58,21 +58,17 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 TotalPrice = totalPrice,
                 PaidAmount = data.PaidAmount,
                 CreatedAt = DateTime.UtcNow,
+                ReservationType = ReservationType.Class
             };
-            
+
             reservation.DiscountRate = reservation.CalculateDiscountRate(totalPrice);
             reservation.Bonus = reservation.CalculateBonus(totalPrice, data.PaidAmount);
             reservation.PaymentStatus = reservation.DeterminePaymentStatus(data.PaidAmount, totalPrice);
             
-            foreach (var c in data.Classes)
-            {
-                var classResult = Class.Create(c.SubjectId, c.Price, c.StartsAt, c.EndsAt);
-
-                if (!classResult.IsSuccess)
-                    return Result<Reservation>.Failure(classResult.Errors[0]);
-
-                reservation.Classes.Add(classResult.Payload!);
-            }
+            var classesResult = reservation.AddClasses(data.Classes);
+            
+            if (!classesResult.IsSuccess)
+                return Result<Reservation>.Failure(classesResult.Errors[0]);
             
             return Result<Reservation>.Success(reservation);
         }
@@ -96,21 +92,17 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 TotalPrice = data.TotalPrice ?? 0,
                 PaidAmount = data.PaidAmount,
                 CreatedAt = DateTime.UtcNow,
+                ReservationType = ReservationType.Project
             };
+            
+            var addProjectsResult = reservation.AddProjects(projects);
+            
+            if (!addProjectsResult.IsSuccess)
+                return Result<Reservation>.Failure(addProjectsResult.Errors[0]);
             
             reservation.DiscountRate = reservation.CalculateDiscountRate(reservation.TotalPrice);
             reservation.Bonus = reservation.CalculateBonus(reservation.TotalPrice, data.PaidAmount);
             reservation.PaymentStatus = reservation.DeterminePaymentStatus(data.PaidAmount, reservation.TotalPrice);
-            
-            foreach (var p in projects)
-            {
-                var projectResult = Project.Create(p);
-
-                if (!projectResult.IsSuccess)
-                    return Result<Reservation>.Failure(projectResult.Errors[0]);
-
-                reservation.Projects.Add(projectResult.Payload!);
-            }
             
             return Result<Reservation>.Success(reservation);
         }
@@ -186,6 +178,9 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
         public Result UpdateClasses(IReadOnlyList<ClassUpdateData> classesToUpdate)
         {
+            if(ReservationType != ReservationType.Project)
+                return Result.Failure(ReservationError.NotAClassReservation(Id));
+
             var invalidClassIds = classesToUpdate.Where(c => Classes.All(existingClass => existingClass.Id != c.Id)).Select(c => c.Id).ToList();
             if (invalidClassIds.Count != 0)
                 return Result.Failure(ClassError.NotFound(invalidClassIds[0]));
@@ -199,7 +194,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                     return Result.Failure(updateResult.Errors[0]);
             }
             
-            TotalPrice = SumDefaultPriceOfClasses();
+            TotalPrice = Classes.Sum(c => c.Price);
             DiscountRate = CalculateDiscountRate(TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
@@ -210,6 +205,9 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         
         public Result AddClasses(IReadOnlyList<ClassCreateData> classesToAdd)
         {
+            if(ReservationType != ReservationType.Class)
+                return Result.Failure(ReservationError.NotAClassReservation(Id));
+                                                                            
             foreach (var classData in classesToAdd)
             {
                 var classResult = Class.Create(classData.SubjectId, classData.Price, classData.StartsAt, classData.EndsAt);
@@ -220,7 +218,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 Classes.Add(classResult.Payload!);
             }
 
-            TotalPrice = SumDefaultPriceOfClasses();
+            TotalPrice = Classes.Sum(c => c.Price);
             DiscountRate = CalculateDiscountRate(TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
@@ -231,6 +229,9 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
         public Result AddProjects(IReadOnlyList<ProjectCreateData> projectsToAdd)
         {
+            if(ReservationType != ReservationType.Project)
+                return Result.Failure(ReservationError.NotAProjectReservation(Id));
+
             foreach (var projectData in projectsToAdd)
             {
                 var projectResult = Project.Create(projectData);
@@ -240,7 +241,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 Projects.Add(projectResult.Payload!);
             }
             
-            TotalPrice = SumDefaultPriceOfClasses();
+            TotalPrice = Projects.Sum(p => p.Price);
             DiscountRate = CalculateDiscountRate(TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
@@ -251,23 +252,25 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         
         private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice)
         {
+            var lastItem = ReservationType == ReservationType.Class 
+                ? Classes.Select(c => c.EndsAt).Last() 
+                : Projects.Select(p => p.EndDate).Last();
+            
             return paidAmount switch
             {
                 var amount when amount >= totalPrice => PaymentStatus.Paid,
-                var amount when amount < totalPrice && Classes.Select(c => c.EndsAt).Last() < DateTime.UtcNow => PaymentStatus.Overdue,
+                var amount when amount < totalPrice && lastItem < DateTime.UtcNow => PaymentStatus.Overdue,
                 var amount when amount > 0 && amount < totalPrice => PaymentStatus.PartiallyPaid,
                 _ => PaymentStatus.Pending
             };
         }
         
-        private decimal SumDefaultPriceOfClasses()
-        {
-            return Classes.Sum(c => c.Price);
-        }
-        
         private decimal CalculateDiscountRate(decimal requestedTotalPrice)
         {
-            var defaultTotal = SumDefaultPriceOfClasses();
+            var defaultTotal = ReservationType == ReservationType.Class 
+                ? Classes.Sum(c => c.Price) 
+                : Projects.Sum(p => p.Price);
+            
             if (defaultTotal <= 0 || defaultTotal < requestedTotalPrice)
                 return 0;
         
@@ -288,7 +291,8 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         public bool RequiresHistoryRetention()
             => ReservationStatus == ReservationStatus.Completed
                || PaymentStatus != PaymentStatus.Pending
-               || Classes.Any(c => c.StartsAt <= DateTime.UtcNow);
+               || Classes.Any(c => c.StartsAt <= DateTime.UtcNow)
+               || Projects.Any(p => p.StartDate <= DateTime.UtcNow);
 
         public void Delete()
         {
