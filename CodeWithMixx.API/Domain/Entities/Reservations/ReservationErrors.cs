@@ -51,5 +51,11 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
             return new Error("Reservation.NotAProjectReservation", message, ErrorType.Validation);
         }
+        
+        public static Error AlreadyDeleted(int identifier)
+        {
+            string message = $"Reservation with identifier '{identifier}' is already deleted";
+            return new Error("Reservation.AlreadyDeleted", message, ErrorType.Conflict);
+        }
     }
 }

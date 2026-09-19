@@ -238,6 +238,50 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
         
+        public Result DeleteClassReservation()
+        {
+            if(ReservationType != ReservationType.Class)
+                return Result.Failure(ReservationError.NotAClassReservation(Id));
+            
+            foreach (var @class in Classes)
+            {
+                var deleteResult = @class.Delete(); 
+                
+                if(!deleteResult.IsSuccess)
+                    return deleteResult;
+            }
+            var result = Delete();
+            if(!result.IsSuccess)
+                return result;
+            
+            return Result.Success();
+        }
+        
+        public Result DeleteProjectReservation()
+        {
+            if(ReservationType != ReservationType.Project)
+                return Result.Failure(ReservationError.NotAProjectReservation(Id));
+            
+            foreach (var project in Projects)  
+            {
+                var deleteProjectResult = project.Delete(); 
+                
+                if(!deleteProjectResult.IsSuccess)
+                    return deleteProjectResult;
+            }
+            var result = Delete();
+            if(!result.IsSuccess)
+                return result;
+            
+            return Result.Success();
+        }
+        
+        public bool RequiresHistoryRetention()
+            => ReservationStatus == ReservationStatus.Completed
+               || PaymentStatus != PaymentStatus.Pending
+               || Classes.Any(c => c.StartsAt <= DateTime.UtcNow)
+               || Projects.Any(p => p.StartDate <= DateTime.UtcNow);
+        
         private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice)
         {
             var lastItem = ReservationType == ReservationType.Class 
@@ -286,16 +330,14 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Math.Round(bonus, 2);
         }
 
-        public bool RequiresHistoryRetention()
-            => ReservationStatus == ReservationStatus.Completed
-               || PaymentStatus != PaymentStatus.Pending
-               || Classes.Any(c => c.StartsAt <= DateTime.UtcNow)
-               || Projects.Any(p => p.StartDate <= DateTime.UtcNow);
-
-        public void Delete()
+        private Result Delete()
         {
+            if(IsDeleted) 
+                return Result.Failure(ReservationError.AlreadyDeleted(Id));
+
             IsDeleted = true;
             DeletedAt = DateTime.UtcNow;
+            return Result.Success();
         }
     }
 }

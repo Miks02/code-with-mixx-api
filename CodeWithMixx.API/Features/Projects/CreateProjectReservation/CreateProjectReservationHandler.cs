@@ -20,12 +20,6 @@ public class CreateProjectReservationHandler (AppDbContext context, IUserProvide
             return Result<CreateProjectReservationResponse>.Failure(StudentError.NotFound(request.StudentId));
         
         var subjectIds = request.Projects.Select(c => c.SubjectId).ToList();
-
-        Console.WriteLine("SISAJ KURAC");
-        foreach (var id in subjectIds)
-        {
-            Console.WriteLine("SubjectID: " + id);
-        }
         
         var subjects = await context.Subjects
             .Where(s => subjectIds.Contains(s.Id))

@@ -4,14 +4,14 @@ using CodeWithMixx.API.Domain.Entities.Reservations;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace CodeWithMixx.API.Features.Classes.DeleteClassReservation;
+namespace CodeWithMixx.API.Features.Projects.DeleteProjectReservation;
 
-public class DeleteClassReservationHandler(AppDbContext context) : IHandler<DeleteClassReservationRequest, Result>
+public class DeleteProjectReservationHandler(AppDbContext context) : IHandler<DeleteProjectReservationRequest, Result>
 {
-    public async Task<Result> HandleAsync(DeleteClassReservationRequest request, CancellationToken ct = default)
+    public async Task<Result> HandleAsync(DeleteProjectReservationRequest request, CancellationToken ct = default)
     {
         var reservation = await context.Reservations
-            .Include(r => r.Classes)
+            .Include(r => r.Projects)
             .FirstOrDefaultAsync(r => r.Id == request.ReservationId, ct);
 
         if (reservation is null)
@@ -19,13 +19,13 @@ public class DeleteClassReservationHandler(AppDbContext context) : IHandler<Dele
 
         if (reservation.RequiresHistoryRetention())
         {
-            var deleteResult = reservation.DeleteClassReservation();
-            if(!deleteResult.IsSuccess)
+            var deleteResult = reservation.DeleteProjectReservation();
+            if (!deleteResult.IsSuccess)
                 return deleteResult;
         }
         else
             context.Reservations.Remove(reservation);
-
+        
         await context.SaveChangesAsync(ct);
         return Result.Success();
     }
