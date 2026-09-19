@@ -18,5 +18,11 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
         
         public static Error InvalidPrice(decimal price)
             => new("Class.InvalidPrice", $"Price '{price}' must be positive", ErrorType.Validation);
+        
+        public static Error AlreadyDeleted(int identifier)
+        {
+            string message = $"Class with identifier '{identifier}' is already deleted";
+            return new Error("Class.AlreadyDeleted", message, ErrorType.Conflict);
+        }
     }
 }

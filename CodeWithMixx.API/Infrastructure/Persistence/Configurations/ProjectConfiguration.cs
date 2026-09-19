@@ -28,7 +28,7 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
         builder.HasOne(p => p.Reservation)
             .WithMany(r => r.Projects)
             .HasForeignKey(p => p.ReservationId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
         
         builder.HasOne(p => p.Subject)
             .WithMany(s => s.Projects)
