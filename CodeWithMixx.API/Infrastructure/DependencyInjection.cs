@@ -1,6 +1,7 @@
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Infrastructure.Cors;
 using CodeWithMixx.API.Infrastructure.Decorators;
+using CodeWithMixx.API.Infrastructure.Emails;
 using CodeWithMixx.API.Infrastructure.Exceptions.Handlers;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using CodeWithMixx.API.Infrastructure.RateLimiting;
@@ -19,6 +20,7 @@ public static class DependencyInjection
         services.AddAuthRateLimiter();
         services.AddPersistence(connectionString);
         services.AddSecurity(configuration);
+        services.AddEmailServices(configuration);
         services.AddValidatorsFromAssembly(typeof(Program).Assembly);
         services.AddProblemDetails();
         services.AddExceptionHandler<TokensRevokedExceptionHandler>();
