@@ -1,3 +1,4 @@
+using System.Text;
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Domain.Entities.Users;
 using CodeWithMixx.API.Features.Authentication.Common;
@@ -31,6 +32,11 @@ public static class SecurityRegistration
             })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
+
+        services.Configure<DataProtectionTokenProviderOptions>(options =>
+        {
+            options.TokenLifespan = TimeSpan.FromHours(1);
+        });
         
         services.AddAuthentication(options =>
         {
@@ -45,7 +51,7 @@ public static class SecurityRegistration
                 ValidIssuer = validIssuer,
                 ValidAudience = validAudience,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(issuerSigningKey))
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(issuerSigningKey))
             };
 
             options.Events = new JwtBearerEvents

@@ -35,6 +35,10 @@ public class AuthEmailSender(IConfiguration configuration, IResend resend) : IAu
                                          Resetuj lozinku
                                      </a>
                                  </div>
+                                 
+                                 <p style="text-align: center; font-size: 13px; color: #a7f3d0; margin: 0 0 30px;">
+                                    Link važi 1 sat.
+                                </p>
                          
                                  <p style="font-size: 14px; color: #fde047;">Ako nisi zatražio/la izmenu lozinke, slobodno ignoriši ovaj mejl. Tvoja lozinka ostaje netaknuta.</p>
                                  
