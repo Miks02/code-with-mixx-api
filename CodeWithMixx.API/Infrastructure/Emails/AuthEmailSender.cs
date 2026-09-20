@@ -58,9 +58,7 @@ public class AuthEmailSender(IConfiguration configuration, IResend resend) : IAu
             HtmlBody = htmlBody,
             Subject = "Resetovanje lozinke"
         };
-
-        Console.WriteLine("Token: " + token);
-        Console.WriteLine("UserID: " + userId);
-        //await resend.EmailSendAsync(message);
+        
+        await resend.EmailSendAsync(message);
     }
 }
