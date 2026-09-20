@@ -1,4 +1,3 @@
-using System.Net;
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Domain.Entities.Users;
@@ -16,9 +15,7 @@ public class ResetPasswordHandler(UserManager<User> userManager, ITokenService t
        if(user is null) 
            return Result.Failure(AuthError.InvalidPasswordResetToken($"User with id |{request.UserId}| has not been found during password reset."));
        
-       var token = WebUtility.UrlDecode(request.Token);
-       
-       var resetResult = await userManager.ResetPasswordAsync(user, token, request.Password);
+       var resetResult = await userManager.ResetPasswordAsync(user, request.Token, request.Password);
 
        if (!resetResult.Succeeded)
            return Result.Failure(AuthError.InvalidPasswordResetToken($"Password reset failed for user with id |{request.UserId}|."));

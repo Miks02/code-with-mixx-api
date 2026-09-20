@@ -9,19 +9,9 @@ public class ResetPasswordEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("auth/reset-password", async (
-                [FromQuery(Name = "userId")] string userId,
-                [FromQuery(Name = "token")] string token,
-                [FromBody] ResetPasswordBody body,
+                [FromBody] ResetPasswordRequest request,
                 IHandler<ResetPasswordRequest, Result> resetPasswordHandler, CancellationToken ct) =>
             {
-                var request = new ResetPasswordRequest
-                {
-                    UserId = userId,
-                    Token = token,
-                    Password = body.Password,
-                    ConfirmedPassword = body.ConfirmedPassword
-                };
-                
                 var result = await resetPasswordHandler.HandleAsync(request, ct);
                 return result.ToTypedResult();
             })

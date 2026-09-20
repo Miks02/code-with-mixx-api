@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-
 namespace CodeWithMixx.API.Features.Authentication.ResetPassword;
 
 public record ResetPasswordRequest
@@ -9,9 +7,3 @@ public record ResetPasswordRequest
     public string Password { get; init; } = null!;
     public string ConfirmedPassword { get; init; } = null!;
 };
-
-public record ResetPasswordBody
-{
-    public string Password { get; init; } = null!;
-    public string ConfirmedPassword { get; init; } = null!;
-}
