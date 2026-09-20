@@ -20,7 +20,7 @@ public class SendResetPasswordLinkHandler(
         
         var token = await userManager.GeneratePasswordResetTokenAsync(user);
         
-        await authEmailSender.SendPasswordResetEmailAsync(user.Email!, token);
+        await authEmailSender.SendPasswordResetEmailAsync(user.Email!, user.Id, token);
         return Result.Success();
     }
 }

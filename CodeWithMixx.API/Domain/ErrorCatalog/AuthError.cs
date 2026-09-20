@@ -36,5 +36,7 @@ public class AuthError
         => new("Auth.ExpiredToken", message, ErrorType.Unauthorized);
     public static Error MissingToken(string message = "Refresh token is missing")
         => new("Auth.MissingToken", message, ErrorType.Unauthorized);
+    public static Error InvalidPasswordResetToken(string message = "Invalid password reset token")
+        => new("Auth.InvalidPasswordResetToken", message, ErrorType.Unauthorized);
     
 }

@@ -9,11 +9,11 @@ public class AuthEmailSender(IConfiguration configuration, IResend resend) : IAu
     private readonly string _clientUrl = configuration["Web:ClientUrl"]!;
     private readonly string _fromEmail = configuration["Resend:EmailSender"]!;
     
-    public async Task SendPasswordResetEmailAsync(string email, string token)
+    public async Task SendPasswordResetEmailAsync(string email, string userId, string token)
     {
         token = UrlEncoder.Default.Encode(token);
         
-        var resetUrl = $"{_clientUrl}/reset-password?token={token}";
+        var resetUrl = $"{_clientUrl}/reset-password?token={token}&userId={userId}";
         
         var htmlBody = $"""
                          <!DOCTYPE html>
@@ -59,6 +59,8 @@ public class AuthEmailSender(IConfiguration configuration, IResend resend) : IAu
             Subject = "Resetovanje lozinke"
         };
 
-        await resend.EmailSendAsync(message);
+        Console.WriteLine("Token: " + token);
+        Console.WriteLine("UserID: " + userId);
+        //await resend.EmailSendAsync(message);
     }
 }
