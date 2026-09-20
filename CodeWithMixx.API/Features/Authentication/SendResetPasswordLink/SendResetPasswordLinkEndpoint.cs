@@ -7,7 +7,7 @@ public class SendResetPasswordLinkEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/auth/reset-password", async (
+        app.MapPost("/auth/forgot-password", async (
                 SendResetPasswordLinkRequest request,
                 IHandler<SendResetPasswordLinkRequest, Result> handler,
                 CancellationToken ct) =>
@@ -16,6 +16,7 @@ public class SendResetPasswordLinkEndpoint : IEndpoint
                 return result.ToTypedResult();
             })
             .WithTags("Authentication")
+            .RequireRateLimiting("ForgotPasswordLimiter")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
     }

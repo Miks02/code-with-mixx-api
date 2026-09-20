@@ -18,6 +18,7 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         services.AddGlobalRateLimiter();
         services.AddAuthRateLimiter();
+        services.AddForgotPasswordRateLimiter();
         services.AddPersistence(connectionString);
         services.AddSecurity(configuration);
         services.AddEmailServices(configuration);
