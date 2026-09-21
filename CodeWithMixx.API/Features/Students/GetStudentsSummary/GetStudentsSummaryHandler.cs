@@ -29,15 +29,20 @@ public class GetStudentsSummaryHandler(AppDbContext context) : IHandler<GetStude
             _ => studentsQuery.OrderByDescending(s => s.User.CreatedAt),
         };
 
-        studentsQuery = request.Filter switch
+        var invalidFilters = StudentsFilterResolver.GetInvalidFilters(request.Filters);
+
+        foreach (var filter in request.Filters.Except(invalidFilters))
         {
-            StudentsFilterBy.WithClasses => studentsQuery.Where(s => s.Reservations.Any(r => r.Classes.Count != 0)),
-            StudentsFilterBy.WithoutClasses => studentsQuery.Where(s => s.Reservations.All(r => r.Classes.Count == 0)),
-            StudentsFilterBy.WithProjects => studentsQuery.Where(s => s.Reservations.Any(r => r.Projects.Count != 0)),
-            StudentsFilterBy.WithoutProjects => studentsQuery.Where(s => s.Reservations.All(r => r.Projects.Count == 0)),
-            _ => studentsQuery
-        };
-        
+            studentsQuery = filter switch
+            {
+                StudentsFilterBy.WithClasses => studentsQuery.Where(s => s.Reservations.Any(r => r.Classes.Count != 0)),
+                StudentsFilterBy.WithoutClasses => studentsQuery.Where(s => s.Reservations.All(r => r.Classes.Count == 0)),
+                StudentsFilterBy.WithProjects => studentsQuery.Where(s => s.Reservations.Any(r => r.Projects.Count != 0)),
+                StudentsFilterBy.WithoutProjects => studentsQuery.Where(s => s.Reservations.All(r => r.Projects.Count == 0)),
+                _ => studentsQuery
+            };
+        }
+
         if(!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
             var searchTerm = request.SearchTerm.Trim();

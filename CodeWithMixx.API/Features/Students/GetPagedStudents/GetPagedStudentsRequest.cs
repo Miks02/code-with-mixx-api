@@ -1,3 +1,4 @@
+
 using CodeWithMixx.API.Features.Students.Common;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,8 +14,9 @@ public record GetPagedStudentsRequest
     public string? SearchTerm { get; init; }
     [FromQuery(Name = "sortBy")]
     public StudentsSortBy? SortBy { get; init; }
-    [FromQuery(Name = "filter")]
-    public StudentsFilterBy? Filter { get; init; }
+
+    [FromQuery(Name = "filters")] 
+    public StudentsFilterBy[] Filters { get; init; } = [];
     [FromQuery(Name = "includeDeleted")]
     public bool IncludeDeleted { get; init; } = false;
 }
