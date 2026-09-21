@@ -1,41 +1,67 @@
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
+using CodeWithMixx.API.Features.Students.Common;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Students.GetPagedStudents;
 
-public class GetPagedStudentsHandler(AppDbContext context)
-    : IHandler<GetPagedStudentsRequest, Result<PagedResult<GetPagedStudentsResponse>>>
+public class GetPagedStudentsHandler(AppDbContext context) : IHandler<GetPagedStudentsRequest, PagedResult<GetPagedStudentsResponse>>
 {
-
-    public async Task<Result<PagedResult<GetPagedStudentsResponse>>> HandleAsync(
-        GetPagedStudentsRequest request,
-        CancellationToken ct = default)
+    public async Task<PagedResult<GetPagedStudentsResponse>> HandleAsync(GetPagedStudentsRequest request, CancellationToken ct = default)
     {
-        var query = context.Students.AsQueryable();
+        var studentsQuery = context.Students
+            .AsQueryable();
+        
+        if(request.IncludeDeleted)
+            studentsQuery = studentsQuery.IgnoreQueryFilters();
 
-        if (!string.IsNullOrWhiteSpace(request.Search))
+        studentsQuery = request.SortBy switch
         {
-            var search = request.Search.Trim();
-            query = query
-                .Where(s => EF.Functions.ILike(s.User.FirstName, $"%{search}%")
-                            || EF.Functions.ILike(s.User.LastName, $"%{search}%")
-                            || EF.Functions.ILike(s.User.Email!, $"%{search}%"))
-                .OrderByDescending(s => s.User.LastName);
+            StudentsSortBy.CreatedAtAscending => studentsQuery.OrderBy(s => s.User.CreatedAt),
+            StudentsSortBy.CreatedAtDescending => studentsQuery.OrderByDescending(s => s.User.CreatedAt),
+            StudentsSortBy.StudentNameAscending => studentsQuery.OrderBy(s => s.User.FirstName)
+                .ThenBy(s => s.User.LastName),
+            StudentsSortBy.StudentNameDescending => studentsQuery.OrderByDescending(s => s.User.FirstName)
+                .ThenByDescending(s => s.User.LastName),
+            StudentsSortBy.TotalReservationAscending => studentsQuery.OrderBy(s => s.Reservations.Count),
+            StudentsSortBy.TotalReservationDescending => studentsQuery.OrderByDescending(s => s.Reservations.Count),
+            _ => studentsQuery.OrderByDescending(s => s.User.CreatedAt),
+        };
+
+        studentsQuery = request.Filter switch
+        {
+            StudentsFilterBy.WithClasses => studentsQuery.Where(s => s.Reservations.Any(r => r.Classes.Count != 0)),
+            StudentsFilterBy.WithoutClasses => studentsQuery.Where(s => s.Reservations.All(r => r.Classes.Count == 0)),
+            StudentsFilterBy.WithProjects => studentsQuery.Where(s => s.Reservations.Any(r => r.Projects.Count != 0)),
+            StudentsFilterBy.WithoutProjects => studentsQuery.Where(s => s.Reservations.All(r => r.Projects.Count == 0)),
+            _ => studentsQuery
+        };
+        
+        if(!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            var searchTerm = request.SearchTerm.Trim();
+            studentsQuery = studentsQuery.Where(s => EF.Functions.ILike(s.User.FirstName, $"%{searchTerm}%")
+                                                     || EF.Functions.ILike(s.User.LastName, $"%{searchTerm}%")
+                                                     || EF.Functions.ILike(s.User.Email!, $"%{searchTerm}%"));
         }
 
-        var projectedQuery = query.Select(s => new GetPagedStudentsResponse
-        {
-            Id = s.UserId,
-            FirstName = s.User.FirstName,
-            LastName = s.User.LastName,
-            Email = s.User.Email!,
-            University = s.University
-        });
-
-        var pagedResult = await PagedResult<GetPagedStudentsResponse>.CreateAsync(projectedQuery, request.PageNumber, request.PageSize, ct);
-
-        return Result<PagedResult<GetPagedStudentsResponse>>.Success(pagedResult);
+        var pagedStudents = studentsQuery
+            .Select(s => new GetPagedStudentsResponse
+            {
+                Id = s.UserId,
+                FirstName = s.User.FirstName,
+                LastName = s.User.LastName,
+                Email = s.User.Email!,
+                PhoneNumber = s.User.PhoneNumber!,
+                University = s.University,
+                TotalClasses  = s.Reservations.Sum(r => r.Classes.Count),
+                TotalProjects = s.Reservations.Sum(r => r.Projects.Count),
+                TotalReservations = s.Reservations.Count,
+                RegisteredAt = s.User.CreatedAt,
+                DeletedAt = s.DeletedAt,
+            });
+        
+        return await PagedResult<GetPagedStudentsResponse>.CreateAsync(pagedStudents, request.PageNumber, request.PageSize, ct);
     }
 }

@@ -11,8 +11,8 @@ public class GetStudentsSummaryEndpoint : IEndpoint
                     IHandler<GetStudentsSummaryRequest, GetStudentsSummaryResponse> handler,
                     CancellationToken ct) 
             => await handler.HandleAsync(request, ct))
-            .RequireAuthorization("AdminOnly")
             .WithTags("Students")
+            .RequireAuthorization("AdminOnly")
             .Produces<GetStudentsSummaryResponse>();
     }
 }
