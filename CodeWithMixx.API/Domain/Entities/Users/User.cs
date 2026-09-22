@@ -1,3 +1,4 @@
+using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Domain.Entities.Admins;
 using CodeWithMixx.API.Domain.Entities.Students;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +15,7 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
     public DateTime? UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }
+    public AccountStatus AccountStatus { get; set; }
 
     public Student? Student { get; set; }
     public Admin? Admin { get; set; }
@@ -27,7 +29,8 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
             Email = email,
             UserName = email,
             PhoneNumber = phoneNumber,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            AccountStatus = AccountStatus.Pending
         };
     }
     
@@ -35,6 +38,22 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
     {
         LastLoginAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    public Result ActivateAccount(AccountStatus status)
+    {
+        if(PasswordHash is null) 
+            return Result.Failure(UserError.CannotActiveWithNullPassword(Id));
+        
+        if(IsDeleted) 
+            return Result.Failure(UserError.CannotActiveDeletedUser(Id));
+        
+        if(AccountStatus == AccountStatus.Active) 
+            return Result.Failure(UserError.AlreadyActivated(Id));
+        
+        AccountStatus = status;
+        UpdatedAt = DateTime.UtcNow;
+        return Result.Success();
     }
 
     public void DeleteUser()
@@ -48,7 +67,8 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
         PhoneNumber = null;
         FirstName = "Deleted";
         LastName = "Deleted";
-
+        AccountStatus = AccountStatus.Deleted;
+        Student?.Delete();
     }
 
 

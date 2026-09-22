@@ -30,4 +30,13 @@ public class UserError
 
         return new Error("User.NotFound", message, ErrorType.NotFound);
     }
+    
+    public static Error CannotActiveDeletedUser(string identifier) 
+        => new("User.CannotActiveDeletedUser", $"User with identifier '{identifier}' cannot be activated because it is deleted", ErrorType.Conflict);
+    
+    public static Error CannotActiveWithNullPassword(string identifier) 
+        => new("User.CannotActiveWithNullPassword", $"User with identifier '{identifier}' cannot be activated because it has no password", ErrorType.Conflict);
+    
+    public static Error AlreadyActivated(string identifier) 
+        => new("User.AlreadyActivated", $"User with identifier '{identifier}' is already activated", ErrorType.Conflict);
 }
