@@ -25,7 +25,6 @@ namespace CodeWithMixx.API.Features.Students.DeleteStudent
                 return Result.Failure(StudentError.NotFound(request.Id));
 
             studentToDelete.DeleteUser();
-            studentToDelete.Student?.Delete();
 
             await tokenService.RevokeAllUserTokensAsync(studentToDelete.Id);
 
