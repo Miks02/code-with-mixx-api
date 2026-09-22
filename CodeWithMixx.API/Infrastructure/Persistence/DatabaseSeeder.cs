@@ -58,16 +58,12 @@ public class DatabaseSeeder(
             return;
         }
         
-        var admin = new User
-        {
-            FirstName = configuration["Admin:FirstName"]!,
-            LastName = configuration["Admin:LastName"]!,
-            PhoneNumber = configuration["Admin:PhoneNumber"],
-            UserName = adminEmail,
-            Email = adminEmail,
-            EmailConfirmed = true,
-            PhoneNumberConfirmed = true,
-        };
+        var admin = User.CreateAdmin(
+            firstName: configuration["Admin:FirstName"]!.Trim(),
+            lastName: configuration["Admin:LastName"]!.Trim(),
+            email: adminEmail,
+            phoneNumber: configuration["Admin:PhoneNumber"]?.Trim()!
+        );
         
         var createResult = await userManager.CreateAsync(admin, configuration["Admin:Password"]!);
 
