@@ -1,3 +1,5 @@
+using CodeWithMixx.API.Domain.Entities.Users;
+
 namespace CodeWithMixx.API.Features.Students.GetPagedStudents;
 
 public record GetPagedStudentsResponse
@@ -8,6 +10,7 @@ public record GetPagedStudentsResponse
     public string Email { get; init; } = null!;
     public string PhoneNumber { get; init; } = null!;
     public string? University { get; init; }
+    public AccountStatus AccountStatus { get; init; }
     public int TotalReservations { get; init; }
     public int TotalClasses { get; init; }
     public int TotalProjects { get; init; }

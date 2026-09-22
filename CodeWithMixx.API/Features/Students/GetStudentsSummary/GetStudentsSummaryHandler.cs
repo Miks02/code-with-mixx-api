@@ -62,6 +62,7 @@ public class GetStudentsSummaryHandler(AppDbContext context) : IHandler<GetStude
                 Email = s.User.Email!,
                 PhoneNumber = s.User.PhoneNumber!,
                 University = s.University,
+                AccountStatus = s.User.AccountStatus,
                 TotalClasses  = s.Reservations.Sum(r => r.Classes.Count),
                 TotalProjects = s.Reservations.Sum(r => r.Projects.Count),
                 TotalReservations = s.Reservations.Count,
