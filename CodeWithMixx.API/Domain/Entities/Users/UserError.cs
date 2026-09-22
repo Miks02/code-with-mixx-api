@@ -31,12 +31,17 @@ public class UserError
         return new Error("User.NotFound", message, ErrorType.NotFound);
     }
     
-    public static Error CannotActivateDeletedUser(string identifier) 
-        => new("User.CannotActivateDeletedUser", $"User with identifier '{identifier}' cannot be activated because it is deleted", ErrorType.Conflict);
+    public static Error CannotChangeStatusForDeletedUser(string identifier)
+        => new(
+            "User.CannotChangeStatusForDeletedUser", 
+            $"User with identifier '{identifier}' cannot have his status changed status because he is deleted", ErrorType.Conflict);
     
     public static Error CannotActivateWithNullPassword(string identifier) 
         => new("User.CannotActivateWithNullPassword", $"User with identifier '{identifier}' cannot be activated because it has no password", ErrorType.Conflict);
     
     public static Error AlreadyActivated(string identifier) 
         => new("User.AlreadyActivated", $"User with identifier '{identifier}' is already activated", ErrorType.Conflict);
+    
+    public static Error AlreadyDeactivated(string identifier) 
+        => new("User.AlreadyDeactivated", $"User with identifier '{identifier}' is already deactivated", ErrorType.Conflict);
 }

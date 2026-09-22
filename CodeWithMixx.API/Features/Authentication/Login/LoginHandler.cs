@@ -29,6 +29,9 @@ public class LoginHandler(
             if (!isPasswordValid)
                 return Result<LoginResponse>.Failure(AuthError.LoginFailed("Invalid password."));
 
+            if (user.AccountStatus == AccountStatus.Deactivated)
+                return Result<LoginResponse>.Failure(AuthError.AccountDeactivated(user.Id));
+
             var tokens = await tokenService.AssignAuthTokens(user);
             
             cookieProvider.SetAccessTokenCookie(tokens.AccessToken);
@@ -47,6 +50,7 @@ public class LoginHandler(
                 LastName = user.LastName,
                 Email = user.Email!,
                 PhoneNumber = user.PhoneNumber!,
+                AccountStatus = user.AccountStatus,
                 Roles = userRoles
             });
         }

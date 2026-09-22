@@ -56,18 +56,31 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public Result ActivateAccount(AccountStatus status)
+    public Result ActivateAccount()
     {
         if(PasswordHash is null) 
             return Result.Failure(UserError.CannotActivateWithNullPassword(Id));
         
         if(IsDeleted) 
-            return Result.Failure(UserError.CannotActivateDeletedUser(Id));
+            return Result.Failure(UserError.CannotChangeStatusForDeletedUser(Id));
         
         if(AccountStatus == AccountStatus.Active) 
             return Result.Failure(UserError.AlreadyActivated(Id));
         
-        AccountStatus = status;
+        AccountStatus = AccountStatus.Active;
+        UpdatedAt = DateTime.UtcNow;
+        return Result.Success();
+    }
+    
+    public Result DeactivateAccount()
+    {
+        if(IsDeleted) 
+            return Result.Failure(UserError.CannotChangeStatusForDeletedUser(Id));
+        
+        if(AccountStatus == AccountStatus.Deactivated) 
+            return Result.Failure(UserError.AlreadyDeactivated(Id));
+        
+        AccountStatus = AccountStatus.Deactivated;
         UpdatedAt = DateTime.UtcNow;
         return Result.Success();
     }
