@@ -16,5 +16,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasMaxLength(50);
         
+        builder.Property(x => x.AccountStatus)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(20);
+        
     }
 }
