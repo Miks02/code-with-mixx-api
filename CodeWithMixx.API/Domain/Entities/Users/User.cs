@@ -43,10 +43,10 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
     public Result ActivateAccount(AccountStatus status)
     {
         if(PasswordHash is null) 
-            return Result.Failure(UserError.CannotActiveWithNullPassword(Id));
+            return Result.Failure(UserError.CannotActivateWithNullPassword(Id));
         
         if(IsDeleted) 
-            return Result.Failure(UserError.CannotActiveDeletedUser(Id));
+            return Result.Failure(UserError.CannotActivateDeletedUser(Id));
         
         if(AccountStatus == AccountStatus.Active) 
             return Result.Failure(UserError.AlreadyActivated(Id));
