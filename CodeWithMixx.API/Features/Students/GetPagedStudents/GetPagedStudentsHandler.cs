@@ -14,7 +14,9 @@ public class GetPagedStudentsHandler(AppDbContext context) : IHandler<GetPagedSt
             .AsQueryable();
         
         if(request.IncludeDeleted)
-            studentsQuery = studentsQuery.Where(s => s.IsDeleted == true);
+            studentsQuery = studentsQuery
+                .IgnoreQueryFilters()
+                .Where(s => s.IsDeleted == true);
 
         studentsQuery = request.SortBy switch
         {
