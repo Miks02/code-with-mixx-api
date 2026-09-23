@@ -37,7 +37,7 @@ public class UserError
             $"User with identifier '{identifier}' cannot have his status changed status because he is deleted", ErrorType.Conflict);
     
     public static Error CannotActivateWithNullPassword(string identifier) 
-        => new("User.CannotActivateWithNullPassword", $"User with identifier '{identifier}' cannot be activated because it has no password", ErrorType.Conflict);
+        => new("User.CannotActivateWithNullPassword", $"User with identifier '{identifier}' cannot be activated because he has no password", ErrorType.Conflict);
     
     public static Error AlreadyActivated(string identifier) 
         => new("User.AlreadyActivated", $"User with identifier '{identifier}' is already activated", ErrorType.Conflict);
