@@ -1,5 +1,5 @@
 using System.Text.Encodings.Web;
-using CodeWithMixx.API.Features.Authentication.Common;
+using CodeWithMixx.API.Common.Interfaces;
 using Resend;
 
 namespace CodeWithMixx.API.Infrastructure.Emails;

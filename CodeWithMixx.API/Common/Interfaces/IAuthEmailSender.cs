@@ -1,4 +1,4 @@
-namespace CodeWithMixx.API.Features.Authentication.Common;
+namespace CodeWithMixx.API.Common.Interfaces;
 
 public interface IAuthEmailSender
 {
