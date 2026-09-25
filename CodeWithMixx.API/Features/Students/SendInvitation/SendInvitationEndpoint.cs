@@ -17,6 +17,7 @@ public class SendInvitationEndpoint : IEndpoint
         })
         .WithTags("Students")
         .RequireAuthorization("AdminOnly")
+        .RequireRateLimiting("InvitationLimiter")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status400BadRequest)
         .Produces(StatusCodes.Status401Unauthorized)
