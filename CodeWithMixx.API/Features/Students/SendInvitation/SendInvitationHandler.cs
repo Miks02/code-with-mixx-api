@@ -2,6 +2,7 @@ using System.Net;
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Domain.Entities.Users;
+using CodeWithMixx.API.Domain.ErrorCatalog;
 using Microsoft.AspNetCore.Identity;
 
 namespace CodeWithMixx.API.Features.Students.SendInvitation;
@@ -14,6 +15,9 @@ public class SendInvitationHandler(UserManager<User> userManager, IAuthEmailSend
         
         if(user is null)
             return Result.Failure(UserError.NotFound(request.Id));
+        
+        if(user.AccountStatus == AccountStatus.Deactivated)
+            return Result.Failure(AuthError.AccountDeactivated(user.Id));
         
         if(!await userManager.IsInRoleAsync(user, "Student"))
             return Result.Failure(UserError.NotAStudent(request.Id));
