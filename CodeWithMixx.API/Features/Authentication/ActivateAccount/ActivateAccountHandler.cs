@@ -40,6 +40,7 @@ public class ActivateAccountHandler(UserManager<User> userManager, AppDbContext 
 
             user.ActivateAccount();
             await userManager.UpdateAsync(user);
+            await transaction.CommitAsync(ct);
             return Result.Success();
         }
         catch (Exception)
