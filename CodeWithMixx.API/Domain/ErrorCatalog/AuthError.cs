@@ -41,5 +41,7 @@ public class AuthError
         => new("Auth.MissingToken", message, ErrorType.Unauthorized);
     public static Error InvalidPasswordResetToken(string message = "Invalid password reset token")
         => new("Auth.InvalidPasswordResetToken", message, ErrorType.Unauthorized);
+    public static Error InvalidInvitationToken(string message = "Invalid invitation token")
+        => new("Auth.InvalidInvitationToken", message, ErrorType.Unauthorized);
     
 }

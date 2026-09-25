@@ -31,6 +31,9 @@ public class UserError
         return new Error("User.NotFound", message, ErrorType.NotFound);
     }
     
+    public static Error NotAStudent(string identifier) 
+        => new("User.NotAStudent", $"User with identifier '{identifier}' is not a student", ErrorType.Conflict);
+    
     public static Error CannotChangeStatusForDeletedUser(string identifier)
         => new(
             "User.CannotChangeStatusForDeletedUser", 
