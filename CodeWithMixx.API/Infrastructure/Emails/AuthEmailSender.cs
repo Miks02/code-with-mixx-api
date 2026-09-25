@@ -13,8 +13,8 @@ public class AuthEmailSender(IConfiguration configuration, IResend resend) : IAu
     {
         token = UrlEncoder.Default.Encode(token);
         
-        var invitationUrl = $"{_clientUrl}/invitation?token={token}&userId={userId}";
-        
+        var invitationUrl = $"{_clientUrl}/activate-account?token={token}&userId={userId}";
+       
         var htmlBody = $"""
                          <!DOCTYPE html>
                          <html lang="sr">
@@ -54,7 +54,7 @@ public class AuthEmailSender(IConfiguration configuration, IResend resend) : IAu
                          </body>
                          </html>
                          """;
-
+        
         var message = new EmailMessage
         {
             From = _fromEmail,
@@ -63,7 +63,7 @@ public class AuthEmailSender(IConfiguration configuration, IResend resend) : IAu
             Subject = "Pozivnica"
         };
         
-        await resend.EmailSendAsync(message);
+       await resend.EmailSendAsync(message);
     }
     
     public async Task SendPasswordResetEmailAsync(string email, string userId, string token)
