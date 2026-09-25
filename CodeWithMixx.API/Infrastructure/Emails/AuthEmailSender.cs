@@ -8,6 +8,63 @@ public class AuthEmailSender(IConfiguration configuration, IResend resend) : IAu
 {
     private readonly string _clientUrl = configuration["Web:ClientUrl"]!;
     private readonly string _fromEmail = configuration["Resend:EmailSender"]!;
+
+    public async Task SendInvitationEmailAsync(string email, string userId, string token)
+    {
+        token = UrlEncoder.Default.Encode(token);
+        
+        var invitationUrl = $"{_clientUrl}/invitation?token={token}&userId={userId}";
+        
+        var htmlBody = $"""
+                         <!DOCTYPE html>
+                         <html lang="sr">
+                         <head>
+                             <meta charset="UTF-8">
+                             <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                         </head>
+                         <body style="font-family: Arial, sans-serif; background-color: #d1fae5; color: #51545e; margin: 0; padding: 20px; font-weight: 600;">
+                             <div style="max-width: 600px; background-color: #064e3b; margin: 0 auto; padding: 30px; border-radius: 8px; color: #ecfdf5;">
+                                 <h2 style="color: #ecfdf5; margin-top: 0;">Dobrodošao/la</h2>
+                                 <p>Pozdrav kolega/koleginice,</p>
+                                 <p>Ovo je tvoja digitalna pozivnica za platformu.</p>
+                                 <p>Klikni na dugme ispod kako bi postavio/la lozinku na svom nalogu.</p>
+                                 
+                                 <div style="text-align: center; margin: 30px 0;">
+                                     <a href="{invitationUrl}" 
+                                        style="background-color: #d97706; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; display: inline-block; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);">
+                                         Postavi lozinku
+                                     </a>
+                                 </div>
+                                  
+                                 <p style="text-align: center; font-size: 13px; color: #a7f3d0; margin: 0 0 30px;">
+                                    Link važi 7 dana.
+                                </p>
+                         
+                                 <p style="font-size: 14px; color: #fde047;">Ako ne očekuješ ovu pozivnicu, slobodno ignoriši ovaj mejl.</p>
+                                 
+                                 <hr style="border: none; border-top: 1px solid #047857; margin: 20px 0;" />
+                                 
+                                 <p style="font-size: 12px; color: #a7f3d0; word-break: break-all;">
+                                     U slučaju da imaš problema sa dugmetom, stisni desnim klikom miša na link i kopiraj url ručno<br/>
+                                     <a href="{invitationUrl}" style="color: #60a5fa; text-decoration: underline;">Link ka pozivnici</a>
+                                 </p>
+                                 
+                                 <p style="margin-bottom: 0;">Srdačan pozdrav,<br/><strong><span style="color: #f59e0b;">Code</span>WithMixx</strong></p>
+                             </div>
+                         </body>
+                         </html>
+                         """;
+
+        var message = new EmailMessage
+        {
+            From = _fromEmail,
+            To = email,
+            HtmlBody = htmlBody,
+            Subject = "Pozivnica"
+        };
+        
+        await resend.EmailSendAsync(message);
+    }
     
     public async Task SendPasswordResetEmailAsync(string email, string userId, string token)
     {
