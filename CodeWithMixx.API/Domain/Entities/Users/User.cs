@@ -58,8 +58,6 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
 
     public Result ActivateAccount()
     {
-        if(PasswordHash is null) 
-            return Result.Failure(UserError.CannotActivateWithNullPassword(Id));
         
         if(IsDeleted) 
             return Result.Failure(UserError.CannotChangeStatusForDeletedUser(Id));
@@ -67,7 +65,11 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
         if(AccountStatus == AccountStatus.Active) 
             return Result.Failure(UserError.AlreadyActivated(Id));
         
-        AccountStatus = AccountStatus.Active;
+        if(PasswordHash is null) 
+            AccountStatus = AccountStatus.Pending; 
+        else 
+            AccountStatus = AccountStatus.Active;
+        
         UpdatedAt = DateTime.UtcNow;
         return Result.Success();
     }

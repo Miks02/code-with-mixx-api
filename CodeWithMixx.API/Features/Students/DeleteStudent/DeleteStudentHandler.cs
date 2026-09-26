@@ -18,18 +18,24 @@ namespace CodeWithMixx.API.Features.Students.DeleteStudent
         public async Task<Result> HandleAsync(DeleteStudentRequest request, CancellationToken ct = default)
         {
             var studentToDelete = await context.Users
-                .Include(s => s.Student)
+                .Include(u => u.Student)
+                    .ThenInclude(s => s!.Reservations)
                 .FirstOrDefaultAsync(u => u.Id == request.Id, ct);
 
-            if (studentToDelete is null)
+            if (studentToDelete?.Student is null)
                 return Result.Failure(StudentError.NotFound(request.Id));
 
-            studentToDelete.DeleteUser();
-
-            await tokenService.RevokeAllUserTokensAsync(studentToDelete.Id);
-
-            await userManager.UpdateAsync(studentToDelete);
-
+            if (studentToDelete.Student.Reservations.Any())
+            {
+                await tokenService.RevokeAllUserTokensAsync(studentToDelete.Id);
+                studentToDelete.DeleteUser();
+                await userManager.UpdateAsync(studentToDelete);
+            }
+            else 
+            {
+                context.Users.Remove(studentToDelete);
+                await context.SaveChangesAsync(ct);
+            }
 
             return Result.Success();
         }
