@@ -100,7 +100,7 @@ public class GetStudentsSummaryHandler(AppDbContext context) : IHandler<GetStude
 
         return new GetStudentsSummaryResponse
         {
-            Students = pagedResult,
+            PagedStudents = pagedResult,
             MostActiveStudent = mostActiveStudent,
             ActiveStudents = stats.ActiveStudents,
             DeletedStudents = stats.DeletedStudents
