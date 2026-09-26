@@ -1,5 +1,6 @@
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
+using CodeWithMixx.API.Domain.Entities.Users;
 using CodeWithMixx.API.Features.Students.Common;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ public class GetStudentsSummaryHandler(AppDbContext context) : IHandler<GetStude
     public async Task<GetStudentsSummaryResponse> HandleAsync(GetStudentsSummaryRequest request, CancellationToken ct = default)
     {
         var studentsQuery = context.Students
+            .Include(s => s.User)
             .AsQueryable();
         
         if(request.IncludeDeleted)
@@ -90,19 +92,24 @@ public class GetStudentsSummaryHandler(AppDbContext context) : IHandler<GetStude
             .FirstOrDefaultAsync(ct);
         
         var stats = await context.Students
+            .IgnoreQueryFilters()
             .GroupBy(s => 1)
             .Select(g => new
             {
-                ActiveStudents = g.Count(s => !s.IsDeleted),
-                DeletedStudents = g.Count(s => s.IsDeleted)
+                PendingStudents = g.Count(s => s.User.AccountStatus == AccountStatus.Pending),
+                DeactivatedStudents = g.Count(s => s.User.AccountStatus == AccountStatus.Deactivated),
+                DeletedStudents = g.Count(s => s.IsDeleted),
+                ActiveStudents = g.Count(s => s.User.AccountStatus == AccountStatus.Active),
             })
-            .FirstOrDefaultAsync(ct) ?? new {ActiveStudents = 0, DeletedStudents = 0};
-
+            .FirstOrDefaultAsync(ct) ?? new {PendingStudents = 0, DeactivatedStudents = 0, DeletedStudents = 0, ActiveStudents = 0};
+        
         return new GetStudentsSummaryResponse
         {
             PagedStudents = pagedResult,
             MostActiveStudent = mostActiveStudent,
             ActiveStudents = stats.ActiveStudents,
+            PendingStudents = stats.PendingStudents,
+            DeactivatedStudents = stats.DeactivatedStudents,
             DeletedStudents = stats.DeletedStudents
         };
     }

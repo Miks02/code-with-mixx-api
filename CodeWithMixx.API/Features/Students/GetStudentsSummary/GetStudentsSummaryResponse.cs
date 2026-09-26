@@ -7,6 +7,8 @@ public record GetStudentsSummaryResponse
 {
     public int ActiveStudents { get; init; }
     public int DeletedStudents { get; init; }
+    public int DeactivatedStudents { get; init; }
+    public int PendingStudents { get; init; }
     public PagedResult<StudentItem> PagedStudents { get; init; } = null!;
     public MostActiveStudentItem? MostActiveStudent { get; init; }
 
