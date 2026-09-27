@@ -10,7 +10,8 @@ namespace CodeWithMixx.API.Features.Students.UpdateStudent;
 
 public class UpdateStudentHandler(
     AppDbContext context, 
-    UserManager<User> userManager) 
+    UserManager<User> userManager,
+    IAuthEmailSender authEmailSender) 
     : IHandler<UpdateStudentRequest, Result<UpdateStudentResponse>>
 {
     public async Task<Result<UpdateStudentResponse>> HandleAsync(UpdateStudentRequest request, CancellationToken ct = default)
@@ -29,6 +30,7 @@ public class UpdateStudentHandler(
         
         if (!string.Equals(student.User.Email, student.User.NormalizedEmail, StringComparison.OrdinalIgnoreCase))
         {
+            var oldEmail = student.User.Email!;
             var emailChange = await userManager.SetEmailAsync(student.User, request.Email); 
             if(!emailChange.Succeeded)
                 return Result<UpdateStudentResponse>.Failure(emailChange.Errors.First());
@@ -36,6 +38,9 @@ public class UpdateStudentHandler(
             var usernameChange = await userManager.SetUserNameAsync(student.User, request.Email);
             if(!usernameChange.Succeeded)
                 return Result<UpdateStudentResponse>.Failure(usernameChange.Errors.First());
+            
+            if(student.User.EmailConfirmed) 
+                await authEmailSender.SendEmailChangeConfirmationAsync(oldEmail);
         }
         
         if(!string.Equals(student.User.PhoneNumber, request.PhoneNumber, StringComparison.OrdinalIgnoreCase))
