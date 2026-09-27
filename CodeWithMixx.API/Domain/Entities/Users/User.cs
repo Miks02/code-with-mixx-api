@@ -50,6 +50,13 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
             AccountStatus = AccountStatus.Active
         };
     }
+
+    public void ChangeName(string firstName, string lastName)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+        UpdatedAt = DateTime.UtcNow;
+    }
     
     public void UpdateLastLogin()
     {

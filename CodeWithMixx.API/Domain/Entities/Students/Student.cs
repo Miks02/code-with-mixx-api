@@ -24,6 +24,12 @@ public class Student : ISoftDeletable
         };
     }
 
+    public void ChangeUniversity(string? newUniversity)
+    {
+        University = newUniversity;
+    }
+    
+
     public void Delete()
     {
         IsDeleted = true;
