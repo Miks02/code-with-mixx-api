@@ -39,6 +39,7 @@ public class ActivateAccountHandler(UserManager<User> userManager, AppDbContext 
                 return Result.Failure(stampResult.Errors.First());
 
             user.ActivateAccount();
+            user.ConfirmEmail();
             await userManager.UpdateAsync(user);
             await transaction.CommitAsync(ct);
             return Result.Success();

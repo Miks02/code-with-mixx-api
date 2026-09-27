@@ -30,6 +30,7 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
             UserName = email,
             PhoneNumber = phoneNumber,
             CreatedAt = DateTime.UtcNow,
+            EmailConfirmed = false,
             AccountStatus = AccountStatus.Pending
         };
     }
@@ -72,6 +73,15 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
         
         UpdatedAt = DateTime.UtcNow;
         return Result.Success();
+    }
+
+    public void ConfirmEmail()
+    {
+        if (EmailConfirmed)
+            return;
+
+        EmailConfirmed = true;
+        UpdatedAt = DateTime.UtcNow;
     }
     
     public Result DeactivateAccount()
