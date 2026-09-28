@@ -12,7 +12,8 @@ namespace CodeWithMixx.API.Features.Students.DeactivateStudent
     public class DeactivateStudentHandler(
         UserManager<User> userManager,
         AppDbContext context,
-        ITokenService tokenService)
+        ITokenService tokenService,
+        IAuthEmailSender authEmailSender)
         : IHandler<DeactivateStudentRequest, Result>
     {
         public async Task<Result> HandleAsync(DeactivateStudentRequest request, CancellationToken ct = default)
@@ -31,6 +32,8 @@ namespace CodeWithMixx.API.Features.Students.DeactivateStudent
             await tokenService.RevokeAllUserTokensAsync(student.UserId);
 
             await userManager.UpdateAsync(student.User);
+
+            await authEmailSender.SendAccountDeactivatedEmailAsync(student.User.Email!);
 
             return Result.Success();
         }

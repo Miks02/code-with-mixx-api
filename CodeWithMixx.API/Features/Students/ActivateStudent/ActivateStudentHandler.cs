@@ -10,7 +10,8 @@ namespace CodeWithMixx.API.Features.Students.ActivateStudent
 {
     public class ActivateStudentHandler(
         UserManager<User> userManager,
-        AppDbContext context)
+        AppDbContext context,
+        IAuthEmailSender authEmailSender)
         : IHandler<ActivateStudentRequest, Result>
     {
         public async Task<Result> HandleAsync(ActivateStudentRequest request, CancellationToken ct = default)
@@ -27,6 +28,8 @@ namespace CodeWithMixx.API.Features.Students.ActivateStudent
                 return activateResult;
 
             await userManager.UpdateAsync(student.User);
+
+            await authEmailSender.SendAccountActivatedEmailAsync(student.User.Email!);
 
             return Result.Success();
         }

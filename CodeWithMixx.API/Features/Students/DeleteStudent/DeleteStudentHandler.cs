@@ -12,7 +12,8 @@ namespace CodeWithMixx.API.Features.Students.DeleteStudent
     public class DeleteStudentHandler(
         UserManager<User> userManager,
         AppDbContext context,
-        ITokenService tokenService) 
+        ITokenService tokenService,
+        IAuthEmailSender authEmailSender) 
         : IHandler<DeleteStudentRequest, Result>
     {
         public async Task<Result> HandleAsync(DeleteStudentRequest request, CancellationToken ct = default)
@@ -25,6 +26,8 @@ namespace CodeWithMixx.API.Features.Students.DeleteStudent
             if (studentToDelete?.Student is null)
                 return Result.Failure(StudentError.NotFound(request.Id));
 
+            var studentEmail = studentToDelete.Email!;
+
             if (studentToDelete.Student.Reservations.Any())
             {
                 await tokenService.RevokeAllUserTokensAsync(studentToDelete.Id);
@@ -36,6 +39,8 @@ namespace CodeWithMixx.API.Features.Students.DeleteStudent
                 context.Users.Remove(studentToDelete);
                 await context.SaveChangesAsync(ct);
             }
+
+            await authEmailSender.SendAccountDeletedEmailAsync(studentEmail);
 
             return Result.Success();
         }
