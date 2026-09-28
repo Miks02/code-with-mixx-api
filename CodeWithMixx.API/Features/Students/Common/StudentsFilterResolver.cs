@@ -8,6 +8,10 @@
                 [StudentsFilterBy.WithoutClasses] = [StudentsFilterBy.WithClasses],
                 [StudentsFilterBy.WithProjects] = [StudentsFilterBy.WithoutProjects],
                 [StudentsFilterBy.WithoutProjects] = [StudentsFilterBy.WithProjects],
+                [StudentsFilterBy.Active] = [],
+                [StudentsFilterBy.Deactivated] = [],
+                [StudentsFilterBy.Pending] = [],
+                [StudentsFilterBy.Deleted] = [StudentsFilterBy.Active, StudentsFilterBy.Deactivated, StudentsFilterBy.Pending],
             };
 
         public static IReadOnlyList<StudentsFilterBy> GetInvalidFilters(IReadOnlyList<StudentsFilterBy> selectedFilters)

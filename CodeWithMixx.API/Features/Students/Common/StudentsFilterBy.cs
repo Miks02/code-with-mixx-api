@@ -6,4 +6,8 @@ public enum StudentsFilterBy
     WithoutClasses,
     WithProjects,
     WithoutProjects,
+    Active,
+    Deactivated,
+    Pending,
+    Deleted,
 }
