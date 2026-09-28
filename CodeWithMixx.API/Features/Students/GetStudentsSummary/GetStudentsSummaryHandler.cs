@@ -15,11 +15,6 @@ public class GetStudentsSummaryHandler(AppDbContext context) : IHandler<GetStude
             .Include(s => s.User)
             .AsQueryable();
         
-        if(request.IncludeDeleted)
-            studentsQuery = studentsQuery
-                .IgnoreQueryFilters()
-                .Where(s => s.IsDeleted == true);
-
         studentsQuery = request.SortBy switch
         {
             StudentsSortBy.CreatedAtAscending => studentsQuery.OrderBy(s => s.User.CreatedAt),
@@ -34,8 +29,9 @@ public class GetStudentsSummaryHandler(AppDbContext context) : IHandler<GetStude
         };
 
         var invalidFilters = StudentsFilterResolver.GetInvalidFilters(request.Filters);
+        var validFilters = request.Filters.Except(invalidFilters).ToList();
 
-        foreach (var filter in request.Filters.Except(invalidFilters))
+        foreach (var filter in validFilters)
         {
             studentsQuery = filter switch
             {
@@ -45,6 +41,27 @@ public class GetStudentsSummaryHandler(AppDbContext context) : IHandler<GetStude
                 StudentsFilterBy.WithoutProjects => studentsQuery.Where(s => s.Reservations.All(r => r.Projects.Count == 0)),
                 _ => studentsQuery
             };
+        }
+        
+        var statusFilters = validFilters
+            .Select(f => f switch
+            {
+                StudentsFilterBy.Active => AccountStatus.Active,
+                StudentsFilterBy.Pending => AccountStatus.Pending,
+                StudentsFilterBy.Deactivated => AccountStatus.Deactivated,
+                StudentsFilterBy.Deleted => AccountStatus.Deleted,
+                _ => (AccountStatus?)null
+            })
+            .Where(s => s.HasValue)
+            .Select(status => status!.Value)
+            .ToList();
+
+        if (statusFilters.Count > 0)
+        {
+            if(statusFilters.Contains(AccountStatus.Deleted))
+                studentsQuery = studentsQuery.IgnoreQueryFilters();
+            
+            studentsQuery = studentsQuery.Where(s => statusFilters.Contains(s.User.AccountStatus));
         }
 
         if(!string.IsNullOrWhiteSpace(request.SearchTerm))

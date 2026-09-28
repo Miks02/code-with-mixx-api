@@ -1,5 +1,6 @@
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
+using CodeWithMixx.API.Domain.Entities.Users;
 using CodeWithMixx.API.Features.Students.Common;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -13,11 +14,6 @@ public class GetPagedStudentsHandler(AppDbContext context) : IHandler<GetPagedSt
         var studentsQuery = context.Students
             .AsQueryable();
         
-        if(request.IncludeDeleted)
-            studentsQuery = studentsQuery
-                .IgnoreQueryFilters()
-                .Where(s => s.IsDeleted == true);
-
         studentsQuery = request.SortBy switch
         {
             StudentsSortBy.CreatedAtAscending => studentsQuery.OrderBy(s => s.User.CreatedAt),
@@ -32,9 +28,11 @@ public class GetPagedStudentsHandler(AppDbContext context) : IHandler<GetPagedSt
         };
 
         var invalidFilters = StudentsFilterResolver.GetInvalidFilters(request.Filters);
-
-        foreach (var filter in request.Filters.Except(invalidFilters))
+        var validFilters = request.Filters.Except(invalidFilters).ToList();
+        
+        foreach (var filter in validFilters)
         {
+        
             studentsQuery = filter switch
             {
                 StudentsFilterBy.WithClasses => studentsQuery.Where(s => s.Reservations.Any(r => r.Classes.Count != 0)),
@@ -43,6 +41,27 @@ public class GetPagedStudentsHandler(AppDbContext context) : IHandler<GetPagedSt
                 StudentsFilterBy.WithoutProjects => studentsQuery.Where(s => s.Reservations.All(r => r.Projects.Count == 0)),
                 _ => studentsQuery
             };
+        }
+
+        var statusFilters = validFilters
+            .Select(f => f switch
+            {
+                StudentsFilterBy.Active => AccountStatus.Active,
+                StudentsFilterBy.Pending => AccountStatus.Pending,
+                StudentsFilterBy.Deactivated => AccountStatus.Deactivated,
+                StudentsFilterBy.Deleted => AccountStatus.Deleted,
+                _ => (AccountStatus?)null
+            })
+            .Where(s => s.HasValue)
+            .Select(status => status!.Value)
+            .ToList();
+
+        if (statusFilters.Count > 0)
+        {
+            if(statusFilters.Contains(AccountStatus.Deleted))
+                studentsQuery = studentsQuery.IgnoreQueryFilters();
+            
+            studentsQuery = studentsQuery.Where(s => statusFilters.Contains(s.User.AccountStatus));
         }
 
         if(!string.IsNullOrWhiteSpace(request.SearchTerm))
