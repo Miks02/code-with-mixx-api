@@ -19,6 +19,7 @@ public class GetMeHandler(UserManager<User> userManager, IUserProvider userProvi
                 LastName = u.LastName,
                 Email = u.Email!,
                 PhoneNumber = u.PhoneNumber!,
+                AccountStatus = u.AccountStatus,
                 Roles = userProvider.GetUserRoles()
             })
             .FirstOrDefaultAsync(ct);

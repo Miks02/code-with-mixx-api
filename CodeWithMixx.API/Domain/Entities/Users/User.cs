@@ -1,3 +1,4 @@
+using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Domain.Entities.Admins;
 using CodeWithMixx.API.Domain.Entities.Students;
 using Microsoft.AspNetCore.Identity;
@@ -6,17 +7,18 @@ namespace CodeWithMixx.API.Domain.Entities.Users;
 
 public class User : IdentityUser, IAuditable, ISoftDeletable
 {
-    public string FirstName { get; set; } = null!;
-    public string LastName { get; set; } = null!;
+    public string FirstName { get; private set; } = null!;
+    public string LastName { get; private set; } = null!;
 
-    public DateTime? LastLoginAt { get; set; }
+    public DateTime? LastLoginAt { get; private set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get;  set; }
     public DateTime? DeletedAt { get; set; }
+    public AccountStatus AccountStatus { get; private set; }
 
-    public Student? Student { get; set; }
-    public Admin? Admin { get; set; }
+    public Student? Student { get; }
+    public Admin? Admin { get; }
 
     public static User CreateUser(string firstName, string lastName, string email, string phoneNumber)
     {
@@ -27,14 +29,79 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
             Email = email,
             UserName = email,
             PhoneNumber = phoneNumber,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            EmailConfirmed = false,
+            AccountStatus = AccountStatus.Pending
         };
+    }
+
+    public static User CreateAdmin(string firstName, string lastName, string email, string phoneNumber)
+    {
+        return new User
+        {
+            FirstName = firstName,
+            LastName = lastName,
+            Email = email,
+            UserName = email,
+            EmailConfirmed = true,
+            PhoneNumberConfirmed = true,
+            PhoneNumber = phoneNumber,
+            CreatedAt = DateTime.UtcNow,
+            AccountStatus = AccountStatus.Active
+        };
+    }
+
+    public void ChangeName(string firstName, string lastName)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+        UpdatedAt = DateTime.UtcNow;
     }
     
     public void UpdateLastLogin()
     {
         LastLoginAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    public Result ActivateAccount()
+    {
+        
+        if(IsDeleted) 
+            return Result.Failure(UserError.CannotChangeStatusForDeletedUser(Id));
+        
+        if(AccountStatus == AccountStatus.Active) 
+            return Result.Failure(UserError.AlreadyActivated(Id));
+        
+        if(PasswordHash is null) 
+            AccountStatus = AccountStatus.Pending; 
+        else 
+            AccountStatus = AccountStatus.Active;
+        
+        UpdatedAt = DateTime.UtcNow;
+        return Result.Success();
+    }
+
+    public void ConfirmEmail()
+    {
+        if (EmailConfirmed)
+            return;
+
+        EmailConfirmed = true;
+        UpdatedAt = DateTime.UtcNow;
+    }
+    
+    public Result DeactivateAccount()
+    {
+        if(IsDeleted) 
+            return Result.Failure(UserError.CannotChangeStatusForDeletedUser(Id));
+        
+        if(AccountStatus == AccountStatus.Deactivated) 
+            return Result.Failure(UserError.AlreadyDeactivated(Id));
+        
+        AccountStatus = AccountStatus.Deactivated;
+        UpdatedAt = DateTime.UtcNow;
+        return Result.Success();
     }
 
     public void DeleteUser()
@@ -48,7 +115,8 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
         PhoneNumber = null;
         FirstName = "Deleted";
         LastName = "Deleted";
-
+        AccountStatus = AccountStatus.Deleted;
+        Student?.Delete();
     }
 
 

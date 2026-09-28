@@ -38,6 +38,9 @@ public static class SecurityRegistration
             options.TokenLifespan = TimeSpan.FromHours(1);
         });
         
+        services.AddIdentityCore<User>()
+            .AddTokenProvider<InviteTokenProvider<User>>("InviteTokenProvider");
+        
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

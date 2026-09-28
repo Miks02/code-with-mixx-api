@@ -9,6 +9,9 @@ public class AuthError
         
     public static Error LoginFailed(string message = "Invalid username or password")
         => new("Auth.LoginFailed", message, ErrorType.Unauthorized);
+    
+    public static Error AccountDeactivated(string identifier) 
+        => new("Auth.AccountDeactivated", $"Account with identifier '{identifier}' is deactivated", ErrorType.Unauthorized);
         
     public static Error PasswordError(string message = "Error occurred while trying to assign password to the user")
         => new("Auth.InvalidCredentials", message);
@@ -38,5 +41,7 @@ public class AuthError
         => new("Auth.MissingToken", message, ErrorType.Unauthorized);
     public static Error InvalidPasswordResetToken(string message = "Invalid password reset token")
         => new("Auth.InvalidPasswordResetToken", message, ErrorType.Unauthorized);
+    public static Error InvalidInvitationToken(string message = "Invalid invitation token")
+        => new("Auth.InvalidInvitationToken", message, ErrorType.Unauthorized);
     
 }

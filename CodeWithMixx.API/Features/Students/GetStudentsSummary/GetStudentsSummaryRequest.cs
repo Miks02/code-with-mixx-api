@@ -1,10 +1,9 @@
-
 using CodeWithMixx.API.Features.Students.Common;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CodeWithMixx.API.Features.Students.GetPagedStudents;
+namespace CodeWithMixx.API.Features.Students.GetStudentsSummary;
 
-public record GetPagedStudentsRequest
+public record GetStudentsSummaryRequest
 {
     [FromQuery(Name = "pageNumber")]
     public int? PageNumber { get; init; }
@@ -14,6 +13,6 @@ public record GetPagedStudentsRequest
     public string? SearchTerm { get; init; }
     [FromQuery(Name = "sortBy")]
     public StudentsSortBy? SortBy { get; init; }
-    [FromQuery(Name = "filters")] 
+    [FromQuery(Name = "filters")]
     public StudentsFilterBy[] Filters { get; init; } = [];
-}
+};

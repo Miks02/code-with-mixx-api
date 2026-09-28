@@ -5,13 +5,14 @@ using CodeWithMixx.API.Features.Students.Common;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace CodeWithMixx.API.Features.Students.GetPagedStudents;
+namespace CodeWithMixx.API.Features.Students.GetStudentsSummary;
 
-public class GetPagedStudentsHandler(AppDbContext context) : IHandler<GetPagedStudentsRequest, PagedResult<GetPagedStudentsResponse>>
+public class GetStudentsSummaryHandler(AppDbContext context) : IHandler<GetStudentsSummaryRequest, GetStudentsSummaryResponse>
 {
-    public async Task<PagedResult<GetPagedStudentsResponse>> HandleAsync(GetPagedStudentsRequest request, CancellationToken ct = default)
+    public async Task<GetStudentsSummaryResponse> HandleAsync(GetStudentsSummaryRequest request, CancellationToken ct = default)
     {
         var studentsQuery = context.Students
+            .Include(s => s.User)
             .AsQueryable();
         
         studentsQuery = request.SortBy switch
@@ -29,10 +30,9 @@ public class GetPagedStudentsHandler(AppDbContext context) : IHandler<GetPagedSt
 
         var invalidFilters = StudentsFilterResolver.GetInvalidFilters(request.Filters);
         var validFilters = request.Filters.Except(invalidFilters).ToList();
-        
+
         foreach (var filter in validFilters)
         {
-        
             studentsQuery = filter switch
             {
                 StudentsFilterBy.WithClasses => studentsQuery.Where(s => s.Reservations.Any(r => r.Classes.Count != 0)),
@@ -42,7 +42,7 @@ public class GetPagedStudentsHandler(AppDbContext context) : IHandler<GetPagedSt
                 _ => studentsQuery
             };
         }
-
+        
         var statusFilters = validFilters
             .Select(f => f switch
             {
@@ -73,7 +73,7 @@ public class GetPagedStudentsHandler(AppDbContext context) : IHandler<GetPagedSt
         }
 
         var pagedStudents = studentsQuery
-            .Select(s => new GetPagedStudentsResponse
+            .Select(s => new GetStudentsSummaryResponse.StudentItem
             {
                 Id = s.UserId,
                 FirstName = s.User.FirstName,
@@ -89,6 +89,45 @@ public class GetPagedStudentsHandler(AppDbContext context) : IHandler<GetPagedSt
                 DeletedAt = s.DeletedAt,
             });
         
-        return await PagedResult<GetPagedStudentsResponse>.CreateAsync(pagedStudents, request.PageNumber, request.PageSize, ct);
+        var pagedResult = await PagedResult<GetStudentsSummaryResponse.StudentItem>.CreateAsync(pagedStudents, request.PageNumber, request.PageSize, ct);
+        
+        var mostActiveStudent = await context.Students
+            .OrderByDescending(s => s.Reservations.Sum(r => r.Classes.Count))
+            .Select(s => new GetStudentsSummaryResponse.MostActiveStudentItem
+            {
+                Id = s.UserId,
+                FirstName = s.User.FirstName,
+                LastName = s.User.LastName,
+                Email = s.User.Email!,
+                PhoneNumber = s.User.PhoneNumber!,
+                TotalClasses  = s.Reservations.Sum(r => r.Classes.Count),
+                TotalProjects = s.Reservations.Sum(r => r.Projects.Count),
+                TotalReservations = s.Reservations.Count,
+                RegisteredAt = s.User.CreatedAt,
+                University = s.University
+            })
+            .FirstOrDefaultAsync(ct);
+        
+        var stats = await context.Students
+            .IgnoreQueryFilters()
+            .GroupBy(s => 1)
+            .Select(g => new
+            {
+                PendingStudents = g.Count(s => s.User.AccountStatus == AccountStatus.Pending),
+                DeactivatedStudents = g.Count(s => s.User.AccountStatus == AccountStatus.Deactivated),
+                DeletedStudents = g.Count(s => s.IsDeleted),
+                ActiveStudents = g.Count(s => s.User.AccountStatus == AccountStatus.Active),
+            })
+            .FirstOrDefaultAsync(ct) ?? new {PendingStudents = 0, DeactivatedStudents = 0, DeletedStudents = 0, ActiveStudents = 0};
+        
+        return new GetStudentsSummaryResponse
+        {
+            PagedStudents = pagedResult,
+            MostActiveStudent = mostActiveStudent,
+            ActiveStudents = stats.ActiveStudents,
+            PendingStudents = stats.PendingStudents,
+            DeactivatedStudents = stats.DeactivatedStudents,
+            DeletedStudents = stats.DeletedStudents
+        };
     }
 }
