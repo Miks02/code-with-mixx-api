@@ -8,7 +8,8 @@ public class Admin
     public User User { get; private set; } = null!;
     public string UserId { get; private set; } = null!;
 
-    public ICollection<Reservation> Reservations { get; private set; } = [];
+    private readonly List<Reservation> _reservations = [];
+    public IReadOnlyCollection<Reservation> Reservations => _reservations.AsReadOnly();
 
     private Admin() {}
 

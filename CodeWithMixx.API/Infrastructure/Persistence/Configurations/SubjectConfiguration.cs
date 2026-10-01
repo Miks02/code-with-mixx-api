@@ -20,6 +20,11 @@ public class SubjectConfiguration : IEntityTypeConfiguration<Subject>
         
         builder.HasIndex(x => x.Name)
             .IsUnique();
-        
+
+        builder.Navigation(x => x.Classes)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(x => x.Projects)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

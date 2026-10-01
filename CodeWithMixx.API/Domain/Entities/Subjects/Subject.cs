@@ -13,8 +13,11 @@ public class Subject : IAuditable, ISoftDeletable
     public DateTime? UpdatedAt { get; private set; }
     public bool IsDeleted { get; private set; }
     public DateTime? DeletedAt { get; private set; }
-    public ICollection<Class> Classes { get; private set; } = [];
-    public ICollection<Project> Projects { get; private set; } = [];
+    private readonly List<Class> _classes = [];
+    private readonly List<Project> _projects = [];
+
+    public IReadOnlyCollection<Class> Classes => _classes.AsReadOnly();
+    public IReadOnlyCollection<Project> Projects => _projects.AsReadOnly();
     
     private Subject() {}
     

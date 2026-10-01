@@ -13,7 +13,8 @@ public class Student : ISoftDeletable
     public bool IsDeleted { get; private set; }
     public DateTime? DeletedAt { get; private set; }
 
-    public ICollection<Reservation> Reservations { get; private set; } = [];
+    private readonly List<Reservation> _reservations = [];
+    public IReadOnlyCollection<Reservation> Reservations => _reservations.AsReadOnly();
 
     private Student() {}
 
