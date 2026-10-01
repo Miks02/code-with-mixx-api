@@ -11,14 +11,16 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
     public string LastName { get; private set; } = null!;
 
     public DateTime? LastLoginAt { get; private set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? UpdatedAt { get; set; }
-    public bool IsDeleted { get;  set; }
-    public DateTime? DeletedAt { get; set; }
+    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; private set; }
+    public bool IsDeleted { get; private set; }
+    public DateTime? DeletedAt { get; private set; }
     public AccountStatus AccountStatus { get; private set; }
 
     public Student? Student { get; }
     public Admin? Admin { get; }
+
+    private User() {}
 
     public static User CreateUser(string firstName, string lastName, string email, string phoneNumber)
     {

@@ -1,10 +1,10 @@
 namespace CodeWithMixx.API.Domain.Entities.Reservations;
 
-public class ClassUpdateData
+public record ClassUpdateData
 {
-    public int Id { get; set; }
-    public int SubjectId { get; set; }
-    public decimal Price { get; set; }
-    public DateTime StartsAt { get; set; }
-    public DateTime EndsAt { get; set; }
+    public int Id { get; init; }
+    public int SubjectId { get; init; }
+    public decimal Price { get; init; }
+    public DateTime StartsAt { get; init; }
+    public DateTime EndsAt { get; init; }
 }

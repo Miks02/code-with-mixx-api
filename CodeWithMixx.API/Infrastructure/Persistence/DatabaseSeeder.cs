@@ -80,10 +80,7 @@ public class DatabaseSeeder(
             throw new InvalidOperationException($"Failed to add an administrator to the 'Admin' role. Errors: {string.Join(", ", errors)}");
         }
 
-        var newAdmin = new Admin
-        {
-            UserId = admin.Id,
-        };
+        var newAdmin = Admin.Create(admin.Id);
 
         context.Admins.Add(newAdmin);
         await context.SaveChangesAsync();

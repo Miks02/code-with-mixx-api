@@ -19,10 +19,10 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
         public string? Notes { get; private set; }
 
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletedAt { get; set; }
+        public DateTime CreatedAt { get; private set; }
+        public DateTime? UpdatedAt { get; private set; }
+        public bool IsDeleted { get; private set; }
+        public DateTime? DeletedAt { get; private set; }
 
         public Admin Admin { get; private set; } = null!;
         public string AdminId { get; private set; } = null!;
