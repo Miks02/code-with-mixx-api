@@ -105,7 +105,7 @@ public class UpdateClassReservationHandler(AppDbContext context)
         var classesToRemove = reservation.Classes.Where(c => classIdsToDelete.Contains(c.Id)).ToList();
 
         foreach (var classToRemove in classesToRemove)
-            reservation.Classes.Remove(classToRemove);
+            reservation.RemoveClass(classToRemove);
 
         context.Classes.RemoveRange(classesToRemove);
 

@@ -32,8 +32,11 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         
         public ReservationType ReservationType { get; private set; }
 
-        public ICollection<Class> Classes { get; private set; } = [];
-        public ICollection<Project> Projects { get; private set; } = [];
+        private readonly List<Class> _classes = [];
+        private readonly List<Project> _projects = [];
+        
+        public IReadOnlyCollection<Class> Classes => _classes.AsReadOnly();
+        public IReadOnlyCollection<Project> Projects => _projects.AsReadOnly();
         
         private Reservation() {}
 
@@ -237,7 +240,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 if (!classResult.IsSuccess)
                     return Result.Failure(classResult.Errors[0]);
 
-                Classes.Add(classResult.Payload!);
+                _classes.Add(classResult.Payload!);
             }
 
             return Result.Success();
@@ -254,7 +257,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 if (!projectResult.IsSuccess)
                     return Result.Failure(projectResult.Errors[0]);
 
-                Projects.Add(projectResult.Payload!);
+                _projects.Add(projectResult.Payload!);
             }
             
             return Result.Success();
@@ -343,6 +346,13 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                || PaymentStatus != PaymentStatus.Pending
                || Classes.Any(c => c.StartsAt <= DateTime.UtcNow)
                || Projects.Any(p => p.StartDate <= DateTime.UtcNow);
+        
+        public void RemoveClass(Class classToRemove) 
+            => _classes.Remove(classToRemove);
+
+        public void RemoveProject(Project projectToRemove)
+           => _projects.Remove(projectToRemove);
+        
         
         private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice)
         {

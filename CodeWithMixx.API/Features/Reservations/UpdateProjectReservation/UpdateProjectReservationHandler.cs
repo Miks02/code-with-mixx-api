@@ -104,8 +104,8 @@ public class UpdateProjectReservationHandler(AppDbContext context)
         var projectsToRemove = reservation.Projects.Where(p => projectIdsToDelete.Contains(p.Id)).ToList();
 
         foreach (var projectToRemove in projectsToRemove)
-            reservation.Projects.Remove(projectToRemove);
-
+            reservation.RemoveProject(projectToRemove);
+        
         context.Projects.RemoveRange(projectsToRemove);
 
         return Result.Success();
