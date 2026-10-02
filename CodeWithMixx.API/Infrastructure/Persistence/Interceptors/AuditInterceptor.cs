@@ -25,4 +25,24 @@ public class AuditInterceptor(TimeProvider timeProvider) : SaveChangesIntercepto
 
         return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
+    
+    public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
+    {
+        var context = eventData.Context;
+
+        if (context is null) return base.SavingChanges(eventData, result);
+
+        var currentTime = timeProvider.GetUtcNow().UtcDateTime;
+        
+        foreach (var entry in context.ChangeTracker.Entries<IAuditable>())
+        {
+            if (entry.State == EntityState.Added)
+                entry.Property("CreatedAt").CurrentValue = currentTime;
+            
+            if (entry.State == EntityState.Modified)
+                entry.Property("UpdatedAt").CurrentValue = currentTime;
+        }
+
+        return base.SavingChanges(eventData, result);
+    }
 }
