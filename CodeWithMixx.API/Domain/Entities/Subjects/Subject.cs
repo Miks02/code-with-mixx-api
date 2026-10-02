@@ -27,7 +27,6 @@ public class Subject : IAuditable, ISoftDeletable
         {
             Name = name,
             Description = description,
-            CreatedAt = DateTime.UtcNow,
         };
     }
 
@@ -52,6 +51,5 @@ public class Subject : IAuditable, ISoftDeletable
     {
         Name = name;
         Description = description;
-        UpdatedAt = DateTime.UtcNow;
     }
 }

@@ -57,7 +57,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 StudentId = data.StudentId,
                 ReservationStatus = data.ReservationStatus,
                 PaidAmount = data.PaidAmount,
-                CreatedAt = DateTime.UtcNow,
                 ReservationType = ReservationType.Class
             };
 
@@ -92,7 +91,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 ReservationStatus = data.ReservationStatus,
                 TotalPrice = data.TotalPrice ?? 0,
                 PaidAmount = data.PaidAmount,
-                CreatedAt = DateTime.UtcNow,
                 ReservationType = ReservationType.Project
             };
             
@@ -113,7 +111,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         public void UpdateReservationStatus(ReservationStatus newStatus)
         {
             ReservationStatus = newStatus;
-            UpdatedAt = DateTime.UtcNow;
         }
 
         public Result UpdateTotalPrice(decimal totalPrice)
@@ -125,7 +122,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             DiscountRate = CalculateDiscountRate(totalPrice);
             Bonus = CalculateBonus(totalPrice, PaidAmount);
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
-            UpdatedAt = DateTime.UtcNow;
 
             return Result.Success();
         }
@@ -139,8 +135,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
-
-            UpdatedAt = DateTime.UtcNow;
 
             return Result.Success();
         }
@@ -158,21 +152,17 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
 
-            UpdatedAt = DateTime.UtcNow;
-
             return Result.Success();
         }
         
         public void UpdateNotes(string? notes)
         {
             Notes = notes;
-            UpdatedAt = DateTime.UtcNow;
         }
         
         public void ChangeStudent(string studentId)
         {
             StudentId = studentId;
-            UpdatedAt = DateTime.UtcNow;
         }
 
         public Result UpdateClasses(IReadOnlyList<ClassUpdateData> classesToUpdate)
@@ -197,7 +187,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             DiscountRate = CalculateDiscountRate(TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
-            UpdatedAt = DateTime.UtcNow;
 
             return Result.Success();
         }
@@ -223,7 +212,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             DiscountRate = CalculateDiscountRate(TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
-            UpdatedAt = DateTime.UtcNow;
 
             return Result.Success();
         }

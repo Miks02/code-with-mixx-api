@@ -12,7 +12,7 @@ public class RefreshToken : IAuditable
     
     public DateTime ExpiresAt { get; private set; }
     public DateTime? RevokedAt { get; private set; }
-    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
 
     public User User { get; private set; } = null!;
@@ -38,6 +38,5 @@ public class RefreshToken : IAuditable
     {
         RevokedAt = DateTime.UtcNow;
         ReplacedByTokenHash = replacedByTokenHash;
-        UpdatedAt = DateTime.UtcNow;
     }
 }

@@ -40,7 +40,6 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
                 Price = price,
                 StartsAt = startsAt,
                 EndsAt = endsAt,
-                CreatedAt = DateTime.UtcNow
             };
             
             return Result<Class>.Success(newClass);
@@ -59,7 +58,6 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
             Price = price;
             StartsAt = startsAt;
             EndsAt = endsAt;
-            UpdatedAt = DateTime.UtcNow;
 
             return Result<Class>.Success(this);
         }

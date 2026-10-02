@@ -20,7 +20,6 @@ public class ProjectNote : IAuditable
         var newProjectNote = new ProjectNote
         {
             Content = content,
-            CreatedAt = DateTime.UtcNow
         };
         return Result<ProjectNote>.Success(newProjectNote);
     }

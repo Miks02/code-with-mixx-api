@@ -52,7 +52,6 @@ public class Project : IAuditable, ISoftDeletable
             ReservedAt = data.ReservedAt,
             StartDate = data.StartDate,
             EndDate = data.EndDate,
-            CreatedAt = DateTime.UtcNow
         };
 
         foreach (var note in data.Notes)
@@ -84,7 +83,6 @@ public class Project : IAuditable, ISoftDeletable
         EndDate = data.EndDate;
         GithubLink = data.GithubLink;
         DownloadLink = data.DownloadLink;
-        UpdatedAt = DateTime.UtcNow;
 
         return Result.Success();
     }
