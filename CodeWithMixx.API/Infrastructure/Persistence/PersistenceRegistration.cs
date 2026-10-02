@@ -1,3 +1,4 @@
+using CodeWithMixx.API.Infrastructure.Persistence.Interceptors;
 using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Infrastructure.Persistence;
@@ -6,6 +7,7 @@ public static class PersistenceRegistration
 {
     public static void AddPersistence(this IServiceCollection services, string connectionString)
     {
+        var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
         var railwayDbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
         if (!string.IsNullOrEmpty(railwayDbUrl))
         {
@@ -31,10 +33,19 @@ public static class PersistenceRegistration
         
             connectionString += "SSL Mode=Require;Trust Server Certificate=true;";
         }
+
+        services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<AuditInterceptor>();
         
-        services.AddDbContext<AppDbContext>(options =>
+        services.AddDbContext<AppDbContext>((serviceProvider, options) =>
         {
-            options.UseNpgsql(connectionString);
+            options.UseNpgsql(connectionString)
+                .AddInterceptors(serviceProvider.GetRequiredService<AuditInterceptor>());
+                if(env == "Development")
+                {
+                    options.EnableSensitiveDataLogging();
+                    options.EnableDetailedErrors();
+                }
         });
 
         services.AddScoped<DatabaseSeeder>();
