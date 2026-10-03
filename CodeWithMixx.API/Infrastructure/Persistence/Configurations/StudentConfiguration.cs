@@ -18,6 +18,8 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
 
         builder.Property(x => x.University)
             .HasMaxLength(100);
-        
+
+        builder.Navigation(x => x.Reservations)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

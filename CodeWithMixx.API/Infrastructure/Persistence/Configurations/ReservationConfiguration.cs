@@ -12,6 +12,12 @@ namespace CodeWithMixx.API.Infrastructure.Persistence.Configurations
             builder.ToTable(t => t.HasCheckConstraint("CK_Reservations_Bonus_Positive", "\"Bonus\" >= 0"));
             builder.ToTable(t => t.HasCheckConstraint("CK_Reservations_DiscountRate_Positive", "\"DiscountRate\" >= 0"));
             builder.ToTable(t => t.HasCheckConstraint("CK_Reservations_DiscountRate_LessThan100", "\"DiscountRate\" <= 100"));
+            
+            builder.Navigation(p => p.Classes)
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
+            
+            builder.Navigation(p => p.Projects)
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             builder.Property(r => r.TotalPrice)
                 .HasPrecision(18, 2);

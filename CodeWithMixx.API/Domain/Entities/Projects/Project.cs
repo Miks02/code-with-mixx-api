@@ -17,10 +17,10 @@ public class Project : IAuditable, ISoftDeletable
     public DateTime StartDate { get; private set; }
     public DateTime EndDate { get; private set; }
 
-    public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
-    public bool IsDeleted { get; set; }
-    public DateTime? DeletedAt { get; set; }
+    public DateTime CreatedAt { get; private set; }
+    public DateTime? UpdatedAt { get; private set; }
+    public bool IsDeleted { get; private set; }
+    public DateTime? DeletedAt { get; private set; }
 
     public Subject Subject { get; private set; } = null!;
     public int SubjectId { get; private set; }
@@ -30,6 +30,8 @@ public class Project : IAuditable, ISoftDeletable
     
     private readonly List<ProjectNote> _projectNotes = [];
     public IReadOnlyCollection<ProjectNote> ProjectNotes => _projectNotes.AsReadOnly();
+
+    private Project() {}
 
     public static Result<Project> Create(ProjectCreateData data)
     {
@@ -50,7 +52,6 @@ public class Project : IAuditable, ISoftDeletable
             ReservedAt = data.ReservedAt,
             StartDate = data.StartDate,
             EndDate = data.EndDate,
-            CreatedAt = DateTime.UtcNow
         };
 
         foreach (var note in data.Notes)
@@ -82,7 +83,6 @@ public class Project : IAuditable, ISoftDeletable
         EndDate = data.EndDate;
         GithubLink = data.GithubLink;
         DownloadLink = data.DownloadLink;
-        UpdatedAt = DateTime.UtcNow;
 
         return Result.Success();
     }

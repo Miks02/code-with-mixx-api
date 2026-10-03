@@ -6,23 +6,25 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
 {
     public class Class : IAuditable, ISoftDeletable
     {
-        public int Id { get; set; }
-        public decimal Price { get; set; }
-        public DateTime StartsAt { get; set; }
-        public DateTime EndsAt { get; set; }
+        public int Id { get; private set; }
+        public decimal Price { get; private set; }
+        public DateTime StartsAt { get; private set; }
+        public DateTime EndsAt { get; private set; }
 
-        public Reservation Reservation { get; set; } = null!;
-        public int ReservationId { get; set; } 
-        public Subject Subject { get; set; } = null!;
-        public int SubjectId { get; set; }
+        public Reservation Reservation { get; private set; } = null!;
+        public int ReservationId { get; private set; } 
+        public Subject Subject { get; private set; } = null!;
+        public int SubjectId { get; private set; }
         
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletedAt { get; set; }
+        public bool IsDeleted { get; private set; }
+        public DateTime? DeletedAt { get; private set; }
         
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime CreatedAt { get; private set; }
+        public DateTime? UpdatedAt { get; private set; }
         
         
+        private Class() {}
+
         public static Result<Class> Create(int subjectId, decimal price, DateTime startsAt, DateTime endsAt)
         {
             if(subjectId <= 0)
@@ -38,7 +40,6 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
                 Price = price,
                 StartsAt = startsAt,
                 EndsAt = endsAt,
-                CreatedAt = DateTime.UtcNow
             };
             
             return Result<Class>.Success(newClass);
@@ -57,7 +58,6 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
             Price = price;
             StartsAt = startsAt;
             EndsAt = endsAt;
-            UpdatedAt = DateTime.UtcNow;
 
             return Result<Class>.Success(this);
         }

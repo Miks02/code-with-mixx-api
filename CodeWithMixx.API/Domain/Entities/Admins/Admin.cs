@@ -5,8 +5,19 @@ namespace CodeWithMixx.API.Domain.Entities.Admins;
 
 public class Admin
 {
-    public User User { get; set; } = null!;
-    public string UserId { get; set; } = null!;
+    public User User { get; private set; } = null!;
+    public string UserId { get; private set; } = null!;
 
-    public ICollection<Reservation> Reservations { get; set; } = [];
+    private readonly List<Reservation> _reservations = [];
+    public IReadOnlyCollection<Reservation> Reservations => _reservations.AsReadOnly();
+
+    private Admin() {}
+
+    public static Admin Create(string userId)
+    {
+        return new Admin
+        {
+            UserId = userId
+        };
+    }
 }

@@ -6,9 +6,11 @@ public class ProjectNote : IAuditable
 {
     public int Id { get; private set; }
     public string Content { get; private set; } = null!;
-    public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; private set; }
+    public DateTime? UpdatedAt { get; private set; }
     public int ProjectId { get; private set; }
+
+    private ProjectNote() {}
 
     public static Result<ProjectNote> Create(string content)
     {
@@ -18,7 +20,6 @@ public class ProjectNote : IAuditable
         var newProjectNote = new ProjectNote
         {
             Content = content,
-            CreatedAt = DateTime.UtcNow
         };
         return Result<ProjectNote>.Success(newProjectNote);
     }

@@ -19,10 +19,10 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
         public string? Notes { get; private set; }
 
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletedAt { get; set; }
+        public DateTime CreatedAt { get; private set; }
+        public DateTime? UpdatedAt { get; private set; }
+        public bool IsDeleted { get; private set; }
+        public DateTime? DeletedAt { get; private set; }
 
         public Admin Admin { get; private set; } = null!;
         public string AdminId { get; private set; } = null!;
@@ -32,8 +32,11 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         
         public ReservationType ReservationType { get; private set; }
 
-        public ICollection<Class> Classes { get; private set; } = [];
-        public ICollection<Project> Projects { get; private set; } = [];
+        private readonly List<Class> _classes = [];
+        private readonly List<Project> _projects = [];
+        
+        public IReadOnlyCollection<Class> Classes => _classes.AsReadOnly();
+        public IReadOnlyCollection<Project> Projects => _projects.AsReadOnly();
         
         private Reservation() {}
 
@@ -54,7 +57,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 StudentId = data.StudentId,
                 ReservationStatus = data.ReservationStatus,
                 PaidAmount = data.PaidAmount,
-                CreatedAt = DateTime.UtcNow,
                 ReservationType = ReservationType.Class
             };
 
@@ -89,7 +91,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 ReservationStatus = data.ReservationStatus,
                 TotalPrice = data.TotalPrice ?? 0,
                 PaidAmount = data.PaidAmount,
-                CreatedAt = DateTime.UtcNow,
                 ReservationType = ReservationType.Project
             };
             
@@ -110,7 +111,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         public void UpdateReservationStatus(ReservationStatus newStatus)
         {
             ReservationStatus = newStatus;
-            UpdatedAt = DateTime.UtcNow;
         }
 
         public Result UpdateTotalPrice(decimal totalPrice)
@@ -122,7 +122,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             DiscountRate = CalculateDiscountRate(totalPrice);
             Bonus = CalculateBonus(totalPrice, PaidAmount);
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
-            UpdatedAt = DateTime.UtcNow;
 
             return Result.Success();
         }
@@ -136,8 +135,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
-
-            UpdatedAt = DateTime.UtcNow;
 
             return Result.Success();
         }
@@ -155,21 +152,17 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
 
-            UpdatedAt = DateTime.UtcNow;
-
             return Result.Success();
         }
         
         public void UpdateNotes(string? notes)
         {
             Notes = notes;
-            UpdatedAt = DateTime.UtcNow;
         }
         
         public void ChangeStudent(string studentId)
         {
             StudentId = studentId;
-            UpdatedAt = DateTime.UtcNow;
         }
 
         public Result UpdateClasses(IReadOnlyList<ClassUpdateData> classesToUpdate)
@@ -194,7 +187,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             DiscountRate = CalculateDiscountRate(TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
-            UpdatedAt = DateTime.UtcNow;
 
             return Result.Success();
         }
@@ -220,7 +212,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             DiscountRate = CalculateDiscountRate(TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
-            UpdatedAt = DateTime.UtcNow;
 
             return Result.Success();
         }
@@ -237,7 +228,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 if (!classResult.IsSuccess)
                     return Result.Failure(classResult.Errors[0]);
 
-                Classes.Add(classResult.Payload!);
+                _classes.Add(classResult.Payload!);
             }
 
             return Result.Success();
@@ -254,7 +245,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 if (!projectResult.IsSuccess)
                     return Result.Failure(projectResult.Errors[0]);
 
-                Projects.Add(projectResult.Payload!);
+                _projects.Add(projectResult.Payload!);
             }
             
             return Result.Success();
@@ -343,6 +334,13 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                || PaymentStatus != PaymentStatus.Pending
                || Classes.Any(c => c.StartsAt <= DateTime.UtcNow)
                || Projects.Any(p => p.StartDate <= DateTime.UtcNow);
+        
+        public void RemoveClass(Class classToRemove) 
+            => _classes.Remove(classToRemove);
+
+        public void RemoveProject(Project projectToRemove)
+           => _projects.Remove(projectToRemove);
+        
         
         private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice)
         {

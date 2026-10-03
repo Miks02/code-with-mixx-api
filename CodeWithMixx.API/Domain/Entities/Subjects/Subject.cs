@@ -5,16 +5,19 @@ namespace CodeWithMixx.API.Domain.Entities.Subjects;
 
 public class Subject : IAuditable, ISoftDeletable
 {
-    public int Id { get; init; }
-    public string Name { get; set; } = null!;
-    public string Description { get; set; } = null!;
+    public int Id { get; private set; }
+    public string Name { get; private set; } = null!;
+    public string Description { get; private set; } = null!;
     
-    public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
-    public bool IsDeleted { get; set; }
-    public DateTime? DeletedAt { get; set; }
-    public ICollection<Class> Classes { get; set; } = [];
-    public ICollection<Project> Projects { get; set; } = [];
+    public DateTime CreatedAt { get; private set; }
+    public DateTime? UpdatedAt { get; private set; }
+    public bool IsDeleted { get; private set; }
+    public DateTime? DeletedAt { get; private set; }
+    private readonly List<Class> _classes = [];
+    private readonly List<Project> _projects = [];
+
+    public IReadOnlyCollection<Class> Classes => _classes.AsReadOnly();
+    public IReadOnlyCollection<Project> Projects => _projects.AsReadOnly();
     
     private Subject() {}
     
@@ -24,7 +27,6 @@ public class Subject : IAuditable, ISoftDeletable
         {
             Name = name,
             Description = description,
-            CreatedAt = DateTime.UtcNow,
         };
     }
 
@@ -49,6 +51,5 @@ public class Subject : IAuditable, ISoftDeletable
     {
         Name = name;
         Description = description;
-        UpdatedAt = DateTime.UtcNow;
     }
 }

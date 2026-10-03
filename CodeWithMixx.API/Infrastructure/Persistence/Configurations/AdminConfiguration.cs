@@ -14,6 +14,8 @@ public class AdminConfiguration : IEntityTypeConfiguration<Admin>
             .WithOne(x => x.Admin)
             .HasForeignKey<Admin>(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
-        
+
+        builder.Navigation(x => x.Reservations)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

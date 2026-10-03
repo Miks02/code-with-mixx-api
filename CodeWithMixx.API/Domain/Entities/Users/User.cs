@@ -11,14 +11,16 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
     public string LastName { get; private set; } = null!;
 
     public DateTime? LastLoginAt { get; private set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? UpdatedAt { get; set; }
-    public bool IsDeleted { get;  set; }
-    public DateTime? DeletedAt { get; set; }
+    public DateTime CreatedAt { get; private set; }
+    public DateTime? UpdatedAt { get; private set; }
+    public bool IsDeleted { get; private set; }
+    public DateTime? DeletedAt { get; private set; }
     public AccountStatus AccountStatus { get; private set; }
 
     public Student? Student { get; }
     public Admin? Admin { get; }
+
+    private User() {}
 
     public static User CreateUser(string firstName, string lastName, string email, string phoneNumber)
     {
@@ -29,7 +31,6 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
             Email = email,
             UserName = email,
             PhoneNumber = phoneNumber,
-            CreatedAt = DateTime.UtcNow,
             EmailConfirmed = false,
             AccountStatus = AccountStatus.Pending
         };
@@ -46,7 +47,6 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
             EmailConfirmed = true,
             PhoneNumberConfirmed = true,
             PhoneNumber = phoneNumber,
-            CreatedAt = DateTime.UtcNow,
             AccountStatus = AccountStatus.Active
         };
     }
@@ -55,13 +55,11 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
     {
         FirstName = firstName;
         LastName = lastName;
-        UpdatedAt = DateTime.UtcNow;
     }
     
     public void UpdateLastLogin()
     {
         LastLoginAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
     }
 
     public Result ActivateAccount()
@@ -78,7 +76,6 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
         else 
             AccountStatus = AccountStatus.Active;
         
-        UpdatedAt = DateTime.UtcNow;
         return Result.Success();
     }
 
@@ -88,7 +85,6 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
             return;
 
         EmailConfirmed = true;
-        UpdatedAt = DateTime.UtcNow;
     }
     
     public Result DeactivateAccount()
@@ -100,7 +96,6 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
             return Result.Failure(UserError.AlreadyDeactivated(Id));
         
         AccountStatus = AccountStatus.Deactivated;
-        UpdatedAt = DateTime.UtcNow;
         return Result.Success();
     }
 
@@ -108,7 +103,6 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
     {
         IsDeleted = true;
         DeletedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
         Email = "deleted_" + Id + "@deleted.invalid";
         UserName = "deleted_" + Id + "@deleted.invalid";
         PasswordHash = null;
