@@ -1,0 +1,16 @@
+using CodeWithMixx.API.Domain.Entities.Projects;
+
+namespace CodeWithMixx.API.Features.Reservations.Common;
+
+public record ProjectItem
+{
+    public int Id { get; init; }
+    public int SubjectId { get; init; }
+    public string SubjectName { get; init; } = null!;
+    public ProjectType ProjectType { get; init; }
+    public decimal Price { get; init; }
+    public decimal Progress { get; init; }
+    public DateTime ReservedAt { get; init; }
+    public DateTime StartDate { get; init; }
+    public DateTime EndDate { get; init; }
+};

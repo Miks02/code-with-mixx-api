@@ -71,7 +71,7 @@ public class GetProjectReservationsSummaryHandler(AppDbContext context)
                 CreatedAt = r.CreatedAt,
                 Projects = r.Projects
                     .OrderBy(p => p.StartDate)
-                    .Select(p => new GetProjectReservationsSummaryResponse.ProjectItem
+                    .Select(p => new ProjectItem
                     {
                         Id = p.Id,
                         SubjectId = p.SubjectId,

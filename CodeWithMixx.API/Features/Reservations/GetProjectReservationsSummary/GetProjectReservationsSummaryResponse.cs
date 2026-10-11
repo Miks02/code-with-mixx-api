@@ -1,6 +1,6 @@
 using CodeWithMixx.API.Common.Results;
-using CodeWithMixx.API.Domain.Entities.Projects;
 using CodeWithMixx.API.Domain.Entities.Reservations;
+using CodeWithMixx.API.Features.Reservations.Common;
 
 namespace CodeWithMixx.API.Features.Reservations.GetProjectReservationsSummary;
 
@@ -25,18 +25,5 @@ public record GetProjectReservationsSummaryResponse
         public decimal Bonus { get; init; }
         public DateTime CreatedAt { get; init; }
         public IReadOnlyList<ProjectItem> Projects { get; init; } = [];
-    }
-
-    public record ProjectItem
-    {
-        public int Id { get; init; }
-        public int SubjectId { get; init; }
-        public string SubjectName { get; init; } = null!;
-        public ProjectType ProjectType { get; init; }
-        public decimal Price { get; init; }
-        public decimal Progress { get; init; }
-        public DateTime ReservedAt { get; init; }
-        public DateTime StartDate { get; init; }
-        public DateTime EndDate { get; init; }
     }
 };
