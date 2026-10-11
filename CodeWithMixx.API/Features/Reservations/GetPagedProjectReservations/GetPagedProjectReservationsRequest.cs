@@ -15,4 +15,6 @@ public record GetPagedProjectReservationsRequest
     public ProjectTypeFilter[] ProjectTypes { get; init; } = [];
     [FromQuery(Name = "reservationStatuses")]
     public ReservationStatusFilter[] ReservationStatuses { get; init; } = [];
+    [FromQuery(Name = "showOnlyDeletedStudents")]
+    public bool ShowOnlyDeletedStudents { get; init; }
 };

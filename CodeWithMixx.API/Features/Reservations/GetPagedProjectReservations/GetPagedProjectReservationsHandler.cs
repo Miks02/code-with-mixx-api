@@ -4,6 +4,7 @@ using CodeWithMixx.API.Domain.Entities.Projects;
 using CodeWithMixx.API.Domain.Entities.Reservations;
 using CodeWithMixx.API.Features.Reservations.Common;
 using CodeWithMixx.API.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Reservations.GetPagedProjectReservations;
 
@@ -16,6 +17,11 @@ public class GetPagedProjectReservationsHandler(AppDbContext context)
     {
         var reservationsQuery = context.Reservations
             .Where(r => r.ReservationType == ReservationType.Project);
+        
+        if(request.ShowOnlyDeletedStudents)
+            reservationsQuery = reservationsQuery
+                .IgnoreQueryFilters()
+                .Where(r => r.Student.IsDeleted);
 
         if(request.SubjectIds.Length > 0)
             reservationsQuery = reservationsQuery

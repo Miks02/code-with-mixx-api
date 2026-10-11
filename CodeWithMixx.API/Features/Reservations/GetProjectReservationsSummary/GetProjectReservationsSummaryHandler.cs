@@ -18,6 +18,11 @@ public class GetProjectReservationsSummaryHandler(AppDbContext context)
         var reservationsQuery = context.Reservations
             .Where(r => r.ReservationType == ReservationType.Project);
         
+        if(request.ShowOnlyDeletedStudents)
+            reservationsQuery = reservationsQuery
+                .IgnoreQueryFilters()
+                .Where(r => r.Student.IsDeleted);
+        
         if(request.SubjectIds.Length > 0)
             reservationsQuery = reservationsQuery
                 .Where(r => r.Projects.Any(p => ((IEnumerable<int>)request.SubjectIds).Contains(p.SubjectId)));
