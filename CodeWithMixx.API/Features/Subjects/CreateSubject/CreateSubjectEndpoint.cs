@@ -14,7 +14,8 @@ public class CreateSubjectEndpoint : IEndpoint
         })
         .RequireAuthorization("AdminOnly")
         .WithTags("Subjects")
-        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status201Created)
+        .Produces(StatusCodes.Status409Conflict)
         .Produces(StatusCodes.Status400BadRequest)
         .Produces(StatusCodes.Status401Unauthorized);
     }
