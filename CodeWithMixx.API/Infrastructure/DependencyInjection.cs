@@ -6,6 +6,7 @@ using CodeWithMixx.API.Infrastructure.Exceptions.Handlers;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using CodeWithMixx.API.Infrastructure.RateLimiting;
 using CodeWithMixx.API.Infrastructure.Security;
+using CodeWithMixx.API.Infrastructure.Utility;
 using FluentValidation;
 
 namespace CodeWithMixx.API.Infrastructure;
@@ -16,6 +17,7 @@ public static class DependencyInjection
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")!;
         services.AddHttpContextAccessor();
+        services.AddUtility();
         services.AddGlobalRateLimiter();
         services.AddAuthRateLimiter();
         services.AddForgotPasswordRateLimiter();
