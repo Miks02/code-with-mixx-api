@@ -333,7 +333,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             => ReservationStatus == ReservationStatus.Completed
                || PaymentStatus != PaymentStatus.Pending
                || Classes.Any(c => c.StartsAt <= DateTime.UtcNow)
-               || Projects.Any(p => p.StartDate <= DateTime.UtcNow);
+               || Projects.Any(p => p.StartDate <= DateOnly.FromDateTime(DateTime.UtcNow));
         
         public void RemoveClass(Class classToRemove) 
             => _classes.Remove(classToRemove);
@@ -346,7 +346,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         {
             var lastItem = ReservationType == ReservationType.Class 
                 ? Classes.Select(c => c.EndsAt).Last() 
-                : Projects.Select(p => p.EndDate).Last();
+                : Projects.Select(p => p.EndDate.ToDateTime(TimeOnly.MaxValue)).Last();
             
             return paidAmount switch
             {

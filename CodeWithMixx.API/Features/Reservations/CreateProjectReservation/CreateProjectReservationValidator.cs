@@ -52,7 +52,7 @@ public class ProjectItemValidator : AbstractValidator<CreateProjectReservationRe
 
         RuleFor(x => x.ReservedAt)
             .NotEmpty().WithMessage("Reservation date is required.")
-            .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("Reservation date cannot be in the future.");
+            .Must(reservedAt => reservedAt <= DateOnly.FromDateTime(DateTime.UtcNow)).WithMessage("Reservation date cannot be in the future.");
 
         RuleFor(x => x.GithubLink)
             .MaximumLength(200).WithMessage("GitHub link must be less than 200 characters.")

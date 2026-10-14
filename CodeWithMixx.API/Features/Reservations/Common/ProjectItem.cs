@@ -10,7 +10,7 @@ public record ProjectItem
     public ProjectType ProjectType { get; init; }
     public decimal Price { get; init; }
     public decimal Progress { get; init; }
-    public DateTime ReservedAt { get; init; }
-    public DateTime StartDate { get; init; }
-    public DateTime EndDate { get; init; }
+    public DateOnly ReservedAt { get; init; }
+    public DateOnly StartDate { get; init; }
+    public DateOnly EndDate { get; init; }
 };

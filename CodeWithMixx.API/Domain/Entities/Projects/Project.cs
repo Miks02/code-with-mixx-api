@@ -13,9 +13,9 @@ public class Project : IAuditable, ISoftDeletable
     public string? DownloadLink { get; private set; }
     public decimal Progress { get; private set; }
     
-    public DateTime ReservedAt { get; private set; }
-    public DateTime StartDate { get; private set; }
-    public DateTime EndDate { get; private set; }
+    public DateOnly ReservedAt { get; private set; }
+    public DateOnly StartDate { get; private set; }
+    public DateOnly EndDate { get; private set; }
 
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
@@ -107,8 +107,8 @@ public class Project : IAuditable, ISoftDeletable
         return Result.Success();
     }
 
-    private static Result Validate(int subjectId, decimal price, decimal progress, DateTime startDate, DateTime endDate,
-        DateTime reservedAt, string? githubLink, string? downloadLink)
+    private static Result Validate(int subjectId, decimal price, decimal progress, DateOnly startDate, DateOnly endDate,
+        DateOnly reservedAt, string? githubLink, string? downloadLink)
     {
         if(subjectId <= 0)
             return Result.Failure(SubjectError.NotFound(subjectId));
@@ -119,10 +119,14 @@ public class Project : IAuditable, ISoftDeletable
         if(progress < 0 || progress > 100)
             return Result.Failure(ProjectError.InvalidProgress(progress));
 
-        if(startDate <= DateTime.MinValue || startDate > endDate)
+        if(startDate <= DateOnly.MinValue || startDate > endDate)
             return Result.Failure(ProjectError.InvalidDateRange(startDate, endDate));
 
-        if(reservedAt <= DateTime.MinValue || reservedAt > DateTime.UtcNow)
+        Console.WriteLine(reservedAt);
+        Console.WriteLine(DateTime.MinValue);
+        Console.WriteLine(DateTime.UtcNow);
+
+        if(reservedAt <= DateOnly.MinValue || reservedAt > DateOnly.FromDateTime(DateTime.UtcNow))
             return Result.Failure(ProjectError.InvalidReservationDate(reservedAt));
 
         if(githubLink is not null && githubLink.Length > 200)

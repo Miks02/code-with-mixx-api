@@ -13,7 +13,7 @@ public static class ProjectError
     public static Error InvalidProgress(decimal progress)
         => new Error("Project.InvalidProgress", $"The project progress '{progress}' is invalid. It must be between 0 and 100.", ErrorType.Validation);
 
-    public static Error InvalidDateRange(DateTime startDate, DateTime endDate)
+    public static Error InvalidDateRange(DateOnly startDate, DateOnly endDate)
         => new Error("Project.InvalidDateRange", $"The project start date '{startDate}' cannot be after the end date '{endDate}'.", ErrorType.Validation);
     
     public static Error GithubLinkIsTooLong(string githubLink)
@@ -24,7 +24,7 @@ public static class ProjectError
     public static Error EmptyProjectNote()
         => new Error("Project.EmptyProjectNote", "The project note cannot be empty.", ErrorType.Validation);
     
-    public static Error InvalidReservationDate(DateTime reservedAt)
+    public static Error InvalidReservationDate(DateOnly reservedAt)
         => new Error("Project.InvalidReservationDate", $"The reservation date '{reservedAt}' is invalid. It must be between the minimum value and the current date.", ErrorType.Validation);
     
     public static Error AlreadyDeleted(int identifier)
