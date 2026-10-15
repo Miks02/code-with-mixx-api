@@ -12,6 +12,8 @@ public record ProjectCreateData
     public decimal Price { get; init; }
     public decimal Progress { get; init; }
     public IReadOnlyList<ProjectNoteData> Notes { get; init; } = [];
+    
+    public DateOnly Today { get; init; }
 
     public record ProjectNoteData
     {

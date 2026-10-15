@@ -73,7 +73,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result<Reservation>.Success(reservation);
         }
         
-        public static Result<Reservation> CreateProjectReservation(ReservationCreateData data, IReadOnlyList<ProjectCreateData> projects)
+        public static Result<Reservation> CreateProjectReservation(ReservationCreateData data, IReadOnlyList<ProjectCreateData> projects, DateOnly today)
         {
             if(projects.Count == 0)
                 return Result<Reservation>.Failure(ReservationError.NoProjectsProvided());
@@ -102,7 +102,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             reservation.TotalPrice = reservation.CalculateTotalPrice(data.TotalPrice);
             reservation.DiscountRate = reservation.CalculateDiscountRate(reservation.TotalPrice);
             reservation.Bonus = reservation.CalculateBonus(reservation.TotalPrice, data.PaidAmount);
-            reservation.PaymentStatus = reservation.DeterminePaymentStatus(data.PaidAmount, reservation.TotalPrice);
+            reservation.PaymentStatus = reservation.DeterminePaymentStatus(data.PaidAmount, reservation.TotalPrice, today);
 
             
             return Result<Reservation>.Success(reservation);
@@ -113,7 +113,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             ReservationStatus = newStatus;
         }
 
-        public Result UpdateTotalPrice(decimal totalPrice)
+        public Result UpdateTotalPrice(decimal totalPrice, DateOnly? today = null)
         {
             if (totalPrice < 0)
                 return Result.Failure(ReservationError.InvalidTotalPrice(totalPrice));
@@ -121,25 +121,25 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             TotalPrice = totalPrice;
             DiscountRate = CalculateDiscountRate(totalPrice);
             Bonus = CalculateBonus(totalPrice, PaidAmount);
-            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
+            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
 
             return Result.Success();
         }
 
-        public Result RegisterPayment(decimal paidAmount)
+        public Result RegisterPayment(decimal paidAmount, DateOnly? today = null)
         {
             if (paidAmount < 0)
                 return Result.Failure(ReservationError.InvalidAmount(paidAmount));
 
             PaidAmount += paidAmount;
 
-            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
+            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
 
             return Result.Success();
         }
         
-        public Result SubtractPayment(decimal amount)
+        public Result SubtractPayment(decimal amount, DateOnly? today = null)
         {
             if (amount < 0)
                 return Result.Failure(ReservationError.InvalidAmount(amount, "Amount to subtract cannot be negative."));
@@ -149,7 +149,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
             PaidAmount -= amount;
 
-            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
+            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
 
             return Result.Success();
@@ -191,7 +191,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
         
-        public Result UpdateProjects(IReadOnlyList<ProjectUpdateData> projectsToUpdate)
+        public Result UpdateProjects(IReadOnlyList<ProjectUpdateData> projectsToUpdate, DateOnly today)
         {
             if(ReservationType != ReservationType.Project)
                 return Result.Failure(ReservationError.NotAProjectReservation(Id));
@@ -211,7 +211,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
             DiscountRate = CalculateDiscountRate(TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
-            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
+            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
 
             return Result.Success();
         }
@@ -329,11 +329,11 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
 
-        public bool RequiresHistoryRetention()
+        public bool RequiresHistoryRetention(DateOnly? today = null)
             => ReservationStatus == ReservationStatus.Completed
                || PaymentStatus != PaymentStatus.Pending
                || Classes.Any(c => c.StartsAt <= DateTime.UtcNow)
-               || Projects.Any(p => p.StartDate <= DateOnly.FromDateTime(DateTime.UtcNow));
+               || Projects.Any(p => p.StartDate <= (today ?? DateOnly.FromDateTime(DateTime.UtcNow)));
         
         public void RemoveClass(Class classToRemove) 
             => _classes.Remove(classToRemove);
@@ -342,16 +342,16 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
            => _projects.Remove(projectToRemove);
         
         
-        private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice)
+        private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice, DateOnly? today = null)
         {
-            var lastItem = ReservationType == ReservationType.Class 
-                ? Classes.Select(c => c.EndsAt).Last() 
-                : Projects.Select(p => p.EndDate.ToDateTime(TimeOnly.MaxValue)).Last();
-            
+            var isPastDue = ReservationType == ReservationType.Class
+                ? Classes.Select(c => c.EndsAt).Last() < DateTime.UtcNow
+                : Projects.Select(p => p.EndDate).Last() < (today ?? DateOnly.FromDateTime(DateTime.UtcNow));
+
             return paidAmount switch
             {
                 var amount when amount >= totalPrice => PaymentStatus.Paid,
-                var amount when amount < totalPrice && lastItem < DateTime.UtcNow => PaymentStatus.Overdue,
+                var amount when amount < totalPrice && isPastDue => PaymentStatus.Overdue,
                 var amount when amount > 0 && amount < totalPrice => PaymentStatus.PartiallyPaid,
                 _ => PaymentStatus.Pending
             };

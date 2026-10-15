@@ -12,4 +12,6 @@ public record ProjectUpdateData
     public string? DownloadLink { get; init; }
     public decimal Price { get; init; }
     public decimal Progress { get; init; }
+    
+    public DateOnly Today { get; init; }
 }
