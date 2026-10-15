@@ -4,10 +4,10 @@ namespace CodeWithMixx.API.Infrastructure.Utility;
 
 public class UserClock(IHttpContextAccessor http, TimeProvider timeProvider) : IUserClock
 {
-    private const string FallBackZoneId = "Europe/Belgrade";
+    private const string FallBackZoneId = "America/New_York";
     public TimeZoneInfo TimeZone => field ??= ResolveTimeZone();
     
-    public DateTimeOffset LocalNow => TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), TimeZone).DateTime;
+    public DateTimeOffset LocalNow => TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), TimeZone);
     
     public DateOnly Today => DateOnly.FromDateTime(LocalNow.DateTime);
 
@@ -15,9 +15,12 @@ public class UserClock(IHttpContextAccessor http, TimeProvider timeProvider) : I
     {
         var clientTimeZoneId = http.HttpContext?.Request.Headers["TimeZoneId"].ToString();
 
-        if (!string.IsNullOrWhiteSpace(clientTimeZoneId) && TimeZoneInfo.TryFindSystemTimeZoneById(clientTimeZoneId, out var tz))
-            return tz;
-
+        if (!string.IsNullOrWhiteSpace(clientTimeZoneId) &&
+            TimeZoneInfo.TryFindSystemTimeZoneById(clientTimeZoneId, out var clientTimeZone))
+        {
+            return clientTimeZone;
+        }
+        
         if (TimeZoneInfo.TryFindSystemTimeZoneById(FallBackZoneId, out var fallbackZone))
             return fallbackZone;
 
