@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Reservations.UpdateProjectReservation;
 
-public class UpdateProjectReservationHandler(AppDbContext context)
+public class UpdateProjectReservationHandler(AppDbContext context, IUserClock clock)
     : IHandler<UpdateProjectReservationRequest, Result<UpdateProjectReservationResponse>>
 {
     public async Task<Result<UpdateProjectReservationResponse>> HandleAsync(UpdateProjectReservationRequest request, CancellationToken ct = default)
@@ -49,7 +49,9 @@ public class UpdateProjectReservationHandler(AppDbContext context)
         reservation.UpdateReservationStatus(request.ReservationStatus);
         reservation.UpdateNotes(request.Notes);
 
-        var totalPriceResult = reservation.UpdateTotalPrice(request.TotalPrice);
+        var today = clock.Today;
+        
+        var totalPriceResult = reservation.UpdateTotalPrice(request.TotalPrice, today);
 
         if (!totalPriceResult.IsSuccess)
             return Result<UpdateProjectReservationResponse>.Failure(totalPriceResult.Errors[0]);
@@ -58,14 +60,14 @@ public class UpdateProjectReservationHandler(AppDbContext context)
 
         if (paidAmountDelta > 0)
         {
-            var paymentResult = reservation.RegisterPayment(paidAmountDelta);
+            var paymentResult = reservation.RegisterPayment(paidAmountDelta, today);
 
             if (!paymentResult.IsSuccess)
                 return Result<UpdateProjectReservationResponse>.Failure(paymentResult.Errors[0]);
         }
         else if (paidAmountDelta < 0)
         {
-            var paymentResult = reservation.SubtractPayment(-paidAmountDelta);
+            var paymentResult = reservation.SubtractPayment(-paidAmountDelta, today);
 
             if (!paymentResult.IsSuccess)
                 return Result<UpdateProjectReservationResponse>.Failure(paymentResult.Errors[0]);
@@ -132,6 +134,7 @@ public class UpdateProjectReservationHandler(AppDbContext context)
                 StartDate = p.StartDate,
                 EndDate = p.EndDate,
                 ReservedAt = p.ReservedAt,
+                Today = clock.Today,
                 GithubLink = p.GithubLink,
                 DownloadLink = p.DownloadLink,
                 Price = p.Price,
@@ -139,7 +142,7 @@ public class UpdateProjectReservationHandler(AppDbContext context)
             })
             .ToList();
 
-        return reservation.UpdateProjects(updateData);
+        return reservation.UpdateProjects(updateData, clock.Today);
     }
 
     private async Task<Result> AddNewProjectsAsync(Reservation reservation, IReadOnlyList<UpdateProjectReservationRequest.ProjectItem> projects, CancellationToken ct)
@@ -162,6 +165,7 @@ public class UpdateProjectReservationHandler(AppDbContext context)
                 StartDate = p.StartDate,
                 EndDate = p.EndDate,
                 ReservedAt = p.ReservedAt,
+                Today = clock.Today,
                 GithubLink = p.GithubLink,
                 DownloadLink = p.DownloadLink,
                 Price = p.Price,

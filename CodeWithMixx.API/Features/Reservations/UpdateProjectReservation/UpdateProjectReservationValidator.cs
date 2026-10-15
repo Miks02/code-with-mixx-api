@@ -1,10 +1,11 @@
+using CodeWithMixx.API.Common.Interfaces;
 using FluentValidation;
 
 namespace CodeWithMixx.API.Features.Reservations.UpdateProjectReservation;
 
 public class UpdateProjectReservationValidator : AbstractValidator<UpdateProjectReservationRequest>
 {
-    public UpdateProjectReservationValidator()
+    public UpdateProjectReservationValidator(IUserClock clock)
     {
         RuleFor(x => x.StudentId)
             .NotEmpty().WithMessage("StudentId is required.");
@@ -28,7 +29,7 @@ public class UpdateProjectReservationValidator : AbstractValidator<UpdateProject
             .NotEmpty().WithMessage("At least one project is required for a valid reservation.");
 
         RuleForEach(x => x.Projects)
-            .SetValidator(new UpdateProjectItemValidator());
+            .SetValidator(new UpdateProjectItemValidator(clock));
 
         RuleFor(x => x)
             .Must(x => !x.ProjectsToDelete.Intersect(x.Projects.Select(p => p.Id)).Any())
@@ -39,7 +40,7 @@ public class UpdateProjectReservationValidator : AbstractValidator<UpdateProject
 
 public class UpdateProjectItemValidator : AbstractValidator<UpdateProjectReservationRequest.ProjectItem>
 {
-    public UpdateProjectItemValidator()
+    public UpdateProjectItemValidator(IUserClock clock)
     {
         RuleFor(x => x.Id)
             .GreaterThanOrEqualTo(0).WithMessage("Project id must be 0 (new project) or a valid identifier.");
@@ -65,7 +66,7 @@ public class UpdateProjectItemValidator : AbstractValidator<UpdateProjectReserva
 
         RuleFor(x => x.ReservedAt)
             .NotEmpty().WithMessage("Reservation date is required.")
-            .Must(reservedAt => reservedAt <= DateOnly.FromDateTime(DateTime.UtcNow)).WithMessage("Reservation date cannot be in the future.");
+            .LessThanOrEqualTo(clock.Today).WithMessage("Reservation date cannot be in the future.");
 
         RuleFor(x => x.GithubLink)
             .MaximumLength(200).WithMessage("GitHub link must be less than 200 characters.")

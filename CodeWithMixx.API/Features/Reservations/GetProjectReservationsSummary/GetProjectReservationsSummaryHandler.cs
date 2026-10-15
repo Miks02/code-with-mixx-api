@@ -8,13 +8,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Reservations.GetProjectReservationsSummary;
 
-public class GetProjectReservationsSummaryHandler(AppDbContext context)
+public class GetProjectReservationsSummaryHandler(AppDbContext context, IUserClock clock)
     : IHandler<GetProjectReservationsSummaryRequest, GetProjectReservationsSummaryResponse>
 {
     public async Task<GetProjectReservationsSummaryResponse> HandleAsync(
         GetProjectReservationsSummaryRequest request,
         CancellationToken ct = default)
     {
+        Console.WriteLine("Trenutno vreme i datum: " + clock.LocalNow);
+        Console.WriteLine("Trenutni datum: " + clock.Today);
+        
         var reservationsQuery = context.Reservations
             .Where(r => r.ReservationType == ReservationType.Project);
         
@@ -94,14 +97,16 @@ public class GetProjectReservationsSummaryHandler(AppDbContext context)
         var pagedResult = await PagedResult<GetProjectReservationsSummaryResponse.ProjectReservation>.CreateAsync(
             projectedQuery, request.PageNumber, request.PageSize, ct);
 
+        var today = clock.Today;
+
         var stats = await context.Projects
             .GroupBy(p => 1)
             .Select(g => new
             {
                 TotalProjects = g.Count(),
-                ActiveProjects = g.Count(p => p.Reservation.ReservationStatus == ReservationStatus.Confirmed && p.StartDate <= DateTime.UtcNow),
+                ActiveProjects = g.Count(p => p.Reservation.ReservationStatus == ReservationStatus.Confirmed && p.StartDate <= today),
                 CompletedProjects = g.Count(p => p.Reservation.ReservationStatus == ReservationStatus.Completed),
-                PendingProjects = g.Count(p => p.Reservation.ReservationStatus == ReservationStatus.Confirmed && p.StartDate > DateTime.UtcNow),
+                PendingProjects = g.Count(p => p.Reservation.ReservationStatus == ReservationStatus.Confirmed && p.StartDate > today),
             })
             .FirstOrDefaultAsync(ct) ?? new { TotalProjects = 0, ActiveProjects = 0, CompletedProjects = 0, PendingProjects = 0 };
 

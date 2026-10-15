@@ -1,10 +1,11 @@
+using CodeWithMixx.API.Common.Interfaces;
 using FluentValidation;
 
 namespace CodeWithMixx.API.Features.Reservations.CreateProjectReservation;
 
 public class CreateProjectReservationValidator : AbstractValidator<CreateProjectReservationRequest>
 {
-    public CreateProjectReservationValidator()
+    public CreateProjectReservationValidator(IUserClock clock)
     {
         RuleFor(x => x.StudentId)
             .NotEmpty().WithMessage("StudentId is required.");
@@ -23,13 +24,13 @@ public class CreateProjectReservationValidator : AbstractValidator<CreateProject
             .NotEmpty().WithMessage("At least one project is required for a reservation.");
 
         RuleForEach(x => x.Projects)
-            .SetValidator(new ProjectItemValidator());
+            .SetValidator(new ProjectItemValidator(clock));
     }
 }
 
 public class ProjectItemValidator : AbstractValidator<CreateProjectReservationRequest.ProjectItem>
 {
-    public ProjectItemValidator()
+    public ProjectItemValidator(IUserClock clock)
     {
         RuleFor(x => x.SubjectId)
             .GreaterThan(0).WithMessage("SubjectId must be a valid identifier.");
@@ -49,10 +50,10 @@ public class ProjectItemValidator : AbstractValidator<CreateProjectReservationRe
         RuleFor(x => x.EndDate)
             .NotEmpty().WithMessage("End date is required.")
             .GreaterThanOrEqualTo(x => x.StartDate).WithMessage("End date cannot be before start date.");
-
+        
         RuleFor(x => x.ReservedAt)
             .NotEmpty().WithMessage("Reservation date is required.")
-            .Must(reservedAt => reservedAt <= DateOnly.FromDateTime(DateTime.UtcNow)).WithMessage("Reservation date cannot be in the future.");
+            .LessThanOrEqualTo(clock.Today).WithMessage("Reservation date cannot be in the future.");
 
         RuleFor(x => x.GithubLink)
             .MaximumLength(200).WithMessage("GitHub link must be less than 200 characters.")
