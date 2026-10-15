@@ -4,7 +4,7 @@ namespace CodeWithMixx.API.Infrastructure.Utility;
 
 public class UserClock(IHttpContextAccessor http, TimeProvider timeProvider) : IUserClock
 {
-    private const string FallBackZoneId = "America/New_York";
+    private const string FallBackZoneId = "Europe/Belgrade";
     public TimeZoneInfo TimeZone => field ??= ResolveTimeZone();
     
     public DateTimeOffset LocalNow => TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), TimeZone);
@@ -20,9 +20,11 @@ public class UserClock(IHttpContextAccessor http, TimeProvider timeProvider) : I
         {
             return clientTimeZone;
         }
-        
+
         if (TimeZoneInfo.TryFindSystemTimeZoneById(FallBackZoneId, out var fallbackZone))
+        {
             return fallbackZone;
+        }
 
         return TimeZoneInfo.Utc;
     }
