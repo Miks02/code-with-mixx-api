@@ -86,7 +86,9 @@ public class GetPagedProjectReservationsHandler(AppDbContext context)
                         Progress = p.Progress,
                         ReservedAt = p.ReservedAt,
                         StartDate = p.StartDate,
-                        EndDate = p.EndDate
+                        EndDate = p.EndDate,
+                        GithubLink = p.GithubLink,
+                        DownloadLink = p.DownloadLink
                     })
                     .ToList()
             });

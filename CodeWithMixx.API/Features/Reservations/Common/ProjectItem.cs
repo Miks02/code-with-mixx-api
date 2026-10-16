@@ -10,6 +10,8 @@ public record ProjectItem
     public ProjectType ProjectType { get; init; }
     public decimal Price { get; init; }
     public decimal Progress { get; init; }
+    public string? GithubLink { get; init; }
+    public string? DownloadLink { get; init; }
     public DateOnly ReservedAt { get; init; }
     public DateOnly StartDate { get; init; }
     public DateOnly EndDate { get; init; }
