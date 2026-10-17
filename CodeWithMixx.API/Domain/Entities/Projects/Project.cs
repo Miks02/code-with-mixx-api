@@ -83,7 +83,25 @@ public class Project : IAuditable, ISoftDeletable
         EndDate = data.EndDate;
         GithubLink = data.GithubLink;
         DownloadLink = data.DownloadLink;
+        
+        var existingIds = _projectNotes.Select(pn => pn.Id).ToHashSet();
+        var incomingIds = data.Notes.Select(n => n.Id).Where(id => id != 0).ToHashSet();
 
+        var invalidNoteId = incomingIds.FirstOrDefault(id => !existingIds.Contains(id));
+        if (invalidNoteId != 0)
+            return Result.Failure(ProjectError.NoteNotFound(invalidNoteId));
+
+        var newNotes = new List<ProjectNote>();
+        foreach (var note in data.Notes.Where(n => n.Id == 0))
+        {
+            var noteResult = ProjectNote.Create(note.Content);
+            if (!noteResult.IsSuccess)
+                return Result.Failure(noteResult.Errors[0]);
+            newNotes.Add(noteResult.Payload!);
+        }
+        
+        _projectNotes.RemoveAll(pn => !incomingIds.Contains(pn.Id));
+        _projectNotes.AddRange(newNotes);
         return Result.Success();
     }
 

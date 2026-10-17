@@ -14,4 +14,12 @@ public record ProjectUpdateData
     public decimal Progress { get; init; }
     
     public DateOnly Today { get; init; }
+    public IReadOnlyList<ProjectNoteData> Notes { get; init; } = [];
+    
+    public record ProjectNoteData
+    {
+        public int Id { get; init; }
+        public string Content { get; init; } = null!;
+        
+    }
 }

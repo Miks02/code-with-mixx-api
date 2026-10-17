@@ -24,6 +24,9 @@ public static class ProjectError
     public static Error EmptyProjectNote()
         => new Error("Project.EmptyProjectNote", "The project note cannot be empty.", ErrorType.Validation);
     
+    public static Error NoteNotFound(int identifier) 
+        => new Error("Project.NoteNotFound", $"The project note '{identifier}' was not found.", ErrorType.Validation);
+    
     public static Error InvalidReservationDate(DateOnly reservedAt)
         => new Error("Project.InvalidReservationDate", $"The reservation date '{reservedAt}' is invalid. It must be between the minimum value and the current date.", ErrorType.Validation);
     
