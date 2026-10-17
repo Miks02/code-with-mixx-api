@@ -64,6 +64,15 @@ public class ProjectItemValidator : AbstractValidator<CreateProjectReservationRe
             .When(x => x.DownloadLink is not null);
 
         RuleForEach(x => x.Notes)
+            .SetValidator(new ProjectNoteValidator());
+    }
+}
+
+public class ProjectNoteValidator : AbstractValidator<CreateProjectReservationRequest.ProjectNoteItem>
+{
+    public ProjectNoteValidator()
+    {
+        RuleFor(x => x.Content)
             .NotEmpty().WithMessage("Project note content cannot be empty.");
     }
 }

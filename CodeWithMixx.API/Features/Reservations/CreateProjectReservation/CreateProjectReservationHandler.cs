@@ -57,7 +57,7 @@ public class CreateProjectReservationHandler (AppDbContext context, IUserProvide
                 Today = today,
                 Notes = p.Notes.Select(n => new ProjectCreateData.ProjectNoteData
                 {
-                    Content = n
+                    Content = n.Content
                 }).ToList()
             })
             .ToList();

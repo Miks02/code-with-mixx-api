@@ -1,6 +1,5 @@
 using CodeWithMixx.API.Domain.Entities.Projects;
 using CodeWithMixx.API.Domain.Entities.Reservations;
-using CodeWithMixx.API.Features.Reservations.CreateClassReservation;
 
 namespace CodeWithMixx.API.Features.Reservations.CreateProjectReservation;
 
@@ -23,6 +22,11 @@ public record CreateProjectReservationRequest
         public string? GithubLink { get; init; }
         public string? DownloadLink { get; init; }
         public decimal Progress { get; init; }
-        public IReadOnlyList<string> Notes { get; init; } = [];
+        public IReadOnlyList<ProjectNoteItem> Notes { get; init; } = [];
+    }
+
+    public record ProjectNoteItem
+    {
+        public string Content { get; init; } = null!;
     }
 }
