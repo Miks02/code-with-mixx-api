@@ -121,10 +121,7 @@ public class Project : IAuditable, ISoftDeletable
 
         if(startDate <= DateOnly.MinValue || startDate > endDate)
             return Result.Failure(ProjectError.InvalidDateRange(startDate, endDate));
-
-        Console.WriteLine(reservedAt);
-        Console.WriteLine(DateTime.MinValue);
-        Console.WriteLine(DateTime.UtcNow);
+        
 
         if(reservedAt <= DateOnly.MinValue || reservedAt > DateOnly.FromDateTime(DateTime.UtcNow))
             return Result.Failure(ProjectError.InvalidReservationDate(reservedAt));

@@ -15,9 +15,7 @@ public class GetProjectReservationsSummaryHandler(AppDbContext context, IUserClo
         GetProjectReservationsSummaryRequest request,
         CancellationToken ct = default)
     {
-        Console.WriteLine("Trenutno vreme i datum: " + clock.LocalNow);
-        Console.WriteLine("Trenutni datum: " + clock.Today);
-        
+
         var reservationsQuery = context.Reservations
             .Where(r => r.ReservationType == ReservationType.Project);
         
