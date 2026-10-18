@@ -24,6 +24,8 @@ public record GetProjectReservationsSummaryResponse
         public decimal DiscountRate { get; init; }
         public decimal Bonus { get; init; }
         public DateTime CreatedAt { get; init; }
+        public DateTime? UpdatedAt { get; init; }
+        public DateTime? DeletedAt { get; init; }
         public IReadOnlyList<ProjectItem> Projects { get; init; } = [];
     }
 };

@@ -19,6 +19,11 @@ public class GetProjectReservationsSummaryHandler(AppDbContext context, IUserClo
         var reservationsQuery = context.Reservations
             .Where(r => r.ReservationType == ReservationType.Project);
         
+        if(request.ShowOnlyDeletedReservations)
+            reservationsQuery = reservationsQuery
+                .IgnoreQueryFilters()
+                .Where(r => r.IsDeleted);
+        
         if(request.ShowOnlyDeletedStudents)
             reservationsQuery = reservationsQuery
                 .IgnoreQueryFilters()
@@ -75,6 +80,8 @@ public class GetProjectReservationsSummaryHandler(AppDbContext context, IUserClo
                 DiscountRate = r.DiscountRate,
                 Bonus = r.Bonus,
                 CreatedAt = r.CreatedAt,
+                UpdatedAt = r.UpdatedAt,
+                DeletedAt = r.DeletedAt,
                 Projects = r.Projects
                     .OrderBy(p => p.StartDate)
                     .Select(p => new ProjectItem

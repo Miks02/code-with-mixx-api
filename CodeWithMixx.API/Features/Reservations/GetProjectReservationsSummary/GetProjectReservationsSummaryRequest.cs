@@ -17,4 +17,6 @@ public record GetProjectReservationsSummaryRequest
     public ReservationStatusFilter[] ReservationStatuses { get; init; } = [];
     [FromQuery(Name = "showOnlyDeletedStudents")]
     public bool ShowOnlyDeletedStudents { get; init; }
+    [FromQuery(Name = "showOnlyDeletedReservations")]
+    public bool ShowOnlyDeletedReservations { get; init; }
 };
