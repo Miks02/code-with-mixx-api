@@ -16,6 +16,7 @@ public class UpdateProjectReservationHandler(AppDbContext context, IUserClock cl
     {
         var reservation = await context.Reservations
             .Include(r => r.Projects)
+                .ThenInclude(p => p.ProjectNotes)
             .FirstOrDefaultAsync(r => r.Id == request.Id, ct);
 
         if (reservation is null)
@@ -138,7 +139,12 @@ public class UpdateProjectReservationHandler(AppDbContext context, IUserClock cl
                 GithubLink = p.GithubLink,
                 DownloadLink = p.DownloadLink,
                 Price = p.Price,
-                Progress = p.Progress
+                Progress = p.Progress,
+                Notes = p.Notes.Select(n => new ProjectUpdateData.ProjectNoteData
+                {
+                    Id = n.Id,
+                    Content = n.Content
+                }).ToList()
             })
             .ToList();
 
@@ -172,7 +178,7 @@ public class UpdateProjectReservationHandler(AppDbContext context, IUserClock cl
                 Progress = p.Progress,
                 Notes = p.Notes.Select(n => new ProjectCreateData.ProjectNoteData
                 {
-                    Content = n
+                    Content = n.Content
                 }).ToList()
             })
             .ToList();

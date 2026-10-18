@@ -78,9 +78,16 @@ public class UpdateProjectItemValidator : AbstractValidator<UpdateProjectReserva
 
         RuleForEach(x => x.Notes)
             .NotEmpty().WithMessage("Project note content cannot be empty.");
+        RuleForEach(x => x.Notes)
+            .SetValidator(new ProjectNoteValidator());
+    }
+}
 
-        RuleFor(x => x.Notes)
-            .Empty().WithMessage("Notes of an existing project cannot be changed here.")
-            .When(x => x.Id != 0);
+public class ProjectNoteValidator : AbstractValidator<UpdateProjectReservationRequest.ProjectNoteItem>
+{
+    public ProjectNoteValidator()
+    {
+        RuleFor(x => x.Content)
+            .NotEmpty().WithMessage("Project note content cannot be empty.");
     }
 }

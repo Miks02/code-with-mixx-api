@@ -27,6 +27,12 @@ public record UpdateProjectReservationRequest
         public string? GithubLink { get; init; }
         public string? DownloadLink { get; init; }
         public decimal Progress { get; init; }
-        public IReadOnlyList<string> Notes { get; init; } = [];
+        public IReadOnlyList<ProjectNoteItem> Notes { get; init; } = [];
+    }
+
+    public record ProjectNoteItem
+    {
+        public int Id { get; init; }
+        public string Content { get; init; } = null!;
     }
 }
