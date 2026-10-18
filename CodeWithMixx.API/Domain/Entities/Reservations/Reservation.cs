@@ -108,9 +108,13 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result<Reservation>.Success(reservation);
         }
         
-        public void UpdateReservationStatus(ReservationStatus newStatus)
+        public Result UpdateReservationStatus(ReservationStatus newStatus)
         {
+            if(IsDeleted)
+                return Result.Failure(ReservationError.CantUpdateAnArchivedReservation(Id));
+            
             ReservationStatus = newStatus;
+            return Result.Success();
         }
 
         public Result UpdateTotalPrice(decimal totalPrice, DateOnly? today = null)
