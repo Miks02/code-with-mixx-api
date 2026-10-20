@@ -18,6 +18,9 @@ namespace CodeWithMixx.API.Infrastructure.Persistence.Configurations
             
             builder.Navigation(p => p.Projects)
                 .UsePropertyAccessMode(PropertyAccessMode.Field);
+            
+            builder.Navigation(p => p.PaymentTransactions)
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             builder.Property(r => r.TotalPrice)
                 .HasPrecision(18, 2);

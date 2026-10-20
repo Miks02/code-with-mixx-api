@@ -1,6 +1,7 @@
 ﻿using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Domain.Entities.Admins;
 using CodeWithMixx.API.Domain.Entities.Classes;
+using CodeWithMixx.API.Domain.Entities.PaymentTransactions;
 using CodeWithMixx.API.Domain.Entities.Projects;
 using CodeWithMixx.API.Domain.Entities.Students;
 
@@ -34,9 +35,11 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
         private readonly List<Class> _classes = [];
         private readonly List<Project> _projects = [];
+        private readonly List<PaymentTransaction> _paymentTransactions = [];
         
         public IReadOnlyCollection<Class> Classes => _classes.AsReadOnly();
         public IReadOnlyCollection<Project> Projects => _projects.AsReadOnly();
+        public IReadOnlyCollection<PaymentTransaction> PaymentTransactions => _paymentTransactions.AsReadOnly();
         
         private Reservation() {}
 

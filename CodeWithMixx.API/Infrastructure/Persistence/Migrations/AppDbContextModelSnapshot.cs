@@ -84,6 +84,38 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.PaymentTransactions.PaymentTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<string>("PaymentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReservationId");
+
+                    b.ToTable("PaymentTransactions", t =>
+                        {
+                            t.HasCheckConstraint("CK_PaymentTransactions_Amount_Positive", "\"Amount\" > 0");
+                        });
+                });
+
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Projects.Project", b =>
                 {
                     b.Property<int>("Id")
@@ -632,6 +664,17 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                     b.Navigation("Subject");
                 });
 
+            modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.PaymentTransactions.PaymentTransaction", b =>
+                {
+                    b.HasOne("CodeWithMixx.API.Domain.Entities.Reservations.Reservation", "Reservation")
+                        .WithMany("PaymentTransactions")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Reservation");
+                });
+
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Projects.Project", b =>
                 {
                     b.HasOne("CodeWithMixx.API.Domain.Entities.Reservations.Reservation", "Reservation")
@@ -765,6 +808,8 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Reservations.Reservation", b =>
                 {
                     b.Navigation("Classes");
+
+                    b.Navigation("PaymentTransactions");
 
                     b.Navigation("Projects");
                 });

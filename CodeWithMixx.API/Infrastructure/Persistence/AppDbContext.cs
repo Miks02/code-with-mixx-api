@@ -2,6 +2,7 @@ using System.Reflection;
 using CodeWithMixx.API.Domain;
 using CodeWithMixx.API.Domain.Entities.Admins;
 using CodeWithMixx.API.Domain.Entities.Classes;
+using CodeWithMixx.API.Domain.Entities.PaymentTransactions;
 using CodeWithMixx.API.Domain.Entities.Projects;
 using CodeWithMixx.API.Domain.Entities.RefreshTokens;
 using CodeWithMixx.API.Domain.Entities.Reservations;
@@ -23,6 +24,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<Reservation> Reservations { get; set; }
     public DbSet<Class> Classes { get; set; }
     public DbSet<Project> Projects { get; set; }
+    public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
