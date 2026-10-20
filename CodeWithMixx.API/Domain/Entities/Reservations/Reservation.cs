@@ -349,8 +349,8 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice, DateOnly? today = null)
         {
             var isPastDue = ReservationType == ReservationType.Class
-                ? Classes.Select(c => c.EndsAt).Last() < DateTime.UtcNow
-                : Projects.Select(p => p.EndDate).Last() < (today ?? DateOnly.FromDateTime(DateTime.UtcNow));
+                ? Classes.Select(c => c.EndsAt).Max() < DateTime.UtcNow
+                : Projects.Select(p => p.EndDate).Max() < (today ?? DateOnly.FromDateTime(DateTime.UtcNow));
 
             return paidAmount switch
             {
