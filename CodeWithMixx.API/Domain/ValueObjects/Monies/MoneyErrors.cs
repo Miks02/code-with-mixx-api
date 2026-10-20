@@ -1,6 +1,6 @@
 using CodeWithMixx.API.Common.Result;
 
-namespace CodeWithMixx.API.Domain.ValueObjects.Money;
+namespace CodeWithMixx.API.Domain.ValueObjects.Monies;
 
 public static class MoneyError
 {

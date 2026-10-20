@@ -1,6 +1,6 @@
 using CodeWithMixx.API.Common.Results;
 
-namespace CodeWithMixx.API.Domain.ValueObjects.Money;
+namespace CodeWithMixx.API.Domain.ValueObjects.Monies;
 
 public record Money
 {
