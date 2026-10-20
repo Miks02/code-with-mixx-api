@@ -23,5 +23,4 @@ public class ProjectNote : IAuditable
         };
         return Result<ProjectNote>.Success(newProjectNote);
     }
-    
 }

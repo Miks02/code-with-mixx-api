@@ -63,5 +63,11 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             string message = $"Reservation with identifier '{identifier}' is not archived";
             return new Error("Reservation.NotArchived", message, ErrorType.Conflict);
         }
+
+        public static Error CantUpdateAnArchivedReservation(int identifier)
+        {
+            string message = $"Reservation with identifier '{identifier}' is archived, therefore it cannot be updated";
+            return new Error("Reservation.CantUpdateAnArchivedReservation", message, ErrorType.Conflict);
+        }
     }
 }

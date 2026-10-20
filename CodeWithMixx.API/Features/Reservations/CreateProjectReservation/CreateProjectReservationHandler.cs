@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Reservations.CreateProjectReservation;
 
-public class CreateProjectReservationHandler (AppDbContext context, IUserProvider userProvider)
+public class CreateProjectReservationHandler (AppDbContext context, IUserProvider userProvider, IUserClock clock)
     : IHandler<CreateProjectReservationRequest, Result<CreateProjectReservationResponse>>
 {
     public async Task<Result<CreateProjectReservationResponse>> HandleAsync(CreateProjectReservationRequest request, CancellationToken ct = default)
@@ -40,6 +40,8 @@ public class CreateProjectReservationHandler (AppDbContext context, IUserProvide
             TotalPrice = request.TotalPrice,
         };
 
+        var today = clock.Today;
+
         var projectsData = request.Projects
             .Select(p => new ProjectCreateData
             {
@@ -52,14 +54,15 @@ public class CreateProjectReservationHandler (AppDbContext context, IUserProvide
                 GithubLink = p.GithubLink,
                 DownloadLink = p.DownloadLink,
                 ReservedAt = p.ReservedAt,
+                Today = today,
                 Notes = p.Notes.Select(n => new ProjectCreateData.ProjectNoteData
                 {
-                    Content = n
+                    Content = n.Content
                 }).ToList()
             })
             .ToList();
         
-        var createReservationResult = Reservation.CreateProjectReservation(reservationData, projectsData);
+        var createReservationResult = Reservation.CreateProjectReservation(reservationData, projectsData, today);
 
         if(!createReservationResult.IsSuccess)
             return Result<CreateProjectReservationResponse>.Failure(createReservationResult.Errors[0]);

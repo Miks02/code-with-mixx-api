@@ -29,7 +29,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Admins", (string)null);
+                    b.ToTable("Admins");
                 });
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Classes.Class", b =>
@@ -78,7 +78,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("Classes", null, t =>
+                    b.ToTable("Classes", t =>
                         {
                             t.HasCheckConstraint("CK_Classes_Price_Positive", "\"Price\" >= 0");
                         });
@@ -102,8 +102,8 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("GithubLink")
                         .HasMaxLength(200)
@@ -131,11 +131,11 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                     b.Property<int>("ReservationId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("ReservedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("ReservedAt")
+                        .HasColumnType("date");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
 
                     b.Property<int>("SubjectId")
                         .HasColumnType("integer");
@@ -149,7 +149,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("Projects", null, t =>
+                    b.ToTable("Projects", t =>
                         {
                             t.HasCheckConstraint("CK_Projects_Dates", "\"StartDate\" > '2000-01-01' AND \"StartDate\" <= \"EndDate\"");
 
@@ -233,7 +233,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasIndex("UserId", "TokenHash");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Reservations.Reservation", b =>
@@ -306,7 +306,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Reservations", null, t =>
+                    b.ToTable("Reservations", t =>
                         {
                             t.HasCheckConstraint("CK_Reservations_Bonus_Positive", "\"Bonus\" >= 0");
 
@@ -335,7 +335,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Students", (string)null);
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Subjects.Subject", b =>
@@ -373,7 +373,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Subjects", (string)null);
+                    b.ToTable("Subjects");
                 });
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Users.User", b =>

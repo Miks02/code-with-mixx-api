@@ -7,7 +7,7 @@ public class SubmitPaymentEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/admin/reservations/{reservationId:int}/payments", async (
+        app.MapPost("/admin/reservations/{reservationId:int}/payments/submit", async (
                 int reservationId,
                 SubmitPaymentBody request,
                 IHandler<SubmitPaymentRequest, Result<SubmitPaymentResponse>> handler,

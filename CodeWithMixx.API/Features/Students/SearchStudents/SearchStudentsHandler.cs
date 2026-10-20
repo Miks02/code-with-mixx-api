@@ -23,7 +23,6 @@ namespace CodeWithMixx.API.Features.Students.SearchStudents
                     Id = s.UserId,
                     FullName = $"{s.User.FirstName} {s.User.LastName}",
                     Email = s.User.Email!,
-                    University = s.University
                 })
                 .ToListAsync(ct);   
 

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Reservations.SubtractPayment;
 
-public class SubtractPaymentHandler(AppDbContext context)
+public class SubtractPaymentHandler(AppDbContext context, IUserClock userClock)
     : IHandler<SubtractPaymentRequest, Result<SubtractPaymentResponse>>
 {
     public async Task<Result<SubtractPaymentResponse>> HandleAsync(SubtractPaymentRequest request, CancellationToken ct = default)
@@ -19,7 +19,7 @@ public class SubtractPaymentHandler(AppDbContext context)
         if (reservation is null)
             return Result<SubtractPaymentResponse>.Failure(ReservationError.NotFound(request.ReservationId));
 
-        var paymentResult = reservation.SubtractPayment(request.Body.Amount);
+        var paymentResult = reservation.SubtractPayment(request.Body.Amount, userClock.Today);
 
         if (!paymentResult.IsSuccess)
             return Result<SubtractPaymentResponse>.Failure(paymentResult.Errors[0]);

@@ -13,9 +13,9 @@ public class Project : IAuditable, ISoftDeletable
     public string? DownloadLink { get; private set; }
     public decimal Progress { get; private set; }
     
-    public DateTime ReservedAt { get; private set; }
-    public DateTime StartDate { get; private set; }
-    public DateTime EndDate { get; private set; }
+    public DateOnly ReservedAt { get; private set; }
+    public DateOnly StartDate { get; private set; }
+    public DateOnly EndDate { get; private set; }
 
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
@@ -36,7 +36,7 @@ public class Project : IAuditable, ISoftDeletable
     public static Result<Project> Create(ProjectCreateData data)
     {
         var validationResult = Validate(data.SubjectId, data.Price, data.Progress, data.StartDate, data.EndDate,
-            data.ReservedAt, data.GithubLink, data.DownloadLink);
+            data.ReservedAt, data.GithubLink, data.DownloadLink, data.Today);
 
         if(!validationResult.IsSuccess)
             return Result<Project>.Failure(validationResult.Errors[0]);
@@ -69,7 +69,7 @@ public class Project : IAuditable, ISoftDeletable
     public Result Update(ProjectUpdateData data)
     {
         var validationResult = Validate(data.SubjectId, data.Price, data.Progress, data.StartDate, data.EndDate,
-            data.ReservedAt, data.GithubLink, data.DownloadLink);
+            data.ReservedAt, data.GithubLink, data.DownloadLink, data.Today);
 
         if(!validationResult.IsSuccess)
             return validationResult;
@@ -83,7 +83,25 @@ public class Project : IAuditable, ISoftDeletable
         EndDate = data.EndDate;
         GithubLink = data.GithubLink;
         DownloadLink = data.DownloadLink;
+        
+        var existingIds = _projectNotes.Select(pn => pn.Id).ToHashSet();
+        var incomingIds = data.NotesToDelete.ToHashSet();
+        
+        var invalidNoteId = incomingIds.FirstOrDefault(id => !existingIds.Contains(id));
+        if (invalidNoteId != 0)
+            return Result.Failure(ProjectError.NoteNotFound(invalidNoteId));
 
+        var newNotes = new List<ProjectNote>();
+        foreach (var note in data.Notes.Where(n => n.Id == 0))
+        {
+            var noteResult = ProjectNote.Create(note.Content);
+            if (!noteResult.IsSuccess)
+                return Result.Failure(noteResult.Errors[0]);
+            newNotes.Add(noteResult.Payload!);
+        }
+        
+        _projectNotes.RemoveAll(pn => incomingIds.Contains(pn.Id));
+        _projectNotes.AddRange(newNotes);
         return Result.Success();
     }
 
@@ -107,8 +125,8 @@ public class Project : IAuditable, ISoftDeletable
         return Result.Success();
     }
 
-    private static Result Validate(int subjectId, decimal price, decimal progress, DateTime startDate, DateTime endDate,
-        DateTime reservedAt, string? githubLink, string? downloadLink)
+    private static Result Validate(int subjectId, decimal price, decimal progress, DateOnly startDate, DateOnly endDate,
+        DateOnly reservedAt, string? githubLink, string? downloadLink, DateOnly today)
     {
         if(subjectId <= 0)
             return Result.Failure(SubjectError.NotFound(subjectId));
@@ -119,10 +137,11 @@ public class Project : IAuditable, ISoftDeletable
         if(progress < 0 || progress > 100)
             return Result.Failure(ProjectError.InvalidProgress(progress));
 
-        if(startDate <= DateTime.MinValue || startDate > endDate)
+        if(startDate <= DateOnly.MinValue || startDate > endDate)
             return Result.Failure(ProjectError.InvalidDateRange(startDate, endDate));
+        
 
-        if(reservedAt <= DateTime.MinValue || reservedAt > DateTime.UtcNow)
+        if(reservedAt <= DateOnly.MinValue || reservedAt > DateOnly.FromDateTime(DateTime.UtcNow))
             return Result.Failure(ProjectError.InvalidReservationDate(reservedAt));
 
         if(githubLink is not null && githubLink.Length > 200)

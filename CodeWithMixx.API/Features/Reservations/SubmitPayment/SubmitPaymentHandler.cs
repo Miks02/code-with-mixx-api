@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Reservations.SubmitPayment;
 
-public class SubmitPaymentHandler(AppDbContext context)
+public class SubmitPaymentHandler(AppDbContext context, IUserClock userClock)
     : IHandler<SubmitPaymentRequest, Result<SubmitPaymentResponse>>
 {
     public async Task<Result<SubmitPaymentResponse>> HandleAsync(SubmitPaymentRequest request, CancellationToken ct = default)
@@ -19,7 +19,7 @@ public class SubmitPaymentHandler(AppDbContext context)
         if (reservation is null)
             return Result<SubmitPaymentResponse>.Failure(ReservationError.NotFound(request.ReservationId));
 
-        var paymentResult = reservation.RegisterPayment(request.Body.Amount);
+        var paymentResult = reservation.RegisterPayment(request.Body.Amount, userClock.Today);
 
         if (!paymentResult.IsSuccess)
             return Result<SubmitPaymentResponse>.Failure(paymentResult.Errors[0]);
