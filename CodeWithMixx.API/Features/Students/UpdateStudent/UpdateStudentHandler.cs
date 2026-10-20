@@ -28,7 +28,7 @@ public class UpdateStudentHandler(
         student.User.ChangeName(request.FirstName, request.LastName);
         student.ChangeUniversity(request.University);
         
-        if (!string.Equals(student.User.Email, student.User.NormalizedEmail, StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(student.User.Email, request.Email, StringComparison.OrdinalIgnoreCase))
         {
             var oldEmail = student.User.Email!;
             var emailChange = await userManager.SetEmailAsync(student.User, request.Email); 
