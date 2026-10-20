@@ -15,14 +15,13 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 
 var app = builder.Build();
-
 await app.MapSeeders();
+app.UseExceptionHandler();
 app.UseCors("DevCors");
 
 
 app.MapEndpoints();
 
-app.UseRateLimiter();
 
 if (app.Environment.IsDevelopment())
 {
@@ -30,6 +29,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 app.UseForwardedHeaders();
+app.UseRateLimiter();
 
 app.UseSerilogRequestLogging(options =>
 {
