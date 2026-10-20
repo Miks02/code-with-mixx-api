@@ -85,8 +85,8 @@ public class Project : IAuditable, ISoftDeletable
         DownloadLink = data.DownloadLink;
         
         var existingIds = _projectNotes.Select(pn => pn.Id).ToHashSet();
-        var incomingIds = data.Notes.Select(n => n.Id).Where(id => id != 0).ToHashSet();
-
+        var incomingIds = data.NotesToDelete.ToHashSet();
+        
         var invalidNoteId = incomingIds.FirstOrDefault(id => !existingIds.Contains(id));
         if (invalidNoteId != 0)
             return Result.Failure(ProjectError.NoteNotFound(invalidNoteId));
@@ -100,7 +100,7 @@ public class Project : IAuditable, ISoftDeletable
             newNotes.Add(noteResult.Payload!);
         }
         
-        _projectNotes.RemoveAll(pn => !incomingIds.Contains(pn.Id));
+        _projectNotes.RemoveAll(pn => incomingIds.Contains(pn.Id));
         _projectNotes.AddRange(newNotes);
         return Result.Success();
     }

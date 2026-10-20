@@ -140,6 +140,7 @@ public class UpdateProjectReservationHandler(AppDbContext context, IUserClock cl
                 DownloadLink = p.DownloadLink,
                 Price = p.Price,
                 Progress = p.Progress,
+                NotesToDelete = p.NotesToDelete,
                 Notes = p.Notes.Select(n => new ProjectUpdateData.ProjectNoteData
                 {
                     Id = n.Id,

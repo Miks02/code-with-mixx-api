@@ -14,6 +14,7 @@ public record ProjectUpdateData
     public decimal Progress { get; init; }
     
     public DateOnly Today { get; init; }
+    public IReadOnlyList<int> NotesToDelete { get; init; } = [];
     public IReadOnlyList<ProjectNoteData> Notes { get; init; } = [];
     
     public record ProjectNoteData

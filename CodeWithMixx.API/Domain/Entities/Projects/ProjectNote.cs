@@ -23,14 +23,4 @@ public class ProjectNote : IAuditable
         };
         return Result<ProjectNote>.Success(newProjectNote);
     }
-
-    public Result Update(string content)
-    {
-        if(string.IsNullOrWhiteSpace(content))
-            return Result.Failure(ProjectError.EmptyProjectNote());
-        
-        Content = content;
-        return Result.Success();
-    }
-    
 }
