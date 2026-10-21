@@ -4,6 +4,7 @@ using CodeWithMixx.API.Domain.Entities.Classes;
 using CodeWithMixx.API.Domain.Entities.PaymentTransactions;
 using CodeWithMixx.API.Domain.Entities.Projects;
 using CodeWithMixx.API.Domain.Entities.Students;
+using CodeWithMixx.API.Domain.ValueObjects.Monies;
 
 namespace CodeWithMixx.API.Domain.Entities.Reservations
 {
@@ -131,33 +132,55 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
 
-        public Result RegisterPayment(decimal paidAmount, DateOnly? today = null)
+        public Result<PaymentTransaction> RegisterPayment(decimal paidAmount, DateTime transactionDate, DateOnly? today = null)
         {
             if (paidAmount <= 0)
-                return Result.Failure(ReservationError.InvalidAmount(paidAmount));
+                return Result<PaymentTransaction>.Failure(ReservationError.InvalidAmount(paidAmount));
 
-            PaidAmount += paidAmount;
+            var moneyResult = Money.Create(paidAmount);
+            if (!moneyResult.IsSuccess)
+                return Result<PaymentTransaction>.Failure(moneyResult.Errors[0]);
+            
+            var newTransactionResult = PaymentTransaction.Create(moneyResult.Payload!, PaymentTransactionType.Payment, transactionDate, Id);
+
+            if(!newTransactionResult.IsSuccess) 
+                return Result<PaymentTransaction>.Failure(newTransactionResult.Errors[0]);
+            
+            _paymentTransactions.Add(newTransactionResult.Payload!);
+            
+            PaidAmount += newTransactionResult.Payload!.Amount.Value;
 
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
 
-            return Result.Success();
+            return Result<PaymentTransaction>.Success(newTransactionResult.Payload!);
         }
         
-        public Result SubtractPayment(decimal amount, DateOnly? today = null)
+        public Result<PaymentTransaction> SubtractPayment(decimal amount, DateTime transactionDate,  DateOnly? today = null)
         {
             if (amount <= 0)
-                return Result.Failure(ReservationError.InvalidAmount(amount, "Amount to subtract cannot be negative."));
-
+                return Result<PaymentTransaction>.Failure(ReservationError.InvalidAmount(amount, "Amount to subtract cannot be negative."));
+            
+            var moneyResult = Money.Create(amount);
+            if (!moneyResult.IsSuccess)
+                return Result<PaymentTransaction>.Failure(moneyResult.Errors[0]);
+            
             if (amount > PaidAmount)
-                return Result.Failure(ReservationError.InvalidAmount(amount, "Cannot subtract more than the paid amount."));
+                return Result<PaymentTransaction>.Failure(ReservationError.InvalidAmount(amount, "Cannot subtract more than the paid amount."));
+            
+            var newTransactionResult = PaymentTransaction.Create(moneyResult.Payload!, PaymentTransactionType.Reversal, transactionDate, Id);
+
+            if(!newTransactionResult.IsSuccess) 
+                return Result<PaymentTransaction>.Failure(newTransactionResult.Errors[0]);
+
+            _paymentTransactions.Add(newTransactionResult.Payload!);
 
             PaidAmount -= amount;
 
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
 
-            return Result.Success();
+            return Result<PaymentTransaction>.Success(newTransactionResult.Payload!);
         }
         
         public void UpdateNotes(string? notes)
