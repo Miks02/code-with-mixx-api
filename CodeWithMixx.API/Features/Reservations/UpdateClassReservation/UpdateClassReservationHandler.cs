@@ -54,24 +54,7 @@ public class UpdateClassReservationHandler(AppDbContext context)
 
         if (!totalPriceResult.IsSuccess)
             return Result<UpdateClassReservationResponse>.Failure(totalPriceResult.Errors[0]);
-
-        var paidAmountDelta = request.PaidAmount - reservation.PaidAmount;
-
-        if (paidAmountDelta > 0)
-        {
-            var paymentResult = reservation.RegisterPayment(paidAmountDelta);
-
-            if (!paymentResult.IsSuccess)
-                return Result<UpdateClassReservationResponse>.Failure(paymentResult.Errors[0]);
-        }
-        else if (paidAmountDelta < 0)
-        {
-            var paymentResult = reservation.SubtractPayment(-paidAmountDelta);
-
-            if (!paymentResult.IsSuccess)
-                return Result<UpdateClassReservationResponse>.Failure(paymentResult.Errors[0]);
-        }
-
+        
         await context.SaveChangesAsync(ct);
 
         var response = new UpdateClassReservationResponse
