@@ -18,6 +18,8 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         public decimal PaidAmount { get; private set; }
         public decimal DiscountRate { get; private set; }
         public decimal Bonus { get; private set; }
+        
+        public decimal RemainingAmount => Math.Max(0, TotalPrice - PaidAmount);
 
         public string? Notes { get; private set; }
 
