@@ -7,6 +7,7 @@ public record PaymentTransactionItem
     public int Id { get; init; }
     public int ReservationId { get; init; }
     public decimal Amount { get; init; }
+    public string? Note { get; init; }
     public PaymentTransactionType PaymentType { get; init; }
     public DateTimeOffset TransactionDate { get; init; }
     public DateTimeOffset CreatedAt { get; init; }

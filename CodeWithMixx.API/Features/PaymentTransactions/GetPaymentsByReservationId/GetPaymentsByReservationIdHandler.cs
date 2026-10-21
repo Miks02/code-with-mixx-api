@@ -31,7 +31,8 @@ public class GetPaymentsByReservationIdHandler(AppDbContext context)
                 PaymentType = pt.PaymentType,
                 ReservationId = pt.ReservationId,
                 TransactionDate = pt.TransactionDate,
-                CreatedAt = pt.CreatedAt
+                CreatedAt = pt.CreatedAt,
+                Note = pt.TransactionNote.Note
             })
             .ToList();
         
