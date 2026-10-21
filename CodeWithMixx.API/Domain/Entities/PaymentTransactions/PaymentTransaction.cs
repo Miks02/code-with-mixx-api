@@ -22,10 +22,6 @@ public class PaymentTransaction : IAuditable
 
     public static Result<PaymentTransaction> Create(Money amount, PaymentTransactionType paymentType, DateTime transactionDate, int reservationId, string? note = null)
     {
-        if(paymentType == PaymentTransactionType.Payment)
-            return Result<PaymentTransaction>.Failure(PaymentTransactionError.InvalidPaymentType(paymentType));
-
-        
         if(amount.Value is 0)
             return Result<PaymentTransaction>.Failure(PaymentTransactionError.CannotBeZero());
 
