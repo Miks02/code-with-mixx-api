@@ -10,4 +10,5 @@ public record RegisterPaymentBody
 {
     public decimal Amount { get; init; }
     public DateTimeOffset TransactionDate { get; init; }
+    public string? Note { get; init; }
 }

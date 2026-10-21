@@ -134,7 +134,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
 
-        public Result<PaymentTransaction> RegisterPayment(decimal paidAmount, DateTime transactionDate, DateOnly? today = null)
+        public Result<PaymentTransaction> RegisterPayment(decimal paidAmount, DateTime transactionDate, DateOnly? today = null, string? note = null)
         {
             if (paidAmount <= 0)
                 return Result<PaymentTransaction>.Failure(ReservationError.InvalidAmount(paidAmount));
@@ -143,7 +143,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             if (!moneyResult.IsSuccess)
                 return Result<PaymentTransaction>.Failure(moneyResult.Errors[0]);
             
-            var newTransactionResult = PaymentTransaction.Create(moneyResult.Payload!, PaymentTransactionType.Payment, transactionDate, Id);
+            var newTransactionResult = PaymentTransaction.Create(moneyResult.Payload!, PaymentTransactionType.Payment, transactionDate, Id, note);
 
             if(!newTransactionResult.IsSuccess) 
                 return Result<PaymentTransaction>.Failure(newTransactionResult.Errors[0]);

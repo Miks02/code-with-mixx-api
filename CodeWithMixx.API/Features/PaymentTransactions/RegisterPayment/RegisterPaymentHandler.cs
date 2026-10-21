@@ -22,7 +22,7 @@ public class RegisterPaymentHandler(AppDbContext context, IUserClock userClock) 
 
         var transactionDateUtc = request.Body.TransactionDate.UtcDateTime;
 
-        var registerPaymentResult = reservation.RegisterPayment(request.Body.Amount, transactionDateUtc, userClock.Today);
+        var registerPaymentResult = reservation.RegisterPayment(request.Body.Amount, transactionDateUtc, userClock.Today, request.Body.Note);
 
         if(!registerPaymentResult.IsSuccess)
             return Result<RegisterPaymentResponse>.Failure(registerPaymentResult.Errors[0]);
