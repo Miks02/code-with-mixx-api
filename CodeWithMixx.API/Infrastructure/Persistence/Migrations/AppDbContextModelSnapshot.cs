@@ -119,9 +119,21 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                                 .HasColumnName("Amount");
                         });
 
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "TransactionNote", "CodeWithMixx.API.Domain.Entities.PaymentTransactions.PaymentTransaction.TransactionNote#TransactionNote", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Note")
+                                .HasMaxLength(300)
+                                .HasColumnType("character varying(300)")
+                                .HasColumnName("Note");
+                        });
+
                     b.HasKey("Id");
 
                     b.HasIndex("ReservationId");
+
+                    b.HasIndex("TransactionDate");
 
                     b.ToTable("PaymentTransactions", t =>
                         {

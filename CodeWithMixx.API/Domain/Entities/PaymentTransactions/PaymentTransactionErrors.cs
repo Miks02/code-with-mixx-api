@@ -12,4 +12,7 @@ public static class PaymentTransactionError
     
     public static Error InvalidReservation(int identifier)
         => new("PaymentTransaction.InvalidReservation", $"Reservation with identifier {identifier} is invalid", ErrorType.Validation);
+    
+    public static Error InvalidPaymentType(PaymentTransactionType paymentType)
+        => new("PaymentTransaction.InvalidPaymentType", $"Payment type {paymentType} is invalid for a given transaction.", ErrorType.Validation);
 }

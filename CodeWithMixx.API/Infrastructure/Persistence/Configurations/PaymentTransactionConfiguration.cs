@@ -1,4 +1,5 @@
 using CodeWithMixx.API.Domain.Entities.PaymentTransactions;
+using CodeWithMixx.API.Domain.Entities.PaymentTransactions.TransactionNotes;
 using CodeWithMixx.API.Domain.ValueObjects.Monies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -21,6 +22,16 @@ public class PaymentTransactionConfiguration : IEntityTypeConfiguration<PaymentT
                 .HasPrecision(18, 2)
                 .IsRequired();
         });
+        
+        builder.ComplexProperty(t => t.TransactionNote, note =>
+        {
+            note.Property(n => n.Note)
+                .HasColumnName(nameof(TransactionNote.Note))
+                .HasMaxLength(300)
+                .IsRequired(false);
+        });
+
+        builder.HasIndex(pt => pt.TransactionDate);
         
         builder.HasOne(pt => pt.Reservation)
             .WithMany(r => r.PaymentTransactions)
