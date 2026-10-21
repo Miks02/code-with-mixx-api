@@ -158,8 +158,16 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result<PaymentTransaction>.Success(newTransactionResult.Payload!);
         }
         
-        public Result<PaymentTransaction> SubtractPayment(decimal amount, DateTime transactionDate,  DateOnly? today = null)
+        public Result<PaymentTransaction> SubtractPayment(
+            decimal amount,
+            DateTime transactionDate,
+            PaymentTransactionType paymentType,
+            DateOnly? today = null,
+            string? note = null)
         {
+            if (paymentType == PaymentTransactionType.Payment)
+                return Result<PaymentTransaction>.Failure(PaymentTransactionError.InvalidPaymentType(paymentType));
+
             if (amount <= 0)
                 return Result<PaymentTransaction>.Failure(ReservationError.InvalidAmount(amount, "Amount to subtract cannot be negative."));
             
@@ -170,7 +178,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             if (amount > PaidAmount)
                 return Result<PaymentTransaction>.Failure(ReservationError.InvalidAmount(amount, "Cannot subtract more than the paid amount."));
             
-            var newTransactionResult = PaymentTransaction.Create(moneyResult.Payload!, PaymentTransactionType.Reversal, transactionDate, Id);
+            var newTransactionResult = PaymentTransaction.Create(moneyResult.Payload!, paymentType, transactionDate, Id, note);
 
             if(!newTransactionResult.IsSuccess) 
                 return Result<PaymentTransaction>.Failure(newTransactionResult.Errors[0]);

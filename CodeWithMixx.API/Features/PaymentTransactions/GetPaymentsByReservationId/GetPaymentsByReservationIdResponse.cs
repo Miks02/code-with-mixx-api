@@ -10,5 +10,5 @@ public record GetPaymentsByReservationIdResponse
     public decimal TotalSum { get; init; }
     public decimal PaidSum { get; init; }
     public decimal ReversedSum { get; init; }
-    public IReadOnlyList<PaymentTransactionItem> Payments { get; init; }
+    public IReadOnlyList<PaymentTransactionItem> Payments { get; init; } = [];
 };

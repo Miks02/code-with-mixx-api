@@ -22,7 +22,7 @@ public class SubtractPaymentHandler(AppDbContext context, IUserClock userClock) 
 
         var transactionDateUtc = request.Body.TransactionDate.UtcDateTime;
 
-        var subtractPaymentResult = reservation.SubtractPayment(request.Body.Amount, transactionDateUtc, userClock.Today);
+        var subtractPaymentResult = reservation.SubtractPayment(request.Body.Amount, transactionDateUtc, request.Body.PaymentType, userClock.Today, request.Body.Note);
 
         if(!subtractPaymentResult.IsSuccess)
             return Result<SubtractPaymentResponse>.Failure(subtractPaymentResult.Errors[0]);
