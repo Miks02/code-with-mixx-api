@@ -38,10 +38,21 @@ public record Money
         return Result<Money>.Success(new Money(firstValue.Value - secondValue));
     }
     
-    public static Result<Money> operator +(Money firstValue, Money secondValue) => Add(firstValue.Value, secondValue.Value);
+    public Result<Money> Subtract(Money money)
+    {
+        if(money.Value < 0)
+            return Result<Money>.Failure(MoneyError.NegativeValue());
+        
+        if(Value < money.Value)
+            return Result<Money>.Failure(MoneyError.OldValueIsHigher());
+
+        return Result<Money>.Success(new Money(Value - money.Value));
+    }
+    
+    public static Money operator +(Money firstValue, Money secondValue) => new(firstValue.Value + secondValue.Value);
     public static Result<Money> operator -(Money firstValue, Money secondValue) => Subtract(firstValue, secondValue.Value);
     public static bool operator >(Money firstValue, Money secondValue) => firstValue.Value > secondValue.Value;
-    public static bool operator <(Money firstValue, Money secondValue) => firstValue.Value > secondValue.Value;
+    public static bool operator <(Money firstValue, Money secondValue) => firstValue.Value < secondValue.Value;
     public static bool operator >=(Money firstValue, Money secondValue) => firstValue.Value >= secondValue.Value;
     public static bool operator <=(Money firstValue, Money secondValue) => firstValue.Value <= secondValue.Value;
 };
