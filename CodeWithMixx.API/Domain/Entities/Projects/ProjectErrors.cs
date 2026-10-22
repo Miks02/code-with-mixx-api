@@ -27,6 +27,9 @@ public static class ProjectError
     public static Error NoteNotFound(int identifier) 
         => new Error("Project.NoteNotFound", $"The project note '{identifier}' was not found.", ErrorType.Validation);
     
+    public static Error StartDateBeforeReservedAt(DateOnly startDate, DateOnly reservedAt)
+        => new Error("Project.StartDateBeforeReservedAt", $"The project start date '{startDate}' cannot be before the project reservation date '{reservedAt}'.", ErrorType.Validation);
+    
     public static Error InvalidReservationDate(DateOnly reservedAt)
         => new Error("Project.InvalidReservationDate", $"The reservation date '{reservedAt}' is invalid. It must be between the minimum value and the current date.", ErrorType.Validation);
     

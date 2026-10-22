@@ -28,6 +28,12 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         public static Error InvalidTotalPrice(decimal totalPrice)
             => new("Reservation.InvalidTotalPrice", $"Total price '{totalPrice}' must be positive", ErrorType.Validation);
         
+        public static Error InvalidReservedAt(DateOnly reservedAt)
+            => new("Reservation.InvalidReservedAt", $"Reservation date '{reservedAt}' is invalid. It cannot be empty or in the future", ErrorType.Validation);
+        
+        public static Error ProjectStartsBeforeReservation(DateOnly startDate, DateOnly reservedAt)
+            => new("Reservation.ProjectStartsBeforeReservation", $"Project start date '{startDate}' cannot be before the reservation date '{reservedAt}'", ErrorType.Validation);
+        
         public static Error NoClassesProvided()
             => new("Reservation.NoClassesProvided", "No classes have been provided for a class reservation", ErrorType.Validation);
         

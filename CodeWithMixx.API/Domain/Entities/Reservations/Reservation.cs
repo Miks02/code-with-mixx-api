@@ -92,12 +92,17 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             if(data.PaidAmount < 0)
                 return Result<Reservation>.Failure(ReservationError.InvalidAmount(data.PaidAmount));
             
+            var reservedAtResult = ValidateReservedAt(data.ReservedAt, today);
+            if(!reservedAtResult.IsSuccess)
+                return Result<Reservation>.Failure(reservedAtResult.Errors[0]);
+            
             var reservation = new Reservation
             {
                 AdminId = data.AdminId,
                 StudentId = data.StudentId,
                 ReservationStatus = data.ReservationStatus,
                 PaidAmount = data.PaidAmount,
+                ReservedAt = data.ReservedAt,
                 ReservationType = ReservationType.Project
             };
             
@@ -121,6 +126,23 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 return Result.Failure(ReservationError.CantUpdateAnArchivedReservation(Id));
             
             ReservationStatus = newStatus;
+            return Result.Success();
+        }
+
+        public Result UpdateReservedAt(DateOnly reservedAt, DateOnly today)
+        {
+            if(IsDeleted)
+                return Result.Failure(ReservationError.CantUpdateAnArchivedReservation(Id));
+            
+            var validationResult = ValidateReservedAt(reservedAt, today);
+            if(!validationResult.IsSuccess)
+                return validationResult;
+
+            var projectStartingEarlier = Projects.FirstOrDefault(p => p.StartDate < reservedAt);
+            if(projectStartingEarlier is not null)
+                return Result.Failure(ReservationError.ProjectStartsBeforeReservation(projectStartingEarlier.StartDate, reservedAt));
+            
+            ReservedAt = reservedAt;
             return Result.Success();
         }
 
@@ -275,6 +297,9 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
             foreach (var projectData in projectsToAdd)
             {
+                if(projectData.StartDate < ReservedAt)
+                    return Result.Failure(ReservationError.ProjectStartsBeforeReservation(projectData.StartDate, ReservedAt));
+                
                 var projectResult = Project.Create(projectData);
                 if (!projectResult.IsSuccess)
                     return Result.Failure(projectResult.Errors[0]);
@@ -429,6 +454,14 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             DiscountRate = CalculateDiscountRate(TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
+        }
+
+        private static Result ValidateReservedAt(DateOnly reservedAt, DateOnly today)
+        {
+            if(reservedAt <= DateOnly.MinValue || reservedAt > today)
+                return Result.Failure(ReservationError.InvalidReservedAt(reservedAt));
+            
+            return Result.Success();
         }
 
         private Result Delete()
