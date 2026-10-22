@@ -16,6 +16,10 @@ public class UpdateProjectReservationValidator : AbstractValidator<UpdateProject
         RuleFor(x => x.Notes)
             .MaximumLength(500).WithMessage("Notes cannot exceed 500 characters.");
 
+        RuleFor(x => x.ReservedAt)
+            .NotEmpty().WithMessage("Reservation date is required.")
+            .LessThanOrEqualTo(x => clock.Today).WithMessage("Reservation date cannot be in the future.");
+
         RuleFor(x => x.ReservationStatus)
             .IsInEnum().WithMessage("Invalid reservation status.");
 
@@ -26,7 +30,7 @@ public class UpdateProjectReservationValidator : AbstractValidator<UpdateProject
             .NotEmpty().WithMessage("At least one project is required for a valid reservation.");
 
         RuleForEach(x => x.Projects)
-            .SetValidator(new UpdateProjectItemValidator(clock));
+            .SetValidator((request, _) => new UpdateProjectItemValidator(clock, request.ReservedAt));
 
         RuleFor(x => x)
             .Must(x => !x.ProjectsToDelete.Intersect(x.Projects.Select(p => p.Id)).Any())
@@ -35,9 +39,9 @@ public class UpdateProjectReservationValidator : AbstractValidator<UpdateProject
     }
 }
 
-public class UpdateProjectItemValidator : AbstractValidator<UpdateProjectReservationRequest.ProjectItem>
+internal class UpdateProjectItemValidator : AbstractValidator<UpdateProjectReservationRequest.ProjectItem>
 {
-    public UpdateProjectItemValidator(IUserClock clock)
+    public UpdateProjectItemValidator(IUserClock clock, DateOnly reservationReservedAt)
     {
         RuleFor(x => x.Id)
             .GreaterThanOrEqualTo(0).WithMessage("Project id must be 0 (new project) or a valid identifier.");
@@ -55,7 +59,9 @@ public class UpdateProjectItemValidator : AbstractValidator<UpdateProjectReserva
             .InclusiveBetween(0, 100).WithMessage("Progress must be between 0 and 100.");
 
         RuleFor(x => x.StartDate)
-            .NotEmpty().WithMessage("Start date is required.");
+            .NotEmpty().WithMessage("Start date is required.")
+            .GreaterThanOrEqualTo(x => x.ReservedAt).WithMessage("Start date cannot be before reservation date of a project.")
+            .GreaterThanOrEqualTo(reservationReservedAt).WithMessage("Start date cannot be before reservation date.");
 
         RuleFor(x => x.EndDate)
             .NotEmpty().WithMessage("End date is required.")

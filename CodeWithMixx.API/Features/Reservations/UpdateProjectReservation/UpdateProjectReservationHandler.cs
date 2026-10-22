@@ -42,6 +42,13 @@ public class UpdateProjectReservationHandler(AppDbContext context, IUserClock cl
         if (!updateResult.IsSuccess)
             return Result<UpdateProjectReservationResponse>.Failure(updateResult.Errors[0]);
 
+        // Runs after existing projects are updated (so their new start dates are checked against the new date)
+        // and before new projects are added (AddProjects checks them against the updated ReservedAt).
+        var reservedAtResult = reservation.UpdateReservedAt(request.ReservedAt, clock.Today);
+
+        if (!reservedAtResult.IsSuccess)
+            return Result<UpdateProjectReservationResponse>.Failure(reservedAtResult.Errors[0]);
+
         var addResult = await AddNewProjectsAsync(reservation, request.Projects, ct);
 
         if (!addResult.IsSuccess)
@@ -70,6 +77,7 @@ public class UpdateProjectReservationHandler(AppDbContext context, IUserClock cl
             DiscountRate = reservation.DiscountRate,
             Bonus = reservation.Bonus,
             Notes = reservation.Notes,
+            ReservedAt = reservation.ReservedAt,
             UpdatedAt = reservation.UpdatedAt
         };
 
