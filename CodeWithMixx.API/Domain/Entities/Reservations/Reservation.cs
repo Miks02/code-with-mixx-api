@@ -1,8 +1,10 @@
 ﻿using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Domain.Entities.Admins;
 using CodeWithMixx.API.Domain.Entities.Classes;
+using CodeWithMixx.API.Domain.Entities.PaymentTransactions;
 using CodeWithMixx.API.Domain.Entities.Projects;
 using CodeWithMixx.API.Domain.Entities.Students;
+using CodeWithMixx.API.Domain.ValueObjects.Monies;
 
 namespace CodeWithMixx.API.Domain.Entities.Reservations
 {
@@ -16,6 +18,8 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         public decimal PaidAmount { get; private set; }
         public decimal DiscountRate { get; private set; }
         public decimal Bonus { get; private set; }
+        
+        public decimal RemainingAmount => Math.Max(0, TotalPrice - PaidAmount);
 
         public string? Notes { get; private set; }
 
@@ -34,9 +38,11 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
         private readonly List<Class> _classes = [];
         private readonly List<Project> _projects = [];
+        private readonly List<PaymentTransaction> _paymentTransactions = [];
         
         public IReadOnlyCollection<Class> Classes => _classes.AsReadOnly();
         public IReadOnlyCollection<Project> Projects => _projects.AsReadOnly();
+        public IReadOnlyCollection<PaymentTransaction> PaymentTransactions => _paymentTransactions.AsReadOnly();
         
         private Reservation() {}
 
@@ -60,15 +66,16 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 ReservationType = ReservationType.Class
             };
 
-            reservation.TotalPrice = reservation.CalculateTotalPrice(data.TotalPrice);
-            reservation.DiscountRate = reservation.CalculateDiscountRate(reservation.TotalPrice);
-            reservation.Bonus = reservation.CalculateBonus(reservation.TotalPrice, reservation.PaidAmount);
-            reservation.PaymentStatus = reservation.DeterminePaymentStatus(reservation.PaidAmount, reservation.TotalPrice);
-            
             var classesResult = reservation.AddClasses(data.Classes);
             
             if (!classesResult.IsSuccess)
                 return Result<Reservation>.Failure(classesResult.Errors[0]);
+            
+            reservation.TotalPrice = reservation.CalculateTotalPrice(data.TotalPrice);
+            reservation.DiscountRate = reservation.CalculateDiscountRate(reservation.TotalPrice);
+            reservation.Bonus = reservation.CalculateBonus(reservation.TotalPrice, reservation.PaidAmount);
+            reservation.PaymentStatus = reservation.DeterminePaymentStatus(reservation.PaidAmount, reservation.TotalPrice);
+
             
             return Result<Reservation>.Success(reservation);
         }
@@ -89,7 +96,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 AdminId = data.AdminId,
                 StudentId = data.StudentId,
                 ReservationStatus = data.ReservationStatus,
-                TotalPrice = data.TotalPrice ?? 0,
                 PaidAmount = data.PaidAmount,
                 ReservationType = ReservationType.Project
             };
@@ -123,40 +129,68 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 return Result.Failure(ReservationError.InvalidTotalPrice(totalPrice));
 
             TotalPrice = totalPrice;
-            DiscountRate = CalculateDiscountRate(totalPrice);
-            Bonus = CalculateBonus(totalPrice, PaidAmount);
-            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
+            RecalculatePaymentDetails(today);
 
             return Result.Success();
         }
 
-        public Result RegisterPayment(decimal paidAmount, DateOnly? today = null)
+        public Result<PaymentTransaction> RegisterPayment(decimal paidAmount, DateTime transactionDate, DateOnly? today = null, string? note = null)
         {
-            if (paidAmount < 0)
-                return Result.Failure(ReservationError.InvalidAmount(paidAmount));
+            if (paidAmount <= 0)
+                return Result<PaymentTransaction>.Failure(ReservationError.InvalidAmount(paidAmount));
 
-            PaidAmount += paidAmount;
+            var moneyResult = Money.Create(paidAmount);
+            if (!moneyResult.IsSuccess)
+                return Result<PaymentTransaction>.Failure(moneyResult.Errors[0]);
+            
+            var newTransactionResult = PaymentTransaction.Create(moneyResult.Payload!, PaymentTransactionType.Payment, transactionDate, Id, note);
+
+            if(!newTransactionResult.IsSuccess) 
+                return Result<PaymentTransaction>.Failure(newTransactionResult.Errors[0]);
+            
+            _paymentTransactions.Add(newTransactionResult.Payload!);
+            
+            PaidAmount += newTransactionResult.Payload!.Amount.Value;
 
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
 
-            return Result.Success();
+            return Result<PaymentTransaction>.Success(newTransactionResult.Payload!);
         }
         
-        public Result SubtractPayment(decimal amount, DateOnly? today = null)
+        public Result<PaymentTransaction> SubtractPayment(
+            decimal amount,
+            DateTime transactionDate,
+            PaymentTransactionType paymentType,
+            DateOnly? today = null,
+            string? note = null)
         {
-            if (amount < 0)
-                return Result.Failure(ReservationError.InvalidAmount(amount, "Amount to subtract cannot be negative."));
+            if (paymentType == PaymentTransactionType.Payment)
+                return Result<PaymentTransaction>.Failure(PaymentTransactionError.InvalidPaymentType(paymentType));
 
+            if (amount <= 0)
+                return Result<PaymentTransaction>.Failure(ReservationError.InvalidAmount(amount, "Amount to subtract cannot be negative."));
+            
+            var moneyResult = Money.Create(amount);
+            if (!moneyResult.IsSuccess)
+                return Result<PaymentTransaction>.Failure(moneyResult.Errors[0]);
+            
             if (amount > PaidAmount)
-                return Result.Failure(ReservationError.InvalidAmount(amount, "Cannot subtract more than the paid amount."));
+                return Result<PaymentTransaction>.Failure(ReservationError.InvalidAmount(amount, "Cannot subtract more than the paid amount."));
+            
+            var newTransactionResult = PaymentTransaction.Create(moneyResult.Payload!, paymentType, transactionDate, Id, note);
+
+            if(!newTransactionResult.IsSuccess) 
+                return Result<PaymentTransaction>.Failure(newTransactionResult.Errors[0]);
+
+            _paymentTransactions.Add(newTransactionResult.Payload!);
 
             PaidAmount -= amount;
 
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
 
-            return Result.Success();
+            return Result<PaymentTransaction>.Success(newTransactionResult.Payload!);
         }
         
         public void UpdateNotes(string? notes)
@@ -187,11 +221,8 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                     return Result.Failure(updateResult.Errors[0]);
             }
             
-            TotalPrice = CalculateTotalPrice(TotalPrice);
-            DiscountRate = CalculateDiscountRate(TotalPrice);
-            Bonus = CalculateBonus(TotalPrice, PaidAmount);
-            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice);
-
+            RecalculatePaymentDetails();
+            
             return Result.Success();
         }
         
@@ -213,9 +244,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                     return updateResult;
             }
 
-            DiscountRate = CalculateDiscountRate(TotalPrice);
-            Bonus = CalculateBonus(TotalPrice, PaidAmount);
-            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
+            RecalculatePaymentDetails(today);
 
             return Result.Success();
         }
@@ -349,8 +378,8 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice, DateOnly? today = null)
         {
             var isPastDue = ReservationType == ReservationType.Class
-                ? Classes.Select(c => c.EndsAt).Max() < DateTime.UtcNow
-                : Projects.Select(p => p.EndDate).Max() < (today ?? DateOnly.FromDateTime(DateTime.UtcNow));
+                ? Classes.Count != 0 && Classes.Max(c => c.EndsAt) < DateTime.UtcNow
+                : Projects.Count != 0 && Projects.Max(p => p.EndDate) < (today ?? DateOnly.FromDateTime(DateTime.UtcNow));
 
             return paidAmount switch
             {
@@ -392,6 +421,13 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             var bonus = paidAmount - totalPrice;
         
             return Math.Round(bonus, 2);
+        }
+
+        private void RecalculatePaymentDetails(DateOnly? today = null)
+        {
+            DiscountRate = CalculateDiscountRate(TotalPrice);
+            Bonus = CalculateBonus(TotalPrice, PaidAmount);
+            PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
         }
 
         private Result Delete()

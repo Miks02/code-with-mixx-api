@@ -56,24 +56,7 @@ public class UpdateProjectReservationHandler(AppDbContext context, IUserClock cl
 
         if (!totalPriceResult.IsSuccess)
             return Result<UpdateProjectReservationResponse>.Failure(totalPriceResult.Errors[0]);
-
-        var paidAmountDelta = request.PaidAmount - reservation.PaidAmount;
-
-        if (paidAmountDelta > 0)
-        {
-            var paymentResult = reservation.RegisterPayment(paidAmountDelta, today);
-
-            if (!paymentResult.IsSuccess)
-                return Result<UpdateProjectReservationResponse>.Failure(paymentResult.Errors[0]);
-        }
-        else if (paidAmountDelta < 0)
-        {
-            var paymentResult = reservation.SubtractPayment(-paidAmountDelta, today);
-
-            if (!paymentResult.IsSuccess)
-                return Result<UpdateProjectReservationResponse>.Failure(paymentResult.Errors[0]);
-        }
-
+        
         await context.SaveChangesAsync(ct);
 
         var response = new UpdateProjectReservationResponse

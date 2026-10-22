@@ -1,30 +1,30 @@
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
 
-namespace CodeWithMixx.API.Features.Reservations.SubmitPayment;
+namespace CodeWithMixx.API.Features.PaymentTransactions.RegisterPayment;
 
-public class SubmitPaymentEndpoint : IEndpoint
+public class RegisterPaymentEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/admin/reservations/{reservationId:int}/payments/submit", async (
+        app.MapPost("/admin/reservations/{reservationId:int}/payments/register", async (
                 int reservationId,
-                SubmitPaymentBody request,
-                IHandler<SubmitPaymentRequest, Result<SubmitPaymentResponse>> handler,
+                RegisterPaymentBody request,
+                IHandler<RegisterPaymentRequest, Result<RegisterPaymentResponse>> handler,
                 CancellationToken ct) =>
         {
-            var result = await handler.HandleAsync(new SubmitPaymentRequest
+            var result = await handler.HandleAsync(new RegisterPaymentRequest
             {
                 ReservationId = reservationId,
                 Body = request
             }, ct);
-            
+
             return result.ToTypedResult();
         })
         .RequireAuthorization("AdminOnly")
-        .WithTags("Reservations")
+        .WithTags("Payments")
         .ProducesValidationProblem()
-        .Produces<SubmitPaymentResponse>()
+        .Produces<RegisterPaymentResponse>()
         .Produces(StatusCodes.Status404NotFound);
     }
 }

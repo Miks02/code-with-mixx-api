@@ -1,7 +1,7 @@
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
 
-namespace CodeWithMixx.API.Features.Reservations.SubtractPayment;
+namespace CodeWithMixx.API.Features.PaymentTransactions.SubtractPayment;
 
 public class SubtractPaymentEndpoint : IEndpoint
 {
@@ -22,7 +22,7 @@ public class SubtractPaymentEndpoint : IEndpoint
             return result.ToTypedResult();
         })
         .RequireAuthorization("AdminOnly")
-        .WithTags("Reservations")
+        .WithTags("Payments")
         .ProducesValidationProblem()
         .Produces<SubtractPaymentResponse>()
         .Produces(StatusCodes.Status404NotFound);
