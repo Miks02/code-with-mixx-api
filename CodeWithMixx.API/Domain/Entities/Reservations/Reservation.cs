@@ -23,6 +23,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
         public string? Notes { get; private set; }
 
+        public DateOnly ReservedAt { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
         public bool IsDeleted { get; private set; }

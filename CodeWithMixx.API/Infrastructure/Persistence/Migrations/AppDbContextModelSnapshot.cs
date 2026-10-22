@@ -342,6 +342,9 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateOnly>("ReservedAt")
+                        .HasColumnType("date");
+
                     b.Property<string>("StudentId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -360,6 +363,8 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                     b.HasIndex("PaymentStatus");
 
                     b.HasIndex("ReservationStatus");
+
+                    b.HasIndex("ReservedAt");
 
                     b.HasIndex("StudentId");
 

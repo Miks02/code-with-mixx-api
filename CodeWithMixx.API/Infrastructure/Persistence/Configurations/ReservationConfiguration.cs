@@ -22,6 +22,10 @@ namespace CodeWithMixx.API.Infrastructure.Persistence.Configurations
             builder.Navigation(p => p.PaymentTransactions)
                 .UsePropertyAccessMode(PropertyAccessMode.Field);
 
+            builder.HasIndex(r => r.ReservedAt);
+            builder.HasIndex(r => r.ReservationStatus);
+            builder.HasIndex(r => r.PaymentStatus);
+
             builder.Property(r => r.TotalPrice)
                 .HasPrecision(18, 2);
 
