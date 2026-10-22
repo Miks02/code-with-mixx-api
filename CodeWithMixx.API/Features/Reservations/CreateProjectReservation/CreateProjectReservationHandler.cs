@@ -38,6 +38,7 @@ public class CreateProjectReservationHandler (AppDbContext context, IUserProvide
             PaidAmount = request.PaidAmount,
             ReservationStatus = request.ReservationStatus,
             TotalPrice = request.TotalPrice,
+            ReservedAt = request.ReservedAt,
         };
 
         var today = clock.Today;
