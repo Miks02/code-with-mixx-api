@@ -1,3 +1,4 @@
+using CodeWithMixx.API.Domain.Entities.Reservations;
 using CodeWithMixx.API.Features.Reservations.Common;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,6 +16,8 @@ public record GetProjectReservationsSummaryRequest
     public ProjectTypeFilter[] ProjectTypes { get; init; } = [];
     [FromQuery(Name = "reservationStatuses")]
     public ReservationStatusFilter[] ReservationStatuses { get; init; } = [];
+    [FromQuery(Name = "paymentStatuses")]
+    public PaymentStatus[] PaymentStatuses { get; init; } = [];
     [FromQuery(Name = "showOnlyDeletedStudents")]
     public bool ShowOnlyDeletedStudents { get; init; }
     [FromQuery(Name = "showOnlyDeletedReservations")]

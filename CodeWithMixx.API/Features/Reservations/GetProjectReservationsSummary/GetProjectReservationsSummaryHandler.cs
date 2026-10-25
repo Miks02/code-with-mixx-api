@@ -32,6 +32,10 @@ public class GetProjectReservationsSummaryHandler(AppDbContext context, IUserClo
         if(request.SubjectIds.Length > 0)
             reservationsQuery = reservationsQuery
                 .Where(r => r.Projects.Any(p => ((IEnumerable<int>)request.SubjectIds).Contains(p.SubjectId)));
+        
+        if(request.PaymentStatuses.Length > 0)
+            reservationsQuery = reservationsQuery
+                .Where(r => Enumerable.Contains(request.PaymentStatuses, r.PaymentStatus));
 
         var invalidStatusFilters = ReservationStatusFilterResolver.GetInvalidFilters(request.ReservationStatuses);
 

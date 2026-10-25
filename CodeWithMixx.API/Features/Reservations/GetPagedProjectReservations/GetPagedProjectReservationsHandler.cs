@@ -49,6 +49,9 @@ public class GetPagedProjectReservationsHandler(AppDbContext context)
 
         if (reservationStatuses.Count > 0)
             reservationsQuery = reservationsQuery.Where(r => reservationStatuses.Contains(r.ReservationStatus));
+        
+        if(request.PaymentStatuses.Length > 0) 
+           reservationsQuery = reservationsQuery.Where(r => Enumerable.Contains(request.PaymentStatuses, r.PaymentStatus));
 
         var projectTypes = request.ProjectTypes
             .Select(f => f switch
