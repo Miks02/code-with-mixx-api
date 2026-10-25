@@ -46,11 +46,10 @@ public class CreateClassReservationHandler(AppDbContext context, IUserProvider u
             StudentId = request.StudentId,
             ReservationStatus = request.ReservationStatus,
             TotalPrice = request.TotalPrice,
-            PaidAmount = request.PaidAmount,
             Classes = classes
         };
  
-        var reservationResult = Reservation.CreateClassReservation(newReservationData);
+        var reservationResult = Reservation.CreateClassReservation(newReservationData, request.PaidAmount);
 
         if (!reservationResult.IsSuccess)
             return Result<CreateClassReservationResponse>.Failure(reservationResult.Errors[0]);

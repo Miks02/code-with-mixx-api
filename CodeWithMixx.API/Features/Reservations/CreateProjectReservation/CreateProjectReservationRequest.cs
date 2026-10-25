@@ -6,7 +6,6 @@ namespace CodeWithMixx.API.Features.Reservations.CreateProjectReservation;
 public record CreateProjectReservationRequest
 {
     public string StudentId { get; init; } = null!;
-    public decimal PaidAmount { get; init; }
     public decimal? TotalPrice { get; init; }
     public DateOnly ReservedAt { get; init; }
     public ReservationStatus ReservationStatus { get; init; }

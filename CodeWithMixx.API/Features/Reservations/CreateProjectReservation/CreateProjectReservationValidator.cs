@@ -14,9 +14,6 @@ public class CreateProjectReservationValidator : AbstractValidator<CreateProject
             .GreaterThanOrEqualTo(0).WithMessage("Total price cannot be negative.")
             .When(x => x.TotalPrice is not null);
 
-        RuleFor(x => x.PaidAmount)
-            .GreaterThanOrEqualTo(0).WithMessage("Paid amount cannot be negative.");
-        
         RuleFor(x => x.ReservedAt)
             .NotEmpty().WithMessage("Reservation date is required.")
             .LessThanOrEqualTo(x => clock.Today).WithMessage("Reservation date cannot be in the future");

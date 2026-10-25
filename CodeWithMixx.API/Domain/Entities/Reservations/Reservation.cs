@@ -47,7 +47,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         
         private Reservation() {}
 
-        public static Result<Reservation> CreateClassReservation(ReservationCreateData data)
+        public static Result<Reservation> CreateClassReservation(ReservationCreateData data, decimal paidAmount)
         {
             if (data.Classes.Count == 0)
                 return Result<Reservation>.Failure(ReservationError.NoClassesProvided());
@@ -55,15 +55,15 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             if(data.TotalPrice is not null && data.TotalPrice < 0)
                 return Result<Reservation>.Failure(ReservationError.InvalidTotalPrice(data.TotalPrice.Value));
             
-            if(data.PaidAmount < 0)
-                return Result<Reservation>.Failure(ReservationError.InvalidAmount(data.PaidAmount));
+            if(paidAmount < 0)
+                return Result<Reservation>.Failure(ReservationError.InvalidAmount(paidAmount));
             
             var reservation = new Reservation
             {
                 AdminId = data.AdminId,
                 StudentId = data.StudentId,
                 ReservationStatus = data.ReservationStatus,
-                PaidAmount = data.PaidAmount,
+                PaidAmount = paidAmount,
                 ReservationType = ReservationType.Class
             };
 
@@ -89,9 +89,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             if(data.TotalPrice is not null && data.TotalPrice < 0)
                 return Result<Reservation>.Failure(ReservationError.InvalidTotalPrice(data.TotalPrice.Value));
             
-            if(data.PaidAmount < 0)
-                return Result<Reservation>.Failure(ReservationError.InvalidAmount(data.PaidAmount));
-            
             var reservedAtResult = ValidateReservedAt(data.ReservedAt, today);
             if(!reservedAtResult.IsSuccess)
                 return Result<Reservation>.Failure(reservedAtResult.Errors[0]);
@@ -101,7 +98,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 AdminId = data.AdminId,
                 StudentId = data.StudentId,
                 ReservationStatus = data.ReservationStatus,
-                PaidAmount = data.PaidAmount,
+                PaidAmount = 0,
                 ReservedAt = data.ReservedAt,
                 ReservationType = ReservationType.Project
             };
@@ -113,9 +110,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             
             reservation.TotalPrice = reservation.CalculateTotalPrice(data.TotalPrice);
             reservation.DiscountRate = reservation.CalculateDiscountRate(reservation.TotalPrice);
-            reservation.Bonus = reservation.CalculateBonus(reservation.TotalPrice, data.PaidAmount);
-            reservation.PaymentStatus = reservation.DeterminePaymentStatus(data.PaidAmount, reservation.TotalPrice, today);
-
+            reservation.PaymentStatus = reservation.DeterminePaymentStatus(reservation.PaidAmount, reservation.TotalPrice, today);
             
             return Result<Reservation>.Success(reservation);
         }

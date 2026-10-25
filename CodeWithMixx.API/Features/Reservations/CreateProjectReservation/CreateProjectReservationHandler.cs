@@ -35,7 +35,6 @@ public class CreateProjectReservationHandler (AppDbContext context, IUserProvide
         {
             AdminId = userProvider.GetUserId(),
             StudentId = request.StudentId,
-            PaidAmount = request.PaidAmount,
             ReservationStatus = request.ReservationStatus,
             TotalPrice = request.TotalPrice,
             ReservedAt = request.ReservedAt,
@@ -71,6 +70,7 @@ public class CreateProjectReservationHandler (AppDbContext context, IUserProvide
         var newReservation = createReservationResult.Payload!;
         
         context.Reservations.Add(newReservation);
+        
         await context.SaveChangesAsync(ct);
         
         var response = new CreateProjectReservationResponse
