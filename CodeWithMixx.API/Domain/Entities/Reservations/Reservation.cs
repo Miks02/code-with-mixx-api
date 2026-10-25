@@ -146,12 +146,14 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
 
-        public Result UpdateTotalPrice(decimal totalPrice, DateOnly? today = null)
+        public Result UpdateTotalPrice(decimal? totalPrice, DateOnly? today = null)
         {
-            if (totalPrice < 0)
-                return Result.Failure(ReservationError.InvalidTotalPrice(totalPrice));
+            var total = CalculateTotalPrice(totalPrice);
+            
+            if (total < 0)
+                return Result.Failure(ReservationError.InvalidTotalPrice(total));
 
-            TotalPrice = totalPrice;
+            TotalPrice = total;
             RecalculatePaymentDetails(today);
 
             return Result.Success();
