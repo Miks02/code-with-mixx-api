@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Reservations.UpdateClassReservation;
 
-public class UpdateClassReservationHandler(AppDbContext context)
+public class UpdateClassReservationHandler(AppDbContext context, IUserClock clock)
     : IHandler<UpdateClassReservationRequest, Result<UpdateClassReservationResponse>>
 {
     public async Task<Result<UpdateClassReservationResponse>> HandleAsync(UpdateClassReservationRequest request, CancellationToken ct = default)
@@ -50,7 +50,7 @@ public class UpdateClassReservationHandler(AppDbContext context)
         reservation.UpdateReservationStatus(request.ReservationStatus);
         reservation.UpdateNotes(request.Notes);
 
-        var totalPriceResult = reservation.UpdateTotalPrice(request.TotalPrice);
+        var totalPriceResult = reservation.UpdateTotalPrice(request.TotalPrice, clock.Today);
 
         if (!totalPriceResult.IsSuccess)
             return Result<UpdateClassReservationResponse>.Failure(totalPriceResult.Errors[0]);
@@ -118,7 +118,7 @@ public class UpdateClassReservationHandler(AppDbContext context)
             })
             .ToList();
 
-        return reservation.UpdateClasses(updateData);
+        return reservation.UpdateClasses(updateData, clock.Today);
     }
 
     private async Task<Result> AddNewClassesAsync(Reservation reservation, IReadOnlyList<ClassItem> classes, CancellationToken ct)

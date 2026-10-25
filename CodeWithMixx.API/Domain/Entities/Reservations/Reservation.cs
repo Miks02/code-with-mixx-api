@@ -47,7 +47,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         
         private Reservation() {}
 
-        public static Result<Reservation> CreateClassReservation(ReservationCreateData data, decimal paidAmount)
+        public static Result<Reservation> CreateClassReservation(ReservationCreateData data, decimal paidAmount, DateOnly today)
         {
             if (data.Classes.Count == 0)
                 return Result<Reservation>.Failure(ReservationError.NoClassesProvided());
@@ -75,7 +75,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             reservation.TotalPrice = reservation.CalculateTotalPrice(data.TotalPrice);
             reservation.DiscountRate = reservation.CalculateDiscountRate(reservation.TotalPrice);
             reservation.Bonus = reservation.CalculateBonus(reservation.TotalPrice, reservation.PaidAmount);
-            reservation.PaymentStatus = reservation.DeterminePaymentStatus(reservation.PaidAmount, reservation.TotalPrice);
+            reservation.PaymentStatus = reservation.DeterminePaymentStatus(reservation.PaidAmount, reservation.TotalPrice, today);
 
             
             return Result<Reservation>.Success(reservation);
@@ -141,7 +141,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
 
-        public Result UpdateTotalPrice(decimal? totalPrice, DateOnly? today = null)
+        public Result UpdateTotalPrice(decimal? totalPrice, DateOnly today)
         {
             var total = CalculateTotalPrice(totalPrice);
             
@@ -154,7 +154,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
 
-        public Result<PaymentTransaction> RegisterPayment(decimal paidAmount, DateTime transactionDate, DateOnly? today = null, string? note = null)
+        public Result<PaymentTransaction> RegisterPayment(decimal paidAmount, DateTime transactionDate, DateOnly today, string? note = null)
         {
             if (paidAmount <= 0)
                 return Result<PaymentTransaction>.Failure(ReservationError.InvalidAmount(paidAmount));
@@ -182,7 +182,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             decimal amount,
             DateTime transactionDate,
             PaymentTransactionType paymentType,
-            DateOnly? today = null,
+            DateOnly today,
             string? note = null)
         {
             if (paymentType == PaymentTransactionType.Payment)
@@ -223,7 +223,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             StudentId = studentId;
         }
 
-        public Result UpdateClasses(IReadOnlyList<ClassUpdateData> classesToUpdate)
+        public Result UpdateClasses(IReadOnlyList<ClassUpdateData> classesToUpdate, DateOnly today)
         {
             if(ReservationType != ReservationType.Class)
                 return Result.Failure(ReservationError.NotAClassReservation(Id));
@@ -241,7 +241,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                     return Result.Failure(updateResult.Errors[0]);
             }
             
-            RecalculatePaymentDetails();
+            RecalculatePaymentDetails(today);
             
             return Result.Success();
         }
@@ -385,11 +385,11 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
 
-        public bool RequiresHistoryRetention(DateOnly? today = null)
+        public bool RequiresHistoryRetention(DateOnly today)
             => ReservationStatus == ReservationStatus.Completed
                || PaymentStatus != PaymentStatus.Pending
                || Classes.Any(c => c.StartsAt <= DateTime.UtcNow)
-               || Projects.Any(p => p.StartDate <= (today ?? DateOnly.FromDateTime(DateTime.UtcNow)));
+               || Projects.Any(p => p.StartDate <= today);
         
         public void RemoveClass(Class classToRemove) 
             => _classes.Remove(classToRemove);
@@ -398,11 +398,11 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
            => _projects.Remove(projectToRemove);
         
         
-        private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice, DateOnly? today = null)
+        private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice, DateOnly today)
         {
             var isPastDue = ReservationType == ReservationType.Class
                 ? Classes.Count != 0 && Classes.Max(c => c.EndsAt) < DateTime.UtcNow
-                : Projects.Count != 0 && Projects.Max(p => p.EndDate) < (today ?? DateOnly.FromDateTime(DateTime.UtcNow));
+                : Projects.Count != 0 && Projects.Max(p => p.EndDate) < today;
 
             return paidAmount switch
             {
@@ -446,7 +446,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Math.Round(bonus, 2);
         }
 
-        private void RecalculatePaymentDetails(DateOnly? today = null)
+        private void RecalculatePaymentDetails(DateOnly today)
         {
             DiscountRate = CalculateDiscountRate(TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);

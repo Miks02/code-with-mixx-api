@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Reservations.DeleteClassReservation;
 
-public class DeleteClassReservationHandler(AppDbContext context) : IHandler<DeleteClassReservationRequest, Result>
+public class DeleteClassReservationHandler(AppDbContext context, IUserClock clock) : IHandler<DeleteClassReservationRequest, Result>
 {
     public async Task<Result> HandleAsync(DeleteClassReservationRequest request, CancellationToken ct = default)
     {
@@ -17,7 +17,7 @@ public class DeleteClassReservationHandler(AppDbContext context) : IHandler<Dele
         if (reservation is null)
             return Result.Failure(ReservationError.NotFound(request.ReservationId));
 
-        if (reservation.RequiresHistoryRetention())
+        if (reservation.RequiresHistoryRetention(clock.Today))
         {
             var deleteResult = reservation.DeleteClassReservation();
             if(!deleteResult.IsSuccess)

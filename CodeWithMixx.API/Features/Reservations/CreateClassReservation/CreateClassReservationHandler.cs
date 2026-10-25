@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Reservations.CreateClassReservation;
 
-public class CreateClassReservationHandler(AppDbContext context, IUserProvider userProvider) : IHandler<CreateClassReservationRequest, Result<CreateClassReservationResponse>> 
+public class CreateClassReservationHandler(AppDbContext context, IUserProvider userProvider, IUserClock clock) : IHandler<CreateClassReservationRequest, Result<CreateClassReservationResponse>> 
 {
     public async Task<Result<CreateClassReservationResponse>> HandleAsync(CreateClassReservationRequest request, CancellationToken ct = default)
     {
@@ -49,7 +49,7 @@ public class CreateClassReservationHandler(AppDbContext context, IUserProvider u
             Classes = classes
         };
  
-        var reservationResult = Reservation.CreateClassReservation(newReservationData, request.PaidAmount);
+        var reservationResult = Reservation.CreateClassReservation(newReservationData, request.PaidAmount, clock.Today);
 
         if (!reservationResult.IsSuccess)
             return Result<CreateClassReservationResponse>.Failure(reservationResult.Errors[0]);
