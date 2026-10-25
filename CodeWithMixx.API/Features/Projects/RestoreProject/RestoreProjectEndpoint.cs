@@ -8,7 +8,7 @@ public class RestoreProjectEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/admin/projects/items/{projectId:int}/restore", async (
+        app.MapPost("/admin/reservations/projects/items/{projectId:int}/restore", async (
                 [AsParameters] RestoreProjectRequest request,
                 IHandler<RestoreProjectRequest, Result> handler,
                 CancellationToken ct) =>

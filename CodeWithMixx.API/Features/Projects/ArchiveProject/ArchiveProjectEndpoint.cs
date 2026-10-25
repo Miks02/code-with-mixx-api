@@ -8,7 +8,7 @@ public class ArchiveProjectEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/admin/projects/items/{projectId:int}/archive", async (
+        app.MapPost("/admin/reservations/projects/items/{projectId:int}/archive", async (
                 [AsParameters] ArchiveProjectRequest request,
                 IHandler<ArchiveProjectRequest, Result> handler,
                 CancellationToken ct) =>
