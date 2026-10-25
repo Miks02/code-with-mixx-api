@@ -82,6 +82,7 @@ public class CreateProjectReservationHandler (AppDbContext context, IUserProvide
             PaidAmount = newReservation.PaidAmount,
             PaymentStatus = newReservation.PaymentStatus,
             ReservationStatus = newReservation.ReservationStatus,
+            ReservedAt = newReservation.ReservedAt,
             CreatedAt = newReservation.CreatedAt,
             Projects = newReservation.Projects.Select(p => new CreateProjectReservationResponse.ProjectItem
             {

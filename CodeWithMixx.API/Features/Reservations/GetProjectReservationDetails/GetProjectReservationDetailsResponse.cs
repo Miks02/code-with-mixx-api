@@ -17,6 +17,7 @@ public record GetProjectReservationDetailsResponse
     public decimal DiscountRate { get; init; }
     public decimal Bonus { get; init; }
     public string? Notes { get; init; }
+    public DateOnly ReservedAt { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; init; }
     public IReadOnlyList<ProjectDetailsItem> Projects { get; init; } = [];
