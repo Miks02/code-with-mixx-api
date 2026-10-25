@@ -14,7 +14,6 @@ public class RegisterPaymentValidator : AbstractValidator<RegisterPaymentBody>
             .LessThanOrEqualTo(_ => DateTimeOffset.UtcNow).WithMessage("Transaction date cannot be in the future.");
         
         RuleFor(x => x.Note)
-            .NotEmpty().WithMessage("Note is required for subtracting transactions.")
             .MinimumLength(20).WithMessage("Note must be at least 20 characters long.");
 
     }
