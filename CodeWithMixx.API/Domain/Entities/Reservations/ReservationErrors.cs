@@ -13,13 +13,13 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return new Error("Reservation.NotFound", message, ErrorType.NotFound);
         }
 
-        public static Error AlreadyPaid(int? identifier = null)
+        public static Error RequiresHistoryRetention(int? identifier = null)
         {
             string message = identifier is null
-                ? "Reservation is already fully paid"
-                : $"Reservation with identifier '{identifier}' is already fully paid";
+                ? "Reservation cannot be deleted because it requires history retention"
+                : $"Reservation with identifier '{identifier}' requires history retention, thus it cannot be deleted";
 
-            return new Error("Reservation.AlreadyPaid", message, ErrorType.Validation);
+            return new Error("Reservation.RequiresHistoryRetention", message, ErrorType.Conflict);
         }
 
         public static Error InvalidAmount(decimal amount, string message = "Amount must be positive")
