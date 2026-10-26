@@ -10,7 +10,9 @@ public class DeleteReservationHandler(AppDbContext context, IUserClock userClock
 {
     public async Task<Result> HandleAsync(DeleteReservationRequest request, CancellationToken ct = default)
     {
-        var reservationToDelete = await context.Reservations.FirstOrDefaultAsync(r => r.Id == request.ReservationId, ct);
+        var reservationToDelete = await context.Reservations
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(r => r.Id == request.ReservationId, ct);
         
         if(reservationToDelete is null)
             return Result.Failure(ReservationError.NotFound(request.ReservationId)); 
