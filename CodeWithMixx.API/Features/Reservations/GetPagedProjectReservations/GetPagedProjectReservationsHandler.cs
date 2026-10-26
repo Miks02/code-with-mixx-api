@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Reservations.GetPagedProjectReservations;
 
-public class GetPagedProjectReservationsHandler(AppDbContext context)
+public class GetPagedProjectReservationsHandler(AppDbContext context, IUserClock userClock)
     : IHandler<GetPagedProjectReservationsRequest, PagedResult<GetPagedProjectReservationsResponse>>
 {
     public async Task<PagedResult<GetPagedProjectReservationsResponse>> HandleAsync(
@@ -84,6 +84,7 @@ public class GetPagedProjectReservationsHandler(AppDbContext context)
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
                 DeletedAt = r.DeletedAt,
+                IsHardDeletable = !r.RequiresHistoryRetention(userClock.Today),
                 Projects = r.Projects
                     .OrderBy(p => p.StartDate)
                     .Select(p => new ProjectItem

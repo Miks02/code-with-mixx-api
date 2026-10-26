@@ -26,6 +26,7 @@ public record GetProjectReservationsSummaryResponse
         public DateTime CreatedAt { get; init; }
         public DateTime? UpdatedAt { get; init; }
         public DateTime? DeletedAt { get; init; }
+        public bool IsHardDeletable { get; init; }
         public IReadOnlyList<ProjectItem> Projects { get; init; } = [];
     }
 };
