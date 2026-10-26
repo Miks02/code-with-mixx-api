@@ -15,4 +15,5 @@ public record ProjectItem
     public DateOnly ReservedAt { get; init; }
     public DateOnly StartDate { get; init; }
     public DateOnly EndDate { get; init; }
+    public int NotesCount { get; init; }
 };

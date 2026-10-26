@@ -39,6 +39,9 @@ public static class ProjectError
     public static Error NotArchived(int identifier)
         => new Error("Project.NotArchived", $"The project with identifier '{identifier}' is not archived.", ErrorType.Conflict);
 
+    public static Error CantUpdateAnArchivedProject(int identifier)
+        => new Error("Project.CantUpdateAnArchivedProject", $"The project with identifier '{identifier}' is archived, therefore it cannot be updated.", ErrorType.Conflict);
+
     public static Error ReservationArchived(int identifier, int reservationIdentifier)
         => new Error("Project.ReservationArchived", $"The project with identifier '{identifier}' cannot be restored because its reservation '{reservationIdentifier}' is archived. Restore the reservation instead.", ErrorType.Conflict);
 }

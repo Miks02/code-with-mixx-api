@@ -99,7 +99,8 @@ public class GetPagedProjectReservationsHandler(AppDbContext context, IUserClock
                         StartDate = p.StartDate,
                         EndDate = p.EndDate,
                         GithubLink = p.GithubLink,
-                        DownloadLink = p.DownloadLink
+                        DownloadLink = p.DownloadLink,
+                        NotesCount = p.ProjectNotes.Count
                     })
                     .ToList()
             });
