@@ -13,8 +13,8 @@ public class UpdateProjectReservationValidator : AbstractValidator<UpdateProject
         RuleFor(x => x.TotalPrice)
             .GreaterThanOrEqualTo(0).WithMessage("Total price cannot be negative.");
         
-        RuleFor(x => x.Notes)
-            .MaximumLength(500).WithMessage("Notes cannot exceed 500 characters.");
+        RuleFor(x => x.Description)
+            .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
 
         RuleFor(x => x.ReservedAt)
             .NotEmpty().WithMessage("Reservation date is required.")

@@ -48,7 +48,7 @@ public class UpdateClassReservationHandler(AppDbContext context, IUserClock cloc
             return Result<UpdateClassReservationResponse>.Failure(addResult.Errors[0]);
 
         reservation.UpdateReservationStatus(request.ReservationStatus);
-        reservation.UpdateNotes(request.Notes);
+        reservation.UpdateDescription(request.Description);
 
         var totalPriceResult = reservation.UpdateTotalPrice(request.TotalPrice, clock.Today);
 
@@ -67,7 +67,7 @@ public class UpdateClassReservationHandler(AppDbContext context, IUserClock cloc
             PaidAmount = reservation.PaidAmount,
             DiscountRate = reservation.DiscountRate,
             Bonus = reservation.Bonus,
-            Notes = reservation.Notes,
+            Description = reservation.Description,
             UpdatedAt = reservation.UpdatedAt
         };
 

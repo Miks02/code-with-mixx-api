@@ -9,6 +9,7 @@ public record CreateProjectReservationRequest
     public decimal? TotalPrice { get; init; }
     public DateOnly ReservedAt { get; init; }
     public ReservationStatus ReservationStatus { get; init; }
+    public string? Description { get; init; }
     public IReadOnlyList<ProjectItem> Projects { get; init; } = []; 
 
     public record ProjectItem

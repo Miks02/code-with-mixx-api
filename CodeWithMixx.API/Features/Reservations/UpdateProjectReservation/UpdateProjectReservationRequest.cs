@@ -8,7 +8,7 @@ public record UpdateProjectReservationRequest
     public int Id { get; init; }
     public string StudentId { get; init; } = null!;
     public decimal? TotalPrice { get; init; }
-    public string? Notes { get; init; }
+    public string? Description { get; init; }
     public DateOnly ReservedAt { get; init; }
     public ReservationStatus ReservationStatus { get; init; }
 

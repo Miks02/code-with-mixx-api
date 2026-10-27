@@ -18,6 +18,9 @@ public class CreateProjectReservationValidator : AbstractValidator<CreateProject
             .NotEmpty().WithMessage("Reservation date is required.")
             .LessThanOrEqualTo(x => clock.Today).WithMessage("Reservation date cannot be in the future");
 
+        RuleFor(x => x.Description)
+            .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
+
         RuleFor(x => x.ReservationStatus)
             .IsInEnum().WithMessage("Invalid reservation status.");
 

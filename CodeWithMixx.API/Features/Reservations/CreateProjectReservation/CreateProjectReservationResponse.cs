@@ -13,6 +13,7 @@ public record CreateProjectReservationResponse
     public decimal TotalPrice { get; init; }
     public decimal PaidAmount { get; init; }
     public DateOnly ReservedAt { get; init; }
+    public string? Description { get; init; }
     public DateTime CreatedAt { get; init; }
     
     public IReadOnlyList<ProjectItem> Projects { get; init; } = [];
