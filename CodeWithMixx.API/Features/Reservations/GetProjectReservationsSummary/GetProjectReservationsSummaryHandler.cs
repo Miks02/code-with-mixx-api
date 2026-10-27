@@ -83,6 +83,7 @@ public class GetProjectReservationsSummaryHandler(AppDbContext context, IUserClo
                 PaidAmount = r.PaidAmount,
                 DiscountRate = r.DiscountRate,
                 Bonus = r.Bonus,
+                Description = r.Description,
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
                 DeletedAt = r.DeletedAt,

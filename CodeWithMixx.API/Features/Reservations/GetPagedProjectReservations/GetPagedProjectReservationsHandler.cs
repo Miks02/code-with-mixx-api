@@ -81,6 +81,7 @@ public class GetPagedProjectReservationsHandler(AppDbContext context, IUserClock
                 PaidAmount = r.PaidAmount,
                 DiscountRate = r.DiscountRate,
                 Bonus = r.Bonus,
+                Description = r.Description,
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
                 DeletedAt = r.DeletedAt,
