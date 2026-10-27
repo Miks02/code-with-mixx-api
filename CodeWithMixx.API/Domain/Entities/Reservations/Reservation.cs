@@ -385,6 +385,22 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
 
+        public Result DeleteProjects(IReadOnlyList<int> projectIdsToDelete)
+        {
+            if (projectIdsToDelete.Count == 0)
+                return Result.Success();
+
+            var existingProjectIds = _projects.Select(p => p.Id).ToHashSet();
+            var invalidProjectIds = projectIdsToDelete.Where(id => !existingProjectIds.Contains(id)).ToList();
+
+            if (invalidProjectIds.Count > 0)
+                return Result.Failure(ProjectError.NotFound(invalidProjectIds[0]));
+            
+            _projects.RemoveAll(p => projectIdsToDelete.Contains(p.Id));
+            
+            return Result.Success();
+        }
+
         public bool RequiresHistoryRetention(DateOnly today)
             => ReservationStatus == ReservationStatus.Completed
                || PaymentStatus != PaymentStatus.Pending
