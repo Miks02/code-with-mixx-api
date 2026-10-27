@@ -75,5 +75,14 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             string message = $"Reservation with identifier '{identifier}' is archived, therefore it cannot be updated";
             return new Error("Reservation.CantUpdateAnArchivedReservation", message, ErrorType.Conflict);
         }
+        
+        public static Error DescriptionTooLong(int? identifier = null) 
+        {
+            string message = identifier is null
+                ? "Reservation description is too long"
+                : $"Reservation with identifier '{identifier}' has a description that is too long";
+
+            return new Error("Reservation.DescriptionTooLong", message, ErrorType.Validation);
+        }
     }
 }

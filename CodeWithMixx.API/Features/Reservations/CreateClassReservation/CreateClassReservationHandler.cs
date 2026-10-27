@@ -46,6 +46,7 @@ public class CreateClassReservationHandler(AppDbContext context, IUserProvider u
             StudentId = request.StudentId,
             ReservationStatus = request.ReservationStatus,
             TotalPrice = request.TotalPrice,
+            Description = request.Description,
             Classes = classes
         };
  
@@ -62,6 +63,7 @@ public class CreateClassReservationHandler(AppDbContext context, IUserProvider u
             Id = reservationResult.Payload!.Id,
             PaymentStatus = reservationResult.Payload.PaymentStatus,
             ReservationStatus = reservationResult.Payload.ReservationStatus,
+            Description = reservationResult.Payload.Description,
             TotalPrice = reservationResult.Payload.TotalPrice,
             PaidAmount = reservationResult.Payload.PaidAmount,
             Classes = reservationResult.Payload.Classes.Select(c => new CreateClassReservationResponse.ClassDto

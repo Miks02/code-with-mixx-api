@@ -56,7 +56,11 @@ public class UpdateProjectReservationHandler(AppDbContext context, IUserClock cl
             return Result<UpdateProjectReservationResponse>.Failure(addResult.Errors[0]);
 
         reservation.UpdateReservationStatus(request.ReservationStatus);
-        reservation.UpdateDescription(request.Description);
+
+        var descriptionResult = reservation.UpdateDescription(request.Description);
+
+        if (!descriptionResult.IsSuccess)
+            return Result<UpdateProjectReservationResponse>.Failure(descriptionResult.Errors[0]);
 
         var today = clock.Today;
         

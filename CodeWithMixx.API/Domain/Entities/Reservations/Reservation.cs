@@ -67,6 +67,10 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 ReservationType = ReservationType.Class
             };
 
+            var descriptionResult = reservation.UpdateDescription(data.Description);
+            if (!descriptionResult.IsSuccess)
+                return Result<Reservation>.Failure(descriptionResult.Errors[0]);
+
             var classesResult = reservation.AddClasses(data.Classes);
             
             if (!classesResult.IsSuccess)
@@ -100,10 +104,13 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 ReservationStatus = data.ReservationStatus,
                 PaidAmount = 0,
                 ReservedAt = data.ReservedAt,
-                Description = data.Description,
                 ReservationType = ReservationType.Project
             };
             
+            var descriptionResult = reservation.UpdateDescription(data.Description);
+            if (!descriptionResult.IsSuccess)
+                return Result<Reservation>.Failure(descriptionResult.Errors[0]);
+
             var addProjectsResult = reservation.AddProjects(projects);
             
             if (!addProjectsResult.IsSuccess)
@@ -214,9 +221,13 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result<PaymentTransaction>.Success(newTransactionResult.Payload!);
         }
         
-        public void UpdateDescription(string? description)
+        public Result UpdateDescription(string? description)
         {
+            if (!string.IsNullOrWhiteSpace(description) && description.Length > 500)
+                return Result.Failure(ReservationError.DescriptionTooLong(Id == 0 ? null : Id));
+            
             Description = description;
+            return Result.Success();
         }
         
         public void ChangeStudent(string studentId)
