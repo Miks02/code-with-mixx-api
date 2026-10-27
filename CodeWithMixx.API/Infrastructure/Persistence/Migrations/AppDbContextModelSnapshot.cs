@@ -315,16 +315,16 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<decimal>("DiscountRate")
                         .HasPrecision(5, 2)
                         .HasColumnType("numeric(5,2)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
 
                     b.Property<decimal>("PaidAmount")
                         .HasPrecision(18, 2)

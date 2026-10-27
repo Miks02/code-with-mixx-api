@@ -21,7 +21,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         
         public decimal RemainingAmount => Math.Max(0, TotalPrice - PaidAmount);
 
-        public string? Notes { get; private set; }
+        public string? Description { get; private set; }
 
         public DateOnly ReservedAt { get; private set; }
         public DateTime CreatedAt { get; private set; }
@@ -100,6 +100,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 ReservationStatus = data.ReservationStatus,
                 PaidAmount = 0,
                 ReservedAt = data.ReservedAt,
+                Description = data.Description,
                 ReservationType = ReservationType.Project
             };
             
@@ -213,9 +214,9 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result<PaymentTransaction>.Success(newTransactionResult.Payload!);
         }
         
-        public void UpdateNotes(string? notes)
+        public void UpdateDescription(string? description)
         {
-            Notes = notes;
+            Description = description;
         }
         
         public void ChangeStudent(string studentId)
