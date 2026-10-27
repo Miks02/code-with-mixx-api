@@ -139,10 +139,12 @@ public class Project : IAuditable, ISoftDeletable
 
         if(startDate <= DateOnly.MinValue || startDate > endDate)
             return Result.Failure(ProjectError.InvalidDateRange(startDate, endDate));
-        
 
-        if(reservedAt <= DateOnly.MinValue || reservedAt > DateOnly.FromDateTime(DateTime.UtcNow))
+        if(reservedAt <= DateOnly.MinValue || reservedAt > today)
             return Result.Failure(ProjectError.InvalidReservationDate(reservedAt));
+
+        if(startDate < reservedAt)
+            return Result.Failure(ProjectError.StartDateBeforeReservedAt(startDate, reservedAt));
 
         if(githubLink is not null && githubLink.Length > 200)
             return Result.Failure(ProjectError.GithubLinkIsTooLong(githubLink));

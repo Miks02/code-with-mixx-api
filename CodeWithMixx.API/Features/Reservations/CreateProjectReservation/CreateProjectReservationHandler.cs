@@ -35,9 +35,10 @@ public class CreateProjectReservationHandler (AppDbContext context, IUserProvide
         {
             AdminId = userProvider.GetUserId(),
             StudentId = request.StudentId,
-            PaidAmount = request.PaidAmount,
             ReservationStatus = request.ReservationStatus,
             TotalPrice = request.TotalPrice,
+            ReservedAt = request.ReservedAt,
+            Description = request.Description,
         };
 
         var today = clock.Today;
@@ -70,6 +71,7 @@ public class CreateProjectReservationHandler (AppDbContext context, IUserProvide
         var newReservation = createReservationResult.Payload!;
         
         context.Reservations.Add(newReservation);
+        
         await context.SaveChangesAsync(ct);
         
         var response = new CreateProjectReservationResponse
@@ -81,6 +83,8 @@ public class CreateProjectReservationHandler (AppDbContext context, IUserProvide
             PaidAmount = newReservation.PaidAmount,
             PaymentStatus = newReservation.PaymentStatus,
             ReservationStatus = newReservation.ReservationStatus,
+            ReservedAt = newReservation.ReservedAt,
+            Description = newReservation.Description,
             CreatedAt = newReservation.CreatedAt,
             Projects = newReservation.Projects.Select(p => new CreateProjectReservationResponse.ProjectItem
             {

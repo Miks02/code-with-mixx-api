@@ -27,7 +27,7 @@ public class GetClassReservationByIdHandler(AppDbContext context)
                 PaidAmount = r.PaidAmount,
                 DiscountRate = r.DiscountRate,
                 Bonus = r.Bonus,
-                Notes = r.Notes,
+                Description = r.Description,
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
                 Classes = r.Classes

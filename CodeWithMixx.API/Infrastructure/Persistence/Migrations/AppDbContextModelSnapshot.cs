@@ -315,16 +315,16 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<decimal>("DiscountRate")
                         .HasPrecision(5, 2)
                         .HasColumnType("numeric(5,2)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
 
                     b.Property<decimal>("PaidAmount")
                         .HasPrecision(18, 2)
@@ -341,6 +341,9 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                     b.Property<string>("ReservationType")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateOnly>("ReservedAt")
+                        .HasColumnType("date");
 
                     b.Property<string>("StudentId")
                         .IsRequired()
@@ -360,6 +363,8 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                     b.HasIndex("PaymentStatus");
 
                     b.HasIndex("ReservationStatus");
+
+                    b.HasIndex("ReservedAt");
 
                     b.HasIndex("StudentId");
 

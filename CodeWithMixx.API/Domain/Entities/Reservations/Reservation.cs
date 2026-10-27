@@ -21,8 +21,9 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         
         public decimal RemainingAmount => Math.Max(0, TotalPrice - PaidAmount);
 
-        public string? Notes { get; private set; }
+        public string? Description { get; private set; }
 
+        public DateOnly ReservedAt { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
         public bool IsDeleted { get; private set; }
@@ -46,7 +47,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         
         private Reservation() {}
 
-        public static Result<Reservation> CreateClassReservation(ReservationCreateData data)
+        public static Result<Reservation> CreateClassReservation(ReservationCreateData data, decimal paidAmount, DateOnly today)
         {
             if (data.Classes.Count == 0)
                 return Result<Reservation>.Failure(ReservationError.NoClassesProvided());
@@ -54,17 +55,21 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             if(data.TotalPrice is not null && data.TotalPrice < 0)
                 return Result<Reservation>.Failure(ReservationError.InvalidTotalPrice(data.TotalPrice.Value));
             
-            if(data.PaidAmount < 0)
-                return Result<Reservation>.Failure(ReservationError.InvalidAmount(data.PaidAmount));
+            if(paidAmount < 0)
+                return Result<Reservation>.Failure(ReservationError.InvalidAmount(paidAmount));
             
             var reservation = new Reservation
             {
                 AdminId = data.AdminId,
                 StudentId = data.StudentId,
                 ReservationStatus = data.ReservationStatus,
-                PaidAmount = data.PaidAmount,
+                PaidAmount = paidAmount,
                 ReservationType = ReservationType.Class
             };
+
+            var descriptionResult = reservation.UpdateDescription(data.Description);
+            if (!descriptionResult.IsSuccess)
+                return Result<Reservation>.Failure(descriptionResult.Errors[0]);
 
             var classesResult = reservation.AddClasses(data.Classes);
             
@@ -74,7 +79,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             reservation.TotalPrice = reservation.CalculateTotalPrice(data.TotalPrice);
             reservation.DiscountRate = reservation.CalculateDiscountRate(reservation.TotalPrice);
             reservation.Bonus = reservation.CalculateBonus(reservation.TotalPrice, reservation.PaidAmount);
-            reservation.PaymentStatus = reservation.DeterminePaymentStatus(reservation.PaidAmount, reservation.TotalPrice);
+            reservation.PaymentStatus = reservation.DeterminePaymentStatus(reservation.PaidAmount, reservation.TotalPrice, today);
 
             
             return Result<Reservation>.Success(reservation);
@@ -88,18 +93,24 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             if(data.TotalPrice is not null && data.TotalPrice < 0)
                 return Result<Reservation>.Failure(ReservationError.InvalidTotalPrice(data.TotalPrice.Value));
             
-            if(data.PaidAmount < 0)
-                return Result<Reservation>.Failure(ReservationError.InvalidAmount(data.PaidAmount));
+            var reservedAtResult = ValidateReservedAt(data.ReservedAt, today);
+            if(!reservedAtResult.IsSuccess)
+                return Result<Reservation>.Failure(reservedAtResult.Errors[0]);
             
             var reservation = new Reservation
             {
                 AdminId = data.AdminId,
                 StudentId = data.StudentId,
                 ReservationStatus = data.ReservationStatus,
-                PaidAmount = data.PaidAmount,
+                PaidAmount = 0,
+                ReservedAt = data.ReservedAt,
                 ReservationType = ReservationType.Project
             };
             
+            var descriptionResult = reservation.UpdateDescription(data.Description);
+            if (!descriptionResult.IsSuccess)
+                return Result<Reservation>.Failure(descriptionResult.Errors[0]);
+
             var addProjectsResult = reservation.AddProjects(projects);
             
             if (!addProjectsResult.IsSuccess)
@@ -107,9 +118,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             
             reservation.TotalPrice = reservation.CalculateTotalPrice(data.TotalPrice);
             reservation.DiscountRate = reservation.CalculateDiscountRate(reservation.TotalPrice);
-            reservation.Bonus = reservation.CalculateBonus(reservation.TotalPrice, data.PaidAmount);
-            reservation.PaymentStatus = reservation.DeterminePaymentStatus(data.PaidAmount, reservation.TotalPrice, today);
-
+            reservation.PaymentStatus = reservation.DeterminePaymentStatus(reservation.PaidAmount, reservation.TotalPrice, today);
             
             return Result<Reservation>.Success(reservation);
         }
@@ -123,18 +132,37 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
 
-        public Result UpdateTotalPrice(decimal totalPrice, DateOnly? today = null)
+        public Result UpdateReservedAt(DateOnly reservedAt, DateOnly today)
         {
-            if (totalPrice < 0)
-                return Result.Failure(ReservationError.InvalidTotalPrice(totalPrice));
+            if(IsDeleted)
+                return Result.Failure(ReservationError.CantUpdateAnArchivedReservation(Id));
+            
+            var validationResult = ValidateReservedAt(reservedAt, today);
+            if(!validationResult.IsSuccess)
+                return validationResult;
 
-            TotalPrice = totalPrice;
+            var projectStartingEarlier = Projects.FirstOrDefault(p => p.StartDate < reservedAt);
+            if(projectStartingEarlier is not null)
+                return Result.Failure(ReservationError.ProjectStartsBeforeReservation(projectStartingEarlier.StartDate, reservedAt));
+            
+            ReservedAt = reservedAt;
+            return Result.Success();
+        }
+
+        public Result UpdateTotalPrice(decimal? totalPrice, DateOnly today)
+        {
+            var total = CalculateTotalPrice(totalPrice);
+            
+            if (total < 0)
+                return Result.Failure(ReservationError.InvalidTotalPrice(total));
+
+            TotalPrice = total;
             RecalculatePaymentDetails(today);
 
             return Result.Success();
         }
 
-        public Result<PaymentTransaction> RegisterPayment(decimal paidAmount, DateTime transactionDate, DateOnly? today = null, string? note = null)
+        public Result<PaymentTransaction> RegisterPayment(decimal paidAmount, DateTime transactionDate, DateOnly today, string? note = null)
         {
             if (paidAmount <= 0)
                 return Result<PaymentTransaction>.Failure(ReservationError.InvalidAmount(paidAmount));
@@ -162,7 +190,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             decimal amount,
             DateTime transactionDate,
             PaymentTransactionType paymentType,
-            DateOnly? today = null,
+            DateOnly today,
             string? note = null)
         {
             if (paymentType == PaymentTransactionType.Payment)
@@ -193,9 +221,13 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result<PaymentTransaction>.Success(newTransactionResult.Payload!);
         }
         
-        public void UpdateNotes(string? notes)
+        public Result UpdateDescription(string? description)
         {
-            Notes = notes;
+            if (!string.IsNullOrWhiteSpace(description) && description.Length > 500)
+                return Result.Failure(ReservationError.DescriptionTooLong(Id == 0 ? null : Id));
+            
+            Description = description;
+            return Result.Success();
         }
         
         public void ChangeStudent(string studentId)
@@ -203,7 +235,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             StudentId = studentId;
         }
 
-        public Result UpdateClasses(IReadOnlyList<ClassUpdateData> classesToUpdate)
+        public Result UpdateClasses(IReadOnlyList<ClassUpdateData> classesToUpdate, DateOnly today)
         {
             if(ReservationType != ReservationType.Class)
                 return Result.Failure(ReservationError.NotAClassReservation(Id));
@@ -221,7 +253,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                     return Result.Failure(updateResult.Errors[0]);
             }
             
-            RecalculatePaymentDetails();
+            RecalculatePaymentDetails(today);
             
             return Result.Success();
         }
@@ -274,6 +306,9 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
             foreach (var projectData in projectsToAdd)
             {
+                if(projectData.StartDate < ReservedAt)
+                    return Result.Failure(ReservationError.ProjectStartsBeforeReservation(projectData.StartDate, ReservedAt));
+                
                 var projectResult = Project.Create(projectData);
                 if (!projectResult.IsSuccess)
                     return Result.Failure(projectResult.Errors[0]);
@@ -362,11 +397,27 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
 
-        public bool RequiresHistoryRetention(DateOnly? today = null)
+        public Result DeleteProjects(IReadOnlyList<int> projectIdsToDelete)
+        {
+            if (projectIdsToDelete.Count == 0)
+                return Result.Success();
+
+            var existingProjectIds = _projects.Select(p => p.Id).ToHashSet();
+            var invalidProjectIds = projectIdsToDelete.Where(id => !existingProjectIds.Contains(id)).ToList();
+
+            if (invalidProjectIds.Count > 0)
+                return Result.Failure(ProjectError.NotFound(invalidProjectIds[0]));
+            
+            _projects.RemoveAll(p => projectIdsToDelete.Contains(p.Id));
+            
+            return Result.Success();
+        }
+
+        public bool RequiresHistoryRetention(DateOnly today)
             => ReservationStatus == ReservationStatus.Completed
                || PaymentStatus != PaymentStatus.Pending
                || Classes.Any(c => c.StartsAt <= DateTime.UtcNow)
-               || Projects.Any(p => p.StartDate <= (today ?? DateOnly.FromDateTime(DateTime.UtcNow)));
+               || Projects.Any(p => p.StartDate <= today);
         
         public void RemoveClass(Class classToRemove) 
             => _classes.Remove(classToRemove);
@@ -375,11 +426,11 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
            => _projects.Remove(projectToRemove);
         
         
-        private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice, DateOnly? today = null)
+        private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice, DateOnly today)
         {
             var isPastDue = ReservationType == ReservationType.Class
                 ? Classes.Count != 0 && Classes.Max(c => c.EndsAt) < DateTime.UtcNow
-                : Projects.Count != 0 && Projects.Max(p => p.EndDate) < (today ?? DateOnly.FromDateTime(DateTime.UtcNow));
+                : Projects.Count != 0 && Projects.Max(p => p.EndDate) < today;
 
             return paidAmount switch
             {
@@ -423,11 +474,19 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Math.Round(bonus, 2);
         }
 
-        private void RecalculatePaymentDetails(DateOnly? today = null)
+        private void RecalculatePaymentDetails(DateOnly today)
         {
             DiscountRate = CalculateDiscountRate(TotalPrice);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
+        }
+
+        private static Result ValidateReservedAt(DateOnly reservedAt, DateOnly today)
+        {
+            if(reservedAt <= DateOnly.MinValue || reservedAt > today)
+                return Result.Failure(ReservationError.InvalidReservedAt(reservedAt));
+            
+            return Result.Success();
         }
 
         private Result Delete()

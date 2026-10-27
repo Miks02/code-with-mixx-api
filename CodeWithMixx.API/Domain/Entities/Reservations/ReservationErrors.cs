@@ -13,13 +13,13 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return new Error("Reservation.NotFound", message, ErrorType.NotFound);
         }
 
-        public static Error AlreadyPaid(int? identifier = null)
+        public static Error RequiresHistoryRetention(int? identifier = null)
         {
             string message = identifier is null
-                ? "Reservation is already fully paid"
-                : $"Reservation with identifier '{identifier}' is already fully paid";
+                ? "Reservation cannot be deleted because it requires history retention"
+                : $"Reservation with identifier '{identifier}' requires history retention, thus it cannot be deleted";
 
-            return new Error("Reservation.AlreadyPaid", message, ErrorType.Validation);
+            return new Error("Reservation.RequiresHistoryRetention", message, ErrorType.Conflict);
         }
 
         public static Error InvalidAmount(decimal amount, string message = "Amount must be positive")
@@ -27,6 +27,12 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         
         public static Error InvalidTotalPrice(decimal totalPrice)
             => new("Reservation.InvalidTotalPrice", $"Total price '{totalPrice}' must be positive", ErrorType.Validation);
+        
+        public static Error InvalidReservedAt(DateOnly reservedAt)
+            => new("Reservation.InvalidReservedAt", $"Reservation date '{reservedAt}' is invalid. It cannot be empty or in the future", ErrorType.Validation);
+        
+        public static Error ProjectStartsBeforeReservation(DateOnly startDate, DateOnly reservedAt)
+            => new("Reservation.ProjectStartsBeforeReservation", $"Project start date '{startDate}' cannot be before the reservation date '{reservedAt}'", ErrorType.Validation);
         
         public static Error NoClassesProvided()
             => new("Reservation.NoClassesProvided", "No classes have been provided for a class reservation", ErrorType.Validation);
@@ -68,6 +74,15 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         {
             string message = $"Reservation with identifier '{identifier}' is archived, therefore it cannot be updated";
             return new Error("Reservation.CantUpdateAnArchivedReservation", message, ErrorType.Conflict);
+        }
+        
+        public static Error DescriptionTooLong(int? identifier = null) 
+        {
+            string message = identifier is null
+                ? "Reservation description is too long"
+                : $"Reservation with identifier '{identifier}' has a description that is too long";
+
+            return new Error("Reservation.DescriptionTooLong", message, ErrorType.Validation);
         }
     }
 }

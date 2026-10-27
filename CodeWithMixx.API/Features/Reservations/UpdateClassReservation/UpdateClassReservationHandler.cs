@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Reservations.UpdateClassReservation;
 
-public class UpdateClassReservationHandler(AppDbContext context)
+public class UpdateClassReservationHandler(AppDbContext context, IUserClock clock)
     : IHandler<UpdateClassReservationRequest, Result<UpdateClassReservationResponse>>
 {
     public async Task<Result<UpdateClassReservationResponse>> HandleAsync(UpdateClassReservationRequest request, CancellationToken ct = default)
@@ -48,9 +48,13 @@ public class UpdateClassReservationHandler(AppDbContext context)
             return Result<UpdateClassReservationResponse>.Failure(addResult.Errors[0]);
 
         reservation.UpdateReservationStatus(request.ReservationStatus);
-        reservation.UpdateNotes(request.Notes);
 
-        var totalPriceResult = reservation.UpdateTotalPrice(request.TotalPrice);
+        var descriptionResult = reservation.UpdateDescription(request.Description);
+
+        if (!descriptionResult.IsSuccess)
+            return Result<UpdateClassReservationResponse>.Failure(descriptionResult.Errors[0]);
+
+        var totalPriceResult = reservation.UpdateTotalPrice(request.TotalPrice, clock.Today);
 
         if (!totalPriceResult.IsSuccess)
             return Result<UpdateClassReservationResponse>.Failure(totalPriceResult.Errors[0]);
@@ -67,7 +71,7 @@ public class UpdateClassReservationHandler(AppDbContext context)
             PaidAmount = reservation.PaidAmount,
             DiscountRate = reservation.DiscountRate,
             Bonus = reservation.Bonus,
-            Notes = reservation.Notes,
+            Description = reservation.Description,
             UpdatedAt = reservation.UpdatedAt
         };
 
@@ -118,7 +122,7 @@ public class UpdateClassReservationHandler(AppDbContext context)
             })
             .ToList();
 
-        return reservation.UpdateClasses(updateData);
+        return reservation.UpdateClasses(updateData, clock.Today);
     }
 
     private async Task<Result> AddNewClassesAsync(Reservation reservation, IReadOnlyList<ClassItem> classes, CancellationToken ct)

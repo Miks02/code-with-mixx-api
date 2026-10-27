@@ -28,7 +28,8 @@ public class GetProjectReservationDetailsHandler(AppDbContext context)
                 PaidAmount = r.PaidAmount,
                 DiscountRate = r.DiscountRate,
                 Bonus = r.Bonus,
-                Notes = r.Notes,
+                Description = r.Description,
+                ReservedAt = r.ReservedAt,
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
                 Projects = r.Projects

@@ -1,4 +1,5 @@
 using CodeWithMixx.API.Common.Interfaces;
+using CodeWithMixx.API.Infrastructure.BackgroundServices;
 using CodeWithMixx.API.Infrastructure.Cors;
 using CodeWithMixx.API.Infrastructure.Decorators;
 using CodeWithMixx.API.Infrastructure.Emails;
@@ -30,6 +31,7 @@ public static class DependencyInjection
         services.AddExceptionHandler<TokensRevokedExceptionHandler>();
         services.AddExceptionHandler<SecurityDbUpdateExceptionHandler>();
         services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddHostedService<MarkOverdueReservationsJob>();
         services.AddOpenApi();
         services.RegisterCors();
         

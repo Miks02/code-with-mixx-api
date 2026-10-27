@@ -15,6 +15,9 @@ public class CreateClassReservationRequestValidator : AbstractValidator<CreateCl
         RuleFor(x => x.PaidAmount)
             .GreaterThanOrEqualTo(0).WithMessage("Paid amount cannot be negative.");
 
+        RuleFor(x => x.Description)
+            .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
+
         RuleFor(x => x.ReservationStatus)
             .IsInEnum().WithMessage("Invalid reservation status.");
 

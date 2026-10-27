@@ -12,6 +12,7 @@ public record UpdateProjectReservationResponse
     public decimal PaidAmount { get; init; }
     public decimal DiscountRate { get; init; }
     public decimal Bonus { get; init; }
-    public string? Notes { get; init; }
+    public string? Description { get; init; }
+    public DateOnly ReservedAt { get; init; }
     public DateTime? UpdatedAt { get; init; }
 }

@@ -8,6 +8,7 @@ public record CreateClassReservationRequest
     public decimal PaidAmount { get; init; }
     public decimal? TotalPrice { get; init; }
     public ReservationStatus ReservationStatus { get; init; }
+    public string? Description { get; init; }
     
     public IReadOnlyList<ClassDto> Classes { get; init; } = []; 
 

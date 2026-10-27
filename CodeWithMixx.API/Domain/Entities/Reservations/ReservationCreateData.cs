@@ -6,6 +6,7 @@ public record ReservationCreateData
     public string AdminId { get; init; } = null!;
     public ReservationStatus ReservationStatus { get; init; } = ReservationStatus.Confirmed;
     public decimal? TotalPrice { get; init; }
-    public decimal PaidAmount { get; init; }
+    public DateOnly ReservedAt { get; init; }
+    public string? Description { get; init; }
     public IReadOnlyList<ClassCreateData> Classes { get; init; } = [];
 };

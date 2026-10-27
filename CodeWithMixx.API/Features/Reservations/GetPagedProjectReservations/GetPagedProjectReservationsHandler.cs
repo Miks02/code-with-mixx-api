@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Reservations.GetPagedProjectReservations;
 
-public class GetPagedProjectReservationsHandler(AppDbContext context)
+public class GetPagedProjectReservationsHandler(AppDbContext context, IUserClock userClock)
     : IHandler<GetPagedProjectReservationsRequest, PagedResult<GetPagedProjectReservationsResponse>>
 {
     public async Task<PagedResult<GetPagedProjectReservationsResponse>> HandleAsync(
@@ -49,6 +49,9 @@ public class GetPagedProjectReservationsHandler(AppDbContext context)
 
         if (reservationStatuses.Count > 0)
             reservationsQuery = reservationsQuery.Where(r => reservationStatuses.Contains(r.ReservationStatus));
+        
+        if(request.PaymentStatuses.Length > 0) 
+           reservationsQuery = reservationsQuery.Where(r => Enumerable.Contains(request.PaymentStatuses, r.PaymentStatus));
 
         var projectTypes = request.ProjectTypes
             .Select(f => f switch
@@ -78,9 +81,11 @@ public class GetPagedProjectReservationsHandler(AppDbContext context)
                 PaidAmount = r.PaidAmount,
                 DiscountRate = r.DiscountRate,
                 Bonus = r.Bonus,
+                Description = r.Description,
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
                 DeletedAt = r.DeletedAt,
+                IsHardDeletable = !r.RequiresHistoryRetention(userClock.Today),
                 Projects = r.Projects
                     .OrderBy(p => p.StartDate)
                     .Select(p => new ProjectItem
@@ -95,7 +100,8 @@ public class GetPagedProjectReservationsHandler(AppDbContext context)
                         StartDate = p.StartDate,
                         EndDate = p.EndDate,
                         GithubLink = p.GithubLink,
-                        DownloadLink = p.DownloadLink
+                        DownloadLink = p.DownloadLink,
+                        NotesCount = p.ProjectNotes.Count
                     })
                     .ToList()
             });

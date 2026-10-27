@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Reservations.CreateClassReservation;
 
-public class CreateClassReservationHandler(AppDbContext context, IUserProvider userProvider) : IHandler<CreateClassReservationRequest, Result<CreateClassReservationResponse>> 
+public class CreateClassReservationHandler(AppDbContext context, IUserProvider userProvider, IUserClock clock) : IHandler<CreateClassReservationRequest, Result<CreateClassReservationResponse>> 
 {
     public async Task<Result<CreateClassReservationResponse>> HandleAsync(CreateClassReservationRequest request, CancellationToken ct = default)
     {
@@ -46,11 +46,11 @@ public class CreateClassReservationHandler(AppDbContext context, IUserProvider u
             StudentId = request.StudentId,
             ReservationStatus = request.ReservationStatus,
             TotalPrice = request.TotalPrice,
-            PaidAmount = request.PaidAmount,
+            Description = request.Description,
             Classes = classes
         };
  
-        var reservationResult = Reservation.CreateClassReservation(newReservationData);
+        var reservationResult = Reservation.CreateClassReservation(newReservationData, request.PaidAmount, clock.Today);
 
         if (!reservationResult.IsSuccess)
             return Result<CreateClassReservationResponse>.Failure(reservationResult.Errors[0]);
@@ -63,6 +63,7 @@ public class CreateClassReservationHandler(AppDbContext context, IUserProvider u
             Id = reservationResult.Payload!.Id,
             PaymentStatus = reservationResult.Payload.PaymentStatus,
             ReservationStatus = reservationResult.Payload.ReservationStatus,
+            Description = reservationResult.Payload.Description,
             TotalPrice = reservationResult.Payload.TotalPrice,
             PaidAmount = reservationResult.Payload.PaidAmount,
             Classes = reservationResult.Payload.Classes.Select(c => new CreateClassReservationResponse.ClassDto

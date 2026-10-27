@@ -32,15 +32,23 @@ public class UpdateProjectReservationHandler(AppDbContext context, IUserClock cl
             reservation.ChangeStudent(request.StudentId);
         }
 
-        var deleteResult = DeleteProjects(reservation, request.ProjectsToDelete);
+        if (request.ProjectsToDelete.Count > 0)
+        {
+            var deleteResult = reservation.DeleteProjects(request.ProjectsToDelete);
 
-        if (!deleteResult.IsSuccess)
-            return Result<UpdateProjectReservationResponse>.Failure(deleteResult.Errors[0]);
+            if (!deleteResult.IsSuccess)
+                return Result<UpdateProjectReservationResponse>.Failure(deleteResult.Errors[0]);
+        }
 
         var updateResult = await UpdateExistingProjectsAsync(reservation, request.Projects, ct);
 
         if (!updateResult.IsSuccess)
             return Result<UpdateProjectReservationResponse>.Failure(updateResult.Errors[0]);
+        
+        var reservedAtResult = reservation.UpdateReservedAt(request.ReservedAt, clock.Today);
+
+        if (!reservedAtResult.IsSuccess)
+            return Result<UpdateProjectReservationResponse>.Failure(reservedAtResult.Errors[0]);
 
         var addResult = await AddNewProjectsAsync(reservation, request.Projects, ct);
 
@@ -48,7 +56,11 @@ public class UpdateProjectReservationHandler(AppDbContext context, IUserClock cl
             return Result<UpdateProjectReservationResponse>.Failure(addResult.Errors[0]);
 
         reservation.UpdateReservationStatus(request.ReservationStatus);
-        reservation.UpdateNotes(request.Notes);
+
+        var descriptionResult = reservation.UpdateDescription(request.Description);
+
+        if (!descriptionResult.IsSuccess)
+            return Result<UpdateProjectReservationResponse>.Failure(descriptionResult.Errors[0]);
 
         var today = clock.Today;
         
@@ -69,34 +81,14 @@ public class UpdateProjectReservationHandler(AppDbContext context, IUserClock cl
             PaidAmount = reservation.PaidAmount,
             DiscountRate = reservation.DiscountRate,
             Bonus = reservation.Bonus,
-            Notes = reservation.Notes,
+            Description = reservation.Description,
+            ReservedAt = reservation.ReservedAt,
             UpdatedAt = reservation.UpdatedAt
         };
 
         return Result<UpdateProjectReservationResponse>.Success(response);
     }
-
-    private Result DeleteProjects(Reservation reservation, IReadOnlyList<int> projectIdsToDelete)
-    {
-        if (projectIdsToDelete.Count == 0)
-            return Result.Success();
-
-        var existingProjectIds = reservation.Projects.Select(p => p.Id).ToHashSet();
-        var invalidProjectIds = projectIdsToDelete.Where(id => !existingProjectIds.Contains(id)).ToList();
-
-        if (invalidProjectIds.Count != 0)
-            return Result.Failure(ProjectError.NotFound(invalidProjectIds[0]));
-
-        var projectsToRemove = reservation.Projects.Where(p => projectIdsToDelete.Contains(p.Id)).ToList();
-
-        foreach (var projectToRemove in projectsToRemove)
-            reservation.RemoveProject(projectToRemove);
-        
-        context.Projects.RemoveRange(projectsToRemove);
-
-        return Result.Success();
-    }
-
+    
     private async Task<Result> UpdateExistingProjectsAsync(Reservation reservation, IReadOnlyList<UpdateProjectReservationRequest.ProjectItem> projects, CancellationToken ct)
     {
         var projectsToUpdate = projects.Where(p => p.Id != 0).ToList();
