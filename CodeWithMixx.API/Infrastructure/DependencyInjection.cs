@@ -27,13 +27,14 @@ public static class DependencyInjection
         services.AddSecurity(configuration);
         services.AddEmailServices(configuration);
         services.AddValidatorsFromAssembly(typeof(Program).Assembly);
-        services.AddProblemDetails();
         services.AddExceptionHandler<TokensRevokedExceptionHandler>();
         services.AddExceptionHandler<SecurityDbUpdateExceptionHandler>();
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddHostedService<MarkOverdueReservationsJob>();
         services.AddOpenApi();
         services.RegisterCors();
+        services.AddCustomProblemDetails();
+        
         
         services.Scan(scan => scan.FromAssemblyOf<Program>()
             .AddClasses(classes => classes.AssignableTo(typeof(IHandler<,>)))
@@ -50,5 +51,40 @@ public static class DependencyInjection
         
         await seeder.SeedRolesAsync();
         await seeder.SeedAdminAsync();
+    }
+
+    private static void AddCustomProblemDetails(this IServiceCollection services)
+    {
+        services.AddProblemDetails(options =>
+        {
+            options.CustomizeProblemDetails = ctx =>
+            {
+                ctx.ProblemDetails.Extensions.TryAdd("errorCode", ctx.ProblemDetails.Status switch
+                {
+                    400 => "General.BadRequest",
+                    401 => "General.Unauthorized",
+                    403 => "General.Forbidden",
+                    404 => "General.NotFound",
+                    409 => "General.Conflict",
+                    422 => "General.UnprocessableEntity",
+                    429 => "General.TooManyRequests",
+                    _ => "General.InternalServerError",
+                });
+                
+                ctx.ProblemDetails.Title = ctx.ProblemDetails.Status switch
+                {
+                    400 => "Bad request",
+                    401 => "Unauthorized",
+                    403 => "Forbidden",
+                    404 => "Not found",
+                    409 => "Conflict",
+                    429 => "Too many requests",
+                    _ => "Internal server error"
+                };
+
+                ctx.ProblemDetails.Instance = ctx.HttpContext.Request.Path;
+                ctx.ProblemDetails.Type = $"urn:codewithmixx-api:error:{ctx.ProblemDetails.Extensions["errorCode"]}";
+            };
+        });
     }
 }
