@@ -56,10 +56,9 @@ public static class ResultExtensions
         
         return TypedResults.Problem(new ProblemDetails
         {
-            Title = $"urn:codewithmixx-api:error:{error.Code}",
+            Type = $"urn:codewithmixx-api:error:{error.Code}",
             Detail = "An error occurred while processing your request.",
             Status = status,
-            Instance = $"/errors/{error.Code}",
             Extensions = { ["errorCode"] = error.Code }
         });
     }

@@ -17,7 +17,7 @@ public static class GlobalRateLimiter
                 var problem = new ProblemDetails
                 {
                     Title = "Too many requests",
-                    Type = "urn:code-with-mixx-api:error:General.TooManyRequests",
+                    Type = "urn:codewithmixx-api:error:General.TooManyRequests",
                     Detail = "You have exceeded the allowed number of requests. Please try again later.",
                     Status = StatusCodes.Status429TooManyRequests,
                     Instance = context.HttpContext.Request.Path,

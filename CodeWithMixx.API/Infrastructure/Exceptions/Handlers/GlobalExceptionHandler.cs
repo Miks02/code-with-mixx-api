@@ -23,11 +23,10 @@ public class GlobalExceptionHandler(
             ProblemDetails = new ProblemDetails
             {
                 Type = "urn:codewithmixx:api:error:General.InternalServerError",
-                Title = "Server error occured",
+                Title = "Internal server error",
                 Status = StatusCodes.Status500InternalServerError,
                 Detail =
                     "An unexpected error occurred while processing the request. Please try again later or contact support if the problem persists.",
-                Instance = instance
             }
         });
 
