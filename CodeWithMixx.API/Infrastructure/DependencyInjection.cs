@@ -30,6 +30,7 @@ public static class DependencyInjection
         services.AddExceptionHandler<TokensRevokedExceptionHandler>();
         services.AddExceptionHandler<SecurityDbUpdateExceptionHandler>();
         services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddHostedService<CleanExpiredTokensJob>();
         services.AddHostedService<MarkOverdueReservationsJob>();
         services.AddOpenApi();
         services.RegisterCors();
