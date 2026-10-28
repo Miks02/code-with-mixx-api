@@ -19,14 +19,14 @@ public class ActivateAccountHandler(UserManager<User> userManager, AppDbContext 
             if (user is null)
                 return Result.Failure(UserError.NotFound(request.UserId));
             
-            if(user.AccountStatus == AccountStatus.Deactivated)
-                return Result.Failure(AuthError.AccountDeactivated(request.UserId));
-
             if (!await userManager.VerifyUserTokenAsync(user, "InviteTokenProvider", "Invitation", request.Token))
                 return Result.Failure(AuthError.InvalidInvitationToken(request.UserId));
-
+            
             if (await userManager.HasPasswordAsync(user))
                 return Result.Failure(UserError.AlreadyActivated(request.UserId));
+            
+            if(user.AccountStatus == AccountStatus.Deactivated)
+                return Result.Failure(AuthError.AccountDeactivated(request.UserId));
 
             var setPasswordResult = await userManager.AddPasswordAsync(user, request.Password);
 
@@ -38,7 +38,11 @@ public class ActivateAccountHandler(UserManager<User> userManager, AppDbContext 
             if (!stampResult.Succeeded)
                 return Result.Failure(stampResult.Errors.First());
 
-            user.ActivateAccount();
+            var activationResult = user.ActivateAccount();
+            
+            if(!activationResult.IsSuccess)
+                return Result.Failure(AuthError.InvalidInvitationToken(request.UserId));
+            
             user.ConfirmEmail();
             await userManager.UpdateAsync(user);
             await transaction.CommitAsync(ct);
