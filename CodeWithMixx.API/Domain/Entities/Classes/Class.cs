@@ -10,6 +10,7 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
         public decimal Price { get; private set; }
         public DateTime StartsAt { get; private set; }
         public DateTime EndsAt { get; private set; }
+        public DateOnly ReservedAt { get; private set; }
 
         public Reservation Reservation { get; private set; } = null!;
         public int ReservationId { get; private set; } 
