@@ -48,6 +48,7 @@ public class GetPagedClassReservationsHandler(AppDbContext context)
             Bonus = r.Bonus,
             CreatedAt = r.CreatedAt,
             StartsAt = r.Classes.Min(c => c.StartsAt),
+            EndsAt = r.Classes.Max(c => c.EndsAt),
             Classes = r.Classes
                 .OrderBy(c => c.StartsAt)
                 .Select(c => new ClassItem

@@ -26,6 +26,7 @@ public record GetClassReservationsSummaryResponse
         public decimal Bonus { get; init; }
         public DateTime CreatedAt { get; init; }
         public DateTime StartsAt { get; init; }
+        public DateTime EndsAt { get; init; }
         public IReadOnlyList<ClassItem> Classes { get; init; } = [];
     }
 

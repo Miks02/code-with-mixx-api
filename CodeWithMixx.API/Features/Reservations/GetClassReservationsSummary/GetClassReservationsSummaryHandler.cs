@@ -50,6 +50,7 @@ public class GetClassReservationsSummaryHandler(AppDbContext context)
             DiscountRate = r.DiscountRate,
             Bonus = r.Bonus,
             StartsAt = r.Classes.Min(c => c.StartsAt),
+            EndsAt = r.Classes.Max(c => c.EndsAt),
             Classes = r.Classes
                 .OrderBy(c => c.StartsAt)
                 .Select(c => new ClassItem
