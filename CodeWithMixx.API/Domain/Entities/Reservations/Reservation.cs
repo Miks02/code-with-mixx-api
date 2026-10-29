@@ -47,7 +47,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         
         private Reservation() {}
 
-        public static Result<Reservation> CreateClassReservation(ReservationCreateData data, decimal paidAmount, DateOnly today)
+        public static Result<Reservation> CreateClassReservation(ReservationCreateData data, DateOnly today)
         {
             if (data.Classes.Count == 0)
                 return Result<Reservation>.Failure(ReservationError.NoClassesProvided());
@@ -55,15 +55,11 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             if(data.TotalPrice is not null && data.TotalPrice < 0)
                 return Result<Reservation>.Failure(ReservationError.InvalidTotalPrice(data.TotalPrice.Value));
             
-            if(paidAmount < 0)
-                return Result<Reservation>.Failure(ReservationError.InvalidAmount(paidAmount));
-            
             var reservation = new Reservation
             {
                 AdminId = data.AdminId,
                 StudentId = data.StudentId,
                 ReservationStatus = data.ReservationStatus,
-                PaidAmount = paidAmount,
                 ReservedAt = data.ReservedAt,
                 ReservationType = ReservationType.Class
             };
