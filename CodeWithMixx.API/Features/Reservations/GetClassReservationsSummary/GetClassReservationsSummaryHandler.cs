@@ -89,7 +89,8 @@ public class GetClassReservationsSummaryHandler(AppDbContext context, IUserClock
                     SubjectName = c.Subject.Name,
                     Price = c.Price,
                     StartsAt = c.StartsAt,
-                    EndsAt = c.EndsAt
+                    EndsAt = c.EndsAt,
+                    ReservedAt = c.ReservedAt
                 })
                 .ToList()
         });

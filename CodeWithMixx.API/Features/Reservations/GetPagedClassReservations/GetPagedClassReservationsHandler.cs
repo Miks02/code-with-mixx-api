@@ -88,7 +88,8 @@ public class GetPagedClassReservationsHandler(AppDbContext context, IUserClock u
                     SubjectName = c.Subject.Name,
                     Price = c.Price,
                     StartsAt = c.StartsAt,
-                    EndsAt = c.EndsAt
+                    EndsAt = c.EndsAt,
+                    ReservedAt = c.ReservedAt
                 })
                 .ToList()
         });
