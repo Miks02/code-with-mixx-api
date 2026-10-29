@@ -1,4 +1,5 @@
 ﻿using CodeWithMixx.API.Common.Result;
+using CodeWithMixx.API.Domain.Entities.Classes;
 
 namespace CodeWithMixx.API.Domain.Entities.Reservations
 {
@@ -34,8 +35,14 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         public static Error ProjectStartsBeforeReservation(DateOnly startDate, DateOnly reservedAt)
             => new("Reservation.ProjectStartsBeforeReservation", $"Project start date '{startDate}' cannot be before the reservation date '{reservedAt}'", ErrorType.Validation);
         
+        public static Error BreakDurationExceeded()
+            => new("Reservation.BreakDurationExceeded", $"Break duration between classes cannot exceed {ClassConstants.MaxBreakBetweenClassesInMinutes} minutes", ErrorType.Validation);
+        
         public static Error NoClassesProvided()
             => new("Reservation.NoClassesProvided", "No classes have been provided for a class reservation", ErrorType.Validation);
+        
+        public static Error ClassesOverlap()
+            => new("Reservation.ClassesOverlap", "Classes cannot overlap", ErrorType.Validation);
         
         public static Error NoProjectsProvided()
             => new("Reservation.NoProjectsProvided", "No projects have been provided for a project reservation", ErrorType.Validation);
