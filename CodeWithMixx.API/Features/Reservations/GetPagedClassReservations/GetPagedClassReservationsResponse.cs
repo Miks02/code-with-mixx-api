@@ -14,7 +14,10 @@ public record GetPagedClassReservationsResponse
     public decimal PaidAmount { get; init; }
     public decimal DiscountRate { get; init; }
     public decimal Bonus { get; init; }
+    public string? Description { get; init; }
+    public bool IsHardDeletable { get; init; }
     public DateTime CreatedAt { get; init; }
+    public DateTime? DeletedAt { get; init; }
     public DateTime StartsAt { get; init; }
     public DateTime EndsAt { get; init; }
     public IReadOnlyList<ClassItem> Classes { get; init; } = [];

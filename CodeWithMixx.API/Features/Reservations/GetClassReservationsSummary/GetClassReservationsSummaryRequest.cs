@@ -10,12 +10,16 @@ public record GetClassReservationsSummaryRequest
     public int PageNumber { get; init; } = 1;
     [FromQuery(Name = "pageSize")]
     public int PageSize { get; init; } = 10;
-    [FromQuery(Name = "reservationStatus")]
-    public ReservationStatus? ReservationStatus { get; init; }
-    [FromQuery(Name = "paymentStatus")]
-    public PaymentStatus? PaymentStatus { get; init; }
     [FromQuery(Name = "subjectIds")]
     public int[] SubjectIds { get; init; } = [];
+    [FromQuery(Name = "reservationStatuses")]
+    public ReservationStatusFilter[] ReservationStatuses { get; init; } = [];
+    [FromQuery(Name = "paymentStatuses")]
+    public PaymentStatus[] PaymentStatuses { get; init; } = [];
+    [FromQuery(Name = "showOnlyDeletedStudents")]
+    public bool ShowOnlyDeletedStudents { get; init; }
+    [FromQuery(Name = "showOnlyDeletedReservations")]
+    public bool ShowOnlyDeletedReservations { get; init; }
     [FromQuery(Name = "sortBy")]
     public ClassReservationSortBy SortBy { get; init; } = ClassReservationSortBy.StartDateAscending;
 }
