@@ -6,4 +6,5 @@ public record ClassCreateData
     public decimal Price { get; init; }
     public DateTime StartsAt { get; init; }
     public DateTime EndsAt { get; init; }
+    public DateOnly ReservedAt { get; init; }
 }
