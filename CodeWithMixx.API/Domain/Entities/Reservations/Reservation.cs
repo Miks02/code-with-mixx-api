@@ -64,8 +64,10 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 StudentId = data.StudentId,
                 ReservationStatus = data.ReservationStatus,
                 PaidAmount = paidAmount,
+                ReservedAt = data.ReservedAt,
                 ReservationType = ReservationType.Class
             };
+
 
             var descriptionResult = reservation.UpdateDescription(data.Description);
             if (!descriptionResult.IsSuccess)
@@ -76,9 +78,12 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             if (!classesResult.IsSuccess)
                 return Result<Reservation>.Failure(classesResult.Errors[0]);
             
+            var reservedAtResult = reservation.ValidateReservedAt(data.ReservedAt, today);
+            if(!reservedAtResult.IsSuccess)
+                return Result<Reservation>.Failure(reservedAtResult.Errors[0]);
+            
             reservation.TotalPrice = reservation.CalculateTotalPrice(data.TotalPrice);
             reservation.DiscountRate = reservation.CalculateDiscountRate(reservation.TotalPrice);
-            reservation.Bonus = reservation.CalculateBonus(reservation.TotalPrice, reservation.PaidAmount);
             reservation.PaymentStatus = reservation.DeterminePaymentStatus(reservation.PaidAmount, reservation.TotalPrice, today);
 
             
@@ -93,10 +98,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             if(data.TotalPrice is not null && data.TotalPrice < 0)
                 return Result<Reservation>.Failure(ReservationError.InvalidTotalPrice(data.TotalPrice.Value));
             
-            var reservedAtResult = ValidateReservedAt(data.ReservedAt, today);
-            if(!reservedAtResult.IsSuccess)
-                return Result<Reservation>.Failure(reservedAtResult.Errors[0]);
-            
             var reservation = new Reservation
             {
                 AdminId = data.AdminId,
@@ -106,6 +107,10 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 ReservedAt = data.ReservedAt,
                 ReservationType = ReservationType.Project
             };
+            
+            var reservedAtResult = reservation.ValidateReservedAt(data.ReservedAt, today);
+            if(!reservedAtResult.IsSuccess)
+                return Result<Reservation>.Failure(reservedAtResult.Errors[0]);
             
             var descriptionResult = reservation.UpdateDescription(data.Description);
             if (!descriptionResult.IsSuccess)
@@ -140,10 +145,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             var validationResult = ValidateReservedAt(reservedAt, today);
             if(!validationResult.IsSuccess)
                 return validationResult;
-
-            var projectStartingEarlier = Projects.FirstOrDefault(p => p.StartDate < reservedAt);
-            if(projectStartingEarlier is not null)
-                return Result.Failure(ReservationError.ProjectStartsBeforeReservation(projectStartingEarlier.StartDate, reservedAt));
             
             ReservedAt = reservedAt;
             return Result.Success();
@@ -247,7 +248,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 if (existingClass is null)
                     return Result.Failure(ClassError.NotFound(classUpdate.Id));
 
-                var updateResult = existingClass.Update(classUpdate.SubjectId, classUpdate.Price, classUpdate.StartsAt, classUpdate.EndsAt);
+                var updateResult = existingClass.Update(classUpdate.SubjectId, classUpdate.Price, classUpdate.StartsAt, classUpdate.EndsAt, classUpdate.ReservedAt);
 
                 if (!updateResult.IsSuccess)
                     return Result.Failure(updateResult.Errors[0]);
@@ -288,12 +289,28 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                                                                             
             foreach (var classData in classesToAdd)
             {
-                var classResult = Class.Create(classData.SubjectId, classData.Price, classData.StartsAt, classData.EndsAt);
+                var classResult = Class.Create(classData.SubjectId, classData.Price, classData.StartsAt, classData.EndsAt, classData.ReservedAt);
 
                 if (!classResult.IsSuccess)
                     return Result.Failure(classResult.Errors[0]);
 
                 _classes.Add(classResult.Payload!);
+
+                var previousClass = _classes.Count > 1 
+                    ? _classes.Skip(_classes.Count - 2).FirstOrDefault() 
+                    : null;
+
+                if (previousClass is null)
+                    continue;
+                
+                var currentClass = _classes.Last();
+                
+                if(currentClass.StartsAt < previousClass.EndsAt)
+                    return Result.Failure(ReservationError.ClassesOverlap());
+                
+                if((currentClass.StartsAt - previousClass.EndsAt).TotalMinutes > ClassConstants.MaxBreakBetweenClassesInMinutes)
+                    return Result.Failure(ReservationError.BreakDurationExceeded());
+
             }
 
             return Result.Success();
@@ -481,9 +498,13 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
         }
 
-        private static Result ValidateReservedAt(DateOnly reservedAt, DateOnly today)
+        private Result ValidateReservedAt(DateOnly reservedAt, DateOnly today)
         {
-            if(reservedAt <= DateOnly.MinValue || reservedAt > today)
+            var startOfAFirstService = ReservationType == ReservationType.Class 
+                ? DateOnly.FromDateTime(_classes.Min(c => c.StartsAt))
+                : _projects.Min(p => p.StartDate);
+            
+            if(reservedAt <= DateOnly.MinValue || reservedAt > today || reservedAt > startOfAFirstService)
                 return Result.Failure(ReservationError.InvalidReservedAt(reservedAt));
             
             return Result.Success();
