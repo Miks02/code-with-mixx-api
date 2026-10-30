@@ -36,7 +36,8 @@ public class CreateClassReservationHandler(AppDbContext context, IUserProvider u
                 SubjectId = c.SubjectId,
                 Price = c.Price,
                 StartsAt = c.StartsAt,
-                EndsAt = c.EndsAt
+                EndsAt = c.EndsAt,
+                ReservedAt = c.ReservedAt
             })
             .ToList();
 
@@ -47,10 +48,11 @@ public class CreateClassReservationHandler(AppDbContext context, IUserProvider u
             ReservationStatus = request.ReservationStatus,
             TotalPrice = request.TotalPrice,
             Description = request.Description,
+            ReservedAt = request.ReservedAt,
             Classes = classes
         };
  
-        var reservationResult = Reservation.CreateClassReservation(newReservationData, request.PaidAmount, clock.Today);
+        var reservationResult = Reservation.CreateClassReservation(newReservationData, clock.Today);
 
         if (!reservationResult.IsSuccess)
             return Result<CreateClassReservationResponse>.Failure(reservationResult.Errors[0]);

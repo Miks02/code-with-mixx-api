@@ -60,6 +60,9 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                     b.Property<int>("ReservationId")
                         .HasColumnType("integer");
 
+                    b.Property<DateOnly>("ReservedAt")
+                        .HasColumnType("date");
+
                     b.Property<DateTime>("StartsAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -81,7 +84,13 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.ToTable("Classes", t =>
                         {
-                            t.HasCheckConstraint("CK_Classes_Price_Positive", "\"Price\" >= 0");
+                            t.HasCheckConstraint("CK_Class_EndsAtAfterStartsAt", "\"EndsAt\" > \"StartsAt\"");
+
+                            t.HasCheckConstraint("CK_Class_MaxDuration45Min", "\"EndsAt\" - \"StartsAt\" <= interval '45 minutes'");
+
+                            t.HasCheckConstraint("CK_Class_Price_Positive", "\"Price\" >= 0");
+
+                            t.HasCheckConstraint("CK_Class_ReservedAtBeforeStartsAt", "\"ReservedAt\" <= (\"StartsAt\" AT TIME ZONE 'Europe/Belgrade')::date");
                         });
                 });
 

@@ -32,10 +32,13 @@ public class UpdateClassReservationHandler(AppDbContext context, IUserClock cloc
             reservation.ChangeStudent(request.StudentId);
         }
 
-        var deleteResult = DeleteClasses(reservation, request.ClassesToDelete);
+        if (request.ClassesToDelete.Count > 0)
+        {
+            var deleteResult = reservation.DeleteClasses(request.ClassesToDelete);
 
-        if (!deleteResult.IsSuccess)
-            return Result<UpdateClassReservationResponse>.Failure(deleteResult.Errors[0]);
+            if (!deleteResult.IsSuccess)
+                return Result<UpdateClassReservationResponse>.Failure(deleteResult.Errors[0]);
+        }
 
         var updateResult = await UpdateExistingClassesAsync(reservation, request.Classes, ct);
 
@@ -78,27 +81,6 @@ public class UpdateClassReservationHandler(AppDbContext context, IUserClock cloc
         return Result<UpdateClassReservationResponse>.Success(response);
     }
 
-    private Result DeleteClasses(Reservation reservation, IReadOnlyList<int> classIdsToDelete)
-    {
-        if (classIdsToDelete.Count == 0)
-            return Result.Success();
-
-        var existingClassIds = reservation.Classes.Select(c => c.Id).ToHashSet();
-        var invalidClassIds = classIdsToDelete.Where(id => !existingClassIds.Contains(id)).ToList();
-
-        if (invalidClassIds.Count != 0)
-            return Result.Failure(ClassError.NotFound(invalidClassIds[0]));
-
-        var classesToRemove = reservation.Classes.Where(c => classIdsToDelete.Contains(c.Id)).ToList();
-
-        foreach (var classToRemove in classesToRemove)
-            reservation.RemoveClass(classToRemove);
-
-        context.Classes.RemoveRange(classesToRemove);
-
-        return Result.Success();
-    }
-
     private async Task<Result> UpdateExistingClassesAsync(Reservation reservation, IReadOnlyList<ClassItem> classes, CancellationToken ct)
     {
         var classesToUpdate = classes.Where(c => c.Id != 0).ToList();
@@ -118,7 +100,8 @@ public class UpdateClassReservationHandler(AppDbContext context, IUserClock cloc
                 SubjectId = c.SubjectId,
                 Price = c.Price,
                 StartsAt = c.StartsAt,
-                EndsAt = c.EndsAt
+                EndsAt = c.EndsAt,
+                ReservedAt = c.ReservedAt
             })
             .ToList();
 
@@ -143,7 +126,8 @@ public class UpdateClassReservationHandler(AppDbContext context, IUserClock cloc
                 SubjectId = c.SubjectId,
                 Price = c.Price,
                 StartsAt = c.StartsAt,
-                EndsAt = c.EndsAt
+                EndsAt = c.EndsAt,
+                ReservedAt = c.ReservedAt
             })
             .ToList();
 

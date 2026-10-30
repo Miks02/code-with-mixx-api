@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Reservations.GetClassReservationsSummary;
 
-public class GetClassReservationsSummaryHandler(AppDbContext context)
+public class GetClassReservationsSummaryHandler(AppDbContext context, IUserClock userClock)
     : IHandler<GetClassReservationsSummaryRequest, Result<GetClassReservationsSummaryResponse>>
 {
 
@@ -17,16 +17,42 @@ public class GetClassReservationsSummaryHandler(AppDbContext context)
     {
         var subjectIds = request.SubjectIds;
 
-        var reservationsQuery = context.Reservations.AsQueryable();
+        var reservationsQuery = context.Reservations
+            .Where(r => r.ReservationType == ReservationType.Class);
 
-        if (request.ReservationStatus is not null)
-            reservationsQuery = reservationsQuery.Where(r => r.ReservationStatus == request.ReservationStatus);
+        if (request.ShowOnlyDeletedReservations)
+            reservationsQuery = reservationsQuery
+                .IgnoreQueryFilters()
+                .Where(r => r.IsDeleted);
 
-        if (request.PaymentStatus is not null)
-            reservationsQuery = reservationsQuery.Where(r => r.PaymentStatus == request.PaymentStatus);
+        if (request.ShowOnlyDeletedStudents)
+            reservationsQuery = reservationsQuery
+                .IgnoreQueryFilters()
+                .Where(r => r.Student.IsDeleted);
 
         if (subjectIds.Length > 0)
             reservationsQuery = reservationsQuery.Where(r => r.Classes.Any(c => subjectIds.AsEnumerable().Contains(c.SubjectId)));
+
+        var invalidStatusFilters = ReservationStatusFilterResolver.GetInvalidFilters(request.ReservationStatuses);
+
+        var reservationStatuses = request.ReservationStatuses
+            .Except(invalidStatusFilters)
+            .Select(f => f switch
+            {
+                ReservationStatusFilter.Confirmed => ReservationStatus.Confirmed,
+                ReservationStatusFilter.Completed => ReservationStatus.Completed,
+                ReservationStatusFilter.Cancelled => ReservationStatus.Cancelled,
+                _ => (ReservationStatus?)null
+            })
+            .Where(s => s.HasValue)
+            .Select(s => s!.Value)
+            .ToList();
+
+        if (reservationStatuses.Count > 0)
+            reservationsQuery = reservationsQuery.Where(r => reservationStatuses.Contains(r.ReservationStatus));
+
+        if (request.PaymentStatuses.Length > 0)
+            reservationsQuery = reservationsQuery.Where(r => Enumerable.Contains(request.PaymentStatuses, r.PaymentStatus));
 
         reservationsQuery = request.SortBy switch
         {
@@ -47,9 +73,13 @@ public class GetClassReservationsSummaryHandler(AppDbContext context)
             TotalPrice = r.TotalPrice,
             PaidAmount = r.PaidAmount,
             CreatedAt = r.CreatedAt,
+            DeletedAt = r.DeletedAt,
             DiscountRate = r.DiscountRate,
+            Description = r.Description,
+            IsHardDeletable = !r.RequiresHistoryRetention(userClock.Today),
             Bonus = r.Bonus,
             StartsAt = r.Classes.Min(c => c.StartsAt),
+            EndsAt = r.Classes.Max(c => c.EndsAt),
             Classes = r.Classes
                 .OrderBy(c => c.StartsAt)
                 .Select(c => new ClassItem
@@ -59,7 +89,8 @@ public class GetClassReservationsSummaryHandler(AppDbContext context)
                     SubjectName = c.Subject.Name,
                     Price = c.Price,
                     StartsAt = c.StartsAt,
-                    EndsAt = c.EndsAt
+                    EndsAt = c.EndsAt,
+                    ReservedAt = c.ReservedAt
                 })
                 .ToList()
         });

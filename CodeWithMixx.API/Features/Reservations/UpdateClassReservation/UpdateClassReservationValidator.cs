@@ -1,3 +1,4 @@
+using CodeWithMixx.API.Domain.Entities.Classes;
 using CodeWithMixx.API.Features.Reservations.Common;
 using FluentValidation;
 
@@ -53,6 +54,8 @@ public class ClassItemValidator : AbstractValidator<ClassItem>
 
         RuleFor(x => x.EndsAt)
             .NotEmpty().WithMessage("End time is required.")
-            .GreaterThan(x => x.StartsAt).WithMessage("End time must be after start time.");
+            .GreaterThan(x => x.StartsAt).WithMessage("End time must be after start time.")
+            .Must((x, endsAt) => endsAt - x.StartsAt <= TimeSpan.FromMinutes(ClassConstants.MaxDurationInMinutes))
+            .WithMessage($"Class duration cannot exceed {ClassConstants.MaxDurationInMinutes} minutes.");
     }
 }

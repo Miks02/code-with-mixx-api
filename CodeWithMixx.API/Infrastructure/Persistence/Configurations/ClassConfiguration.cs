@@ -8,8 +8,14 @@ namespace CodeWithMixx.API.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Class> builder)
         {
-            builder.ToTable(t => t.HasCheckConstraint("CK_Classes_Price_Positive", "\"Price\" >= 0"));
-
+            builder.ToTable(t =>
+            {
+                t.HasCheckConstraint($"CK_{nameof(Class)}_Price_Positive", "\"Price\" >= 0");
+                t.HasCheckConstraint($"CK_{nameof(Class)}_EndsAtAfterStartsAt", "\"EndsAt\" > \"StartsAt\"");
+                t.HasCheckConstraint($"CK_{nameof(Class)}_ReservedAtBeforeStartsAt", "\"ReservedAt\" <= (\"StartsAt\" AT TIME ZONE 'Europe/Belgrade')::date");
+                t.HasCheckConstraint($"CK_{nameof(Class)}_MaxDuration45Min", "\"EndsAt\" - \"StartsAt\" <= interval '45 minutes'");
+            });
+            
             builder.Property(r => r.Price)
                 .HasPrecision(18, 2);
 
@@ -25,6 +31,9 @@ namespace CodeWithMixx.API.Infrastructure.Persistence.Configurations
                 .WithMany(r => r.Classes)
                 .HasForeignKey(c => c.ReservationId)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            builder.Property(c => c.ReservedAt)
+                .IsRequired();
         }
     }
 }

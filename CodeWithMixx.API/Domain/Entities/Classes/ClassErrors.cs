@@ -36,5 +36,19 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
             string message = $"Class with identifier '{identifier}' cannot be restored because its reservation '{reservationIdentifier}' is archived. Restore the reservation instead";
             return new Error("Class.ReservationArchived", message, ErrorType.Conflict);
         }
+
+        public static Error InvalidDuration(int? identifier = null)
+        {  
+           return identifier is not null
+               ? new Error($"Class.InvalidDuration", $"Class '{identifier}' duration must be less than {ClassConstants.MaxDurationInMinutes} minutes", ErrorType.Validation) 
+               : new Error("Class.InvalidDuration", $"Class duration must be less than {ClassConstants.MaxDurationInMinutes} minutes", ErrorType.Validation);
+        }
+
+        public static Error InvalidReservationDate(int? identifier = null)
+        {
+            return identifier is not null
+                ? new Error($"Class.InvalidReservationDate", $"Class '{identifier}' reservation date must be before the class starts", ErrorType.Validation)
+                : new Error("Class.InvalidReservationDate", "Class reservation date must be before the class starts", ErrorType.Validation);
+        }
     }
 }

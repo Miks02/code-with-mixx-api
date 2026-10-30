@@ -10,6 +10,7 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
         public decimal Price { get; private set; }
         public DateTime StartsAt { get; private set; }
         public DateTime EndsAt { get; private set; }
+        public DateOnly ReservedAt { get; private set; }
 
         public Reservation Reservation { get; private set; } = null!;
         public int ReservationId { get; private set; } 
@@ -22,42 +23,37 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
         
-        
         private Class() {}
 
-        public static Result<Class> Create(int subjectId, decimal price, DateTime startsAt, DateTime endsAt)
+        public static Result<Class> Create(int subjectId, decimal price, DateTime startsAt, DateTime endsAt, DateOnly reservedAt)
         {
-            if(subjectId <= 0)
-                return Result<Class>.Failure(SubjectError.NotFound(subjectId));
-            if(price <= 0)
-                return Result<Class>.Failure(ClassError.InvalidPrice(price));
-            if(startsAt >= endsAt)
-                return Result<Class>.Failure(ClassError.InvalidSchedule(startsAt, endsAt));
-
+            var validationResult = Validate(subjectId, price, startsAt, endsAt, reservedAt);
+            if(!validationResult.IsSuccess)
+                return Result<Class>.Failure(validationResult.Errors[0]);
+            
             var newClass = new Class
             {
                 SubjectId = subjectId,
                 Price = price,
                 StartsAt = startsAt,
                 EndsAt = endsAt,
+                ReservedAt = reservedAt
             };
             
             return Result<Class>.Success(newClass);
         }
         
-        public Result<Class> Update(int subjectId, decimal price, DateTime startsAt, DateTime endsAt)
+        public Result<Class> Update(int subjectId, decimal price, DateTime startsAt, DateTime endsAt, DateOnly reservedAt)
         {
-            if(subjectId <= 0)
-                return Result<Class>.Failure(SubjectError.NotFound(subjectId));
-            if(price <= 0)
-                return Result<Class>.Failure(ClassError.InvalidPrice(price));
-            if(startsAt >= endsAt)
-                return Result<Class>.Failure(ClassError.InvalidSchedule(startsAt, endsAt));
+            var validationResult = Validate(subjectId, price, startsAt, endsAt, reservedAt);
+            if(!validationResult.IsSuccess)
+                return Result<Class>.Failure(validationResult.Errors[0]);
 
             SubjectId = subjectId;
             Price = price;
             StartsAt = startsAt;
             EndsAt = endsAt;
+            ReservedAt = reservedAt;
 
             return Result<Class>.Success(this);
         }
@@ -81,6 +77,22 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
             IsDeleted = false;
             DeletedAt = null;
 
+            return Result.Success();
+        }
+        
+        private static Result Validate(int subjectId, decimal price, DateTime startsAt, DateTime endsAt, DateOnly reservedAt)
+        {
+            if(subjectId <= 0)
+                return Result<Class>.Failure(SubjectError.NotFound(subjectId));
+            if(price <= 0)
+                return Result<Class>.Failure(ClassError.InvalidPrice(price));
+            if(startsAt >= endsAt)
+                return Result<Class>.Failure(ClassError.InvalidSchedule(startsAt, endsAt));
+            if ((endsAt - startsAt).TotalMinutes > ClassConstants.MaxDurationInMinutes)
+                return Result<Class>.Failure(ClassError.InvalidDuration());
+            if(reservedAt > DateOnly.FromDateTime(startsAt))
+                return Result<Class>.Failure(ClassError.InvalidReservationDate());
+            
             return Result.Success();
         }
     }

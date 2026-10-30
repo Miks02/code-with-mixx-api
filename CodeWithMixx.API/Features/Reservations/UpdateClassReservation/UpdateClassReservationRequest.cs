@@ -8,7 +8,7 @@ public record UpdateClassReservationRequest
     public int Id { get; init; }
     public string StudentId { get; init; } = null!;
     public decimal PaidAmount { get; init; }
-    public decimal TotalPrice { get; init; }
+    public decimal? TotalPrice { get; init; }
     public string? Description { get; init; }
     public ReservationStatus ReservationStatus { get; init; }
     

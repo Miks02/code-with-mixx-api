@@ -2,15 +2,15 @@ using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CodeWithMixx.API.Features.Reservations.GetClassReservationById;
+namespace CodeWithMixx.API.Features.Reservations.GetClassReservationDetails;
 
-public class GetClassReservationByIdEndpoint : IEndpoint
+public class GetClassReservationDetailsEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("/admin/reservations/classes/{reservationId:int}", async (
-                [AsParameters] GetClassReservationByIdRequest request,
-                IHandler<GetClassReservationByIdRequest, Result<GetClassReservationByIdResponse>> handler,
+                [AsParameters] GetClassReservationDetailsRequest request,
+                IHandler<GetClassReservationDetailsRequest, Result<GetClassReservationDetailsResponse>> handler,
                 CancellationToken ct) =>
         {
             var result = await handler.HandleAsync(request, ct);
@@ -18,7 +18,7 @@ public class GetClassReservationByIdEndpoint : IEndpoint
         })
         .RequireAuthorization("AdminOnly")
         .WithTags("Reservations")
-        .Produces<GetClassReservationByIdResponse>()
+        .Produces<GetClassReservationDetailsResponse>()
         .Produces(StatusCodes.Status404NotFound);
     }
 }
