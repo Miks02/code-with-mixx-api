@@ -410,6 +410,22 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             return Result.Success();
         }
 
+        public Result DeleteClasses(IReadOnlyList<int> classIdsToDelete)
+        {
+            if (classIdsToDelete.Count == 0)
+                return Result.Success();
+
+            var existingClassIds = _classes.Select(c => c.Id).ToHashSet();
+            var invalidClassIds = classIdsToDelete.Where(id => !existingClassIds.Contains(id)).ToList();
+
+            if (invalidClassIds.Count > 0)
+                return Result.Failure(ClassError.NotFound(invalidClassIds[0]));
+
+            _classes.RemoveAll(c => classIdsToDelete.Contains(c.Id));
+
+            return Result.Success();
+        }
+
         public Result DeleteProjects(IReadOnlyList<int> projectIdsToDelete)
         {
             if (projectIdsToDelete.Count == 0)
@@ -431,13 +447,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                || PaymentStatus != PaymentStatus.Pending
                || Classes.Any(c => c.StartsAt <= DateTime.UtcNow)
                || Projects.Any(p => p.StartDate <= today);
-        
-        public void RemoveClass(Class classToRemove) 
-            => _classes.Remove(classToRemove);
-
-        public void RemoveProject(Project projectToRemove)
-           => _projects.Remove(projectToRemove);
-        
+       
         
         private PaymentStatus DeterminePaymentStatus(decimal paidAmount, decimal totalPrice, DateOnly today)
         {
