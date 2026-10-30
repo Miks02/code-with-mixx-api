@@ -5,16 +5,18 @@ using CodeWithMixx.API.Features.Reservations.Common;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace CodeWithMixx.API.Features.Reservations.GetClassReservationById;
+namespace CodeWithMixx.API.Features.Reservations.GetClassReservationDetails;
 
-public class GetClassReservationByIdHandler(AppDbContext context)
-    : IHandler<GetClassReservationByIdRequest, Result<GetClassReservationByIdResponse>>
+public class GetClassReservationDetailsHandler(AppDbContext context)
+    : IHandler<GetClassReservationDetailsRequest, Result<GetClassReservationDetailsResponse>>
 {
-    public async Task<Result<GetClassReservationByIdResponse>> HandleAsync(GetClassReservationByIdRequest request, CancellationToken ct = default)
+    public async Task<Result<GetClassReservationDetailsResponse>> HandleAsync(
+        GetClassReservationDetailsRequest request,
+        CancellationToken ct = default)
     {
         var reservation = await context.Reservations
-            .Where(r => r.Id == request.ReservationId)
-            .Select(r => new GetClassReservationByIdResponse
+            .Where(r => r.Id == request.ReservationId && r.ReservationType == ReservationType.Class)
+            .Select(r => new GetClassReservationDetailsResponse
             {
                 Id = r.Id,
                 StudentId = r.StudentId,
@@ -28,6 +30,7 @@ public class GetClassReservationByIdHandler(AppDbContext context)
                 DiscountRate = r.DiscountRate,
                 Bonus = r.Bonus,
                 Description = r.Description,
+                ReservedAt = r.ReservedAt,
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
                 Classes = r.Classes
@@ -39,15 +42,16 @@ public class GetClassReservationByIdHandler(AppDbContext context)
                         SubjectName = c.Subject.Name,
                         Price = c.Price,
                         StartsAt = c.StartsAt,
-                        EndsAt = c.EndsAt
+                        EndsAt = c.EndsAt,
+                        ReservedAt = c.ReservedAt
                     })
                     .ToList()
             })
             .FirstOrDefaultAsync(ct);
 
         if (reservation is null)
-            return Result<GetClassReservationByIdResponse>.Failure(ReservationError.NotFound(request.ReservationId));
+            return Result<GetClassReservationDetailsResponse>.Failure(ReservationError.NotFound(request.ReservationId));
 
-        return Result<GetClassReservationByIdResponse>.Success(reservation);
+        return Result<GetClassReservationDetailsResponse>.Success(reservation);
     }
 }
