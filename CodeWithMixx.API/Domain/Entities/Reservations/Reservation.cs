@@ -104,10 +104,6 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 ReservationType = ReservationType.Project
             };
             
-            var reservedAtResult = reservation.ValidateReservedAt(data.ReservedAt, today);
-            if(!reservedAtResult.IsSuccess)
-                return Result<Reservation>.Failure(reservedAtResult.Errors[0]);
-            
             var descriptionResult = reservation.UpdateDescription(data.Description);
             if (!descriptionResult.IsSuccess)
                 return Result<Reservation>.Failure(descriptionResult.Errors[0]);
@@ -116,6 +112,10 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
             
             if (!addProjectsResult.IsSuccess)
                 return Result<Reservation>.Failure(addProjectsResult.Errors[0]);
+            
+            var reservedAtResult = reservation.ValidateReservedAt(data.ReservedAt, today);
+            if(!reservedAtResult.IsSuccess)
+                return Result<Reservation>.Failure(reservedAtResult.Errors[0]);
             
             reservation.TotalPrice = reservation.CalculateTotalPrice(data.TotalPrice);
             reservation.DiscountRate = reservation.CalculateDiscountRate(reservation.TotalPrice);
