@@ -15,6 +15,12 @@ public class AuthError
         
     public static Error PasswordError(string message = "Error occurred while trying to assign password to the user")
         => new("Auth.InvalidCredentials", message);
+    
+    public static Error CannotChangeEmailToSameEmail(string identifier)
+        => new("Auth.CannotChangeEmailToSameEmail", $"Cannot change email to the same email for user '{identifier}'", ErrorType.Validation);
+
+    public static Error EmailAlreadyInUse(string identifier, string email)
+        => new("Auth.EmailAlreadyInUse", $"Email '{email}' is already in use for user '{identifier}'", ErrorType.Validation);
 
     public static Error InvalidCurrentPassword(
         string message = "Entered password does not match the current password")
@@ -43,5 +49,7 @@ public class AuthError
         => new("Auth.InvalidPasswordResetToken", message, ErrorType.Unauthorized);
     public static Error InvalidInvitationToken(string message = "Invalid invitation token")
         => new("Auth.InvalidInvitationToken", message, ErrorType.Unauthorized);
+    public static Error InvalidEmailResetToken(string message = "Invalid email reset token")
+        => new("Auth.InvalidEmailResetToken", message, ErrorType.Unauthorized);
     
 }

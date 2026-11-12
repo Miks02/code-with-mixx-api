@@ -36,6 +36,11 @@ public static class SecurityRegistration
         {
             options.TokenLifespan = TimeSpan.FromHours(1);
         });
+
+        services.Configure<IdentityOptions>(options =>
+        {
+            options.Tokens.ChangeEmailTokenProvider = TokenOptions.DefaultEmailProvider;
+        });
         
         services.AddIdentityCore<User>()
             .AddTokenProvider<InviteTokenProvider<User>>("InviteTokenProvider");
