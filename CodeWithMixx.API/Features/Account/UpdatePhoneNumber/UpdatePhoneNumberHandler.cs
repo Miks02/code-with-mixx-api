@@ -23,6 +23,6 @@ public class UpdatePhoneNumberHandler(UserManager<User> userManager, IUserProvid
             return Result<UpdatePhoneNumberResponse>.Failure(UserError.CannotUpdatePhoneNumber(user.Id, identityErrorCode));
         }
         
-        return Result<UpdatePhoneNumberResponse>.Success(new UpdatePhoneNumberResponse());
+        return Result<UpdatePhoneNumberResponse>.Success(new UpdatePhoneNumberResponse {PhoneNumber = user.PhoneNumber!});
     }
 }
