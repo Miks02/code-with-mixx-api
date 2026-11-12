@@ -5,7 +5,6 @@ using System.Text;
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Domain.Entities.RefreshTokens;
 using CodeWithMixx.API.Domain.Entities.Users;
-using CodeWithMixx.API.Features.Authentication.Common;
 using CodeWithMixx.API.Infrastructure.Exceptions;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;

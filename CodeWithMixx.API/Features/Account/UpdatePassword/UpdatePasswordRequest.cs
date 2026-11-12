@@ -1,6 +1,6 @@
-namespace CodeWithMixx.API.Features.Account.ChangePassword;
+namespace CodeWithMixx.API.Features.Account.UpdatePassword;
 
-public record ChangePasswordRequest
+public record UpdatePasswordRequest
 {
     public string CurrentPassword { get; init; } = null!;
     public string NewPassword { get; init; } = null!;

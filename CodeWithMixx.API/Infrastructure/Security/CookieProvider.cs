@@ -1,5 +1,5 @@
 using System.Net;
-using CodeWithMixx.API.Features.Authentication.Common;
+using CodeWithMixx.API.Common.Interfaces;
 
 namespace CodeWithMixx.API.Infrastructure.Security;
 

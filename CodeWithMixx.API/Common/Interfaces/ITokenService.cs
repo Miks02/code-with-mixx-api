@@ -1,6 +1,6 @@
 using CodeWithMixx.API.Domain.Entities.Users;
 
-namespace CodeWithMixx.API.Features.Authentication.Common;
+namespace CodeWithMixx.API.Common.Interfaces;
 
 public interface ITokenService
 {

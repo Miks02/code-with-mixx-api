@@ -1,10 +1,10 @@
 using FluentValidation;
 
-namespace CodeWithMixx.API.Features.Account.ChangePassword;
+namespace CodeWithMixx.API.Features.Account.UpdatePassword;
 
-public class ChangePasswordValidator : AbstractValidator<ChangePasswordRequest>
+public class UpdatePasswordValidator : AbstractValidator<UpdatePasswordRequest>
 {
-    public ChangePasswordValidator()
+    public UpdatePasswordValidator()
     {
         RuleFor(x => x.CurrentPassword)
             .NotEmpty().WithMessage("Current password is required");

@@ -2,18 +2,17 @@ using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Domain.Entities.Users;
 using CodeWithMixx.API.Domain.ErrorCatalog;
-using CodeWithMixx.API.Features.Authentication.Common;
 using Microsoft.AspNetCore.Identity;
 
-namespace CodeWithMixx.API.Features.Account.ChangePassword;
+namespace CodeWithMixx.API.Features.Account.UpdatePassword;
 
-public class ChangePasswordHandler(
+public class UpdatePasswordHandler(
     UserManager<User> userManager,
     ITokenService tokenService,
     ICookieProvider cookieProvider,
-    IUserProvider userProvider) : IHandler<ChangePasswordRequest, Result>
+    IUserProvider userProvider) : IHandler<UpdatePasswordRequest, Result>
 {
-    public async Task<Result> HandleAsync(ChangePasswordRequest request, CancellationToken ct = default)
+    public async Task<Result> HandleAsync(UpdatePasswordRequest request, CancellationToken ct = default)
     {
         var user = await userManager.FindByIdAsync(userProvider.GetUserId());
         if (user is null)
