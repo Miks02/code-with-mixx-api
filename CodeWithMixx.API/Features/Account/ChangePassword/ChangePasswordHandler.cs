@@ -5,7 +5,7 @@ using CodeWithMixx.API.Domain.ErrorCatalog;
 using CodeWithMixx.API.Features.Authentication.Common;
 using Microsoft.AspNetCore.Identity;
 
-namespace CodeWithMixx.API.Features.Authentication.ChangePassword;
+namespace CodeWithMixx.API.Features.Account.ChangePassword;
 
 public class ChangePasswordHandler(
     UserManager<User> userManager,

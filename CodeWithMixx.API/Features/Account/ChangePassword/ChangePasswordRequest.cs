@@ -1,4 +1,4 @@
-namespace CodeWithMixx.API.Features.Authentication.ChangePassword;
+namespace CodeWithMixx.API.Features.Account.ChangePassword;
 
 public record ChangePasswordRequest
 {

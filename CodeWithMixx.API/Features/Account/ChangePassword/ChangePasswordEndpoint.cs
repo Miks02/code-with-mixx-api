@@ -1,13 +1,13 @@
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
 
-namespace CodeWithMixx.API.Features.Authentication.ChangePassword;
+namespace CodeWithMixx.API.Features.Account.ChangePassword;
 
 public class ChangePasswordEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("auth/change-password", async (
+        app.MapPost("account/password", async (
                 ChangePasswordRequest request,
                 IHandler<ChangePasswordRequest, Result> changePasswordHandler) =>
         {
@@ -16,7 +16,7 @@ public class ChangePasswordEndpoint : IEndpoint
         })
         .RequireRateLimiting("AuthLimiter")
         .RequireAuthorization()
-        .WithTags("Authentication")
+        .WithTags("Account")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status400BadRequest)
         .Produces(StatusCodes.Status401Unauthorized);
