@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using CodeWithMixx.API.Common.Interfaces;
 
@@ -9,7 +10,10 @@ public class UserProvider(IHttpContextAccessor http) : IUserProvider
         => http.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException("User is not authenticated");
 
     public string GetUserAgent() 
-     => http.HttpContext?.Request.Headers["User-Agent"].ToString() ?? "Unknown User Agent";
+        => http.HttpContext?.Request.Headers["User-Agent"].ToString() ?? "Unknown User Agent";
+
+    public string GetSessionId()
+        => http.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Sid) ?? throw new UnauthorizedAccessException("User is not authenticated");
 
     public string GetUserIpAddress() 
         => http.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown IP";
