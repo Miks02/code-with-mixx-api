@@ -9,6 +9,7 @@ using CodeWithMixx.API.Infrastructure.RateLimiting;
 using CodeWithMixx.API.Infrastructure.Security;
 using CodeWithMixx.API.Infrastructure.Utility;
 using FluentValidation;
+using UAParser;
 
 namespace CodeWithMixx.API.Infrastructure;
 
@@ -35,6 +36,7 @@ public static class DependencyInjection
         services.AddOpenApi();
         services.RegisterCors();
         services.AddCustomProblemDetails();
+        services.AddSingleton(Parser.GetDefault(new ParserOptions { UseCompiledRegex = true }));
         
         
         services.Scan(scan => scan.FromAssemblyOf<Program>()
