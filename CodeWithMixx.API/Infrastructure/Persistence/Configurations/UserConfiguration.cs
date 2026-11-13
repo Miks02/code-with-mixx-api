@@ -20,6 +20,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasConversion<string>()
             .HasMaxLength(20);
-        
+
+        builder.Navigation(x => x.RefreshTokens)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
     }
 }

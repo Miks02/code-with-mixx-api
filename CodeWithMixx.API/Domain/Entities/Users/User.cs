@@ -1,5 +1,6 @@
 using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Domain.Entities.Admins;
+using CodeWithMixx.API.Domain.Entities.RefreshTokens;
 using CodeWithMixx.API.Domain.Entities.Students;
 using Microsoft.AspNetCore.Identity;
 
@@ -19,6 +20,9 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
 
     public Student? Student { get; }
     public Admin? Admin { get; }
+
+    private readonly List<RefreshToken> _refreshTokens = [];
+    public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
 
     private User() {}
 
