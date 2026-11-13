@@ -31,7 +31,7 @@ public class GetMeHandler(IUserProvider userProvider, Parser uaParser, AppDbCont
                     .Where(rt => rt.RevokedAt == null && rt.ExpiresAt > DateTime.UtcNow)
                     .Select(rt => new ActiveSessionItem
                     {
-                        SessionId = rt.Id,
+                        SessionId = rt.SessionId,
                         ActiveSince = rt.CreatedAt,
                         Browser = uaParser.Parse(rt.UserAgent).UA.Family,
                         Os = uaParser.Parse(rt.UserAgent).OS.Family,
