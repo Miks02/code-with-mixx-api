@@ -26,6 +26,7 @@ public class GetMeHandler(IUserProvider userProvider, Parser uaParser, AppDbCont
                 Email = u.Email!,
                 PhoneNumber = u.PhoneNumber!,
                 AccountStatus = u.AccountStatus,
+                LastLogin = (DateTime) u.LastLoginAt!,
                 Roles = userProvider.GetUserRoles(),
                 ActiveSessions = u.RefreshTokens
                     .Where(rt => rt.RevokedAt == null && rt.ExpiresAt > DateTime.UtcNow)
