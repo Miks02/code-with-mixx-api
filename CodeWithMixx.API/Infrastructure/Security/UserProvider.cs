@@ -7,7 +7,9 @@ public class UserProvider(IHttpContextAccessor http) : IUserProvider
 {
     public string GetUserId() 
         => http.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException("User is not authenticated");
-   
+
+    public string GetUserAgent() 
+     => http.HttpContext?.Request.Headers["User-Agent"].ToString() ?? "Unknown User Agent";
 
     public string GetUserIpAddress() 
         => http.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown IP";
