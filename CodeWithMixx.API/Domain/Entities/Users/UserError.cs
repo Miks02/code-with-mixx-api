@@ -47,4 +47,11 @@ public class UserError
     
     public static Error AlreadyDeactivated(string identifier) 
         => new("User.AlreadyDeactivated", $"User with identifier '{identifier}' is already deactivated", ErrorType.Conflict);
+
+    public static Error CannotUpdatePhoneNumber(string identifier, string? identityErrorCode = null)
+    {
+        return string.IsNullOrWhiteSpace(identityErrorCode)
+            ? new Error("User.CannotUpdatePhoneNumber", $"User with identifier '{identifier}' cannot update his phone number", ErrorType.Conflict)
+            : new Error("User.CannotUpdatePhoneNumber", $"User with identifier '{identifier}' cannot update his phone number because of identity error '{identityErrorCode}'", ErrorType.Conflict);
+    } 
 }

@@ -165,6 +165,43 @@ public class AuthEmailSender(IConfiguration configuration, IResend resend) : IAu
         await resend.EmailSendAsync(message);
     }
 
+    public async Task SendPasswordChangeConfirmationAsync(string email)
+    {
+        var htmlBody = """
+                       <!DOCTYPE html>
+                       <html lang="sr">
+                       <head>
+                           <meta charset="UTF-8">
+                           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                       </head>
+                       <body style="font-family: Arial, sans-serif; background-color: #d1fae5; color: #51545e; margin: 0; padding: 20px; font-weight: 600;">
+                           <div style="max-width: 600px; background-color: #064e3b; margin: 0 auto; padding: 30px; border-radius: 8px; color: #ecfdf5;">
+                               <h2 style="color: #ecfdf5; margin-top: 0;">Promena lozinke</h2>
+                               <p>Pozdrav kolega/koleginice,</p>
+                               <p>Lozinka za tvoj nalog je uspešno promenjena.</p>
+                               <p>Od sada se na platformu prijavljuješ sa novom lozinkom.</p>
+
+                               <p style="font-size: 14px; color: #fde047;">Ako nisi ti promenio/la lozinku, javi se administratoru u što kraćem roku jer je moguće da je došlo do sigurnosnog propusta.</p>
+
+                               <hr style="border: none; border-top: 1px solid #047857; margin: 20px 0;" />
+
+                               <p style="margin-bottom: 0;">Srdačan pozdrav,<br/><strong><span style="color: #f59e0b;">Code</span>WithMixx</strong></p>
+                           </div>
+                       </body>
+                       </html>
+                       """;
+
+        var message = new EmailMessage
+        {
+            From = _fromEmail,
+            To = email,
+            HtmlBody = htmlBody,
+            Subject = "Promena lozinke"
+        };
+
+        await resend.EmailSendAsync(message);
+    }
+
     public async Task SendAccountActivatedEmailAsync(string email)
     {
         var htmlBody = """
@@ -271,6 +308,48 @@ public class AuthEmailSender(IConfiguration configuration, IResend resend) : IAu
             To = email,
             HtmlBody = htmlBody,
             Subject = "Nalog je obrisan"
+        };
+        
+        await resend.EmailSendAsync(message);
+    }
+
+    public async Task SendTokenForEmailChangeAsync(string email, string newEmail, string token)
+    {
+        var htmlBody = $"""
+                        <!DOCTYPE html>
+                        <html lang="sr">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        </head>
+                        <body style="font-family: Arial, sans-serif; background-color: #d1fae5; color: #51545e; margin: 0; padding: 20px; font-weight: 600;">
+                            <div style="max-width: 600px; background-color: #064e3b; margin: 0 auto; padding: 30px; border-radius: 8px; color: #ecfdf5;">
+                                <h2 style="color: #ecfdf5; margin-top: 0;">Promena email adrese</h2>
+                                <p>Pozdrav kolega/koleginice,</p>
+                                <p>Primili smo zahtev da se email adresa tvog naloga promeni na <strong style="color: #fde047;">{newEmail}</strong>.</p>
+                                <p>Unesi sledeći kod na platformi da potvrdiš promenu:</p>
+
+                                <div style="background-color: #022c22; border: 1px solid #047857; border-radius: 8px; padding: 20px; margin: 25px 0; text-align: center;">
+                                    <span style="font-family: 'Courier New', Courier, monospace; font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #f59e0b;">{token}</span>
+                                </div>
+
+                                <p style="font-size: 14px;">Kod važi ograničeno vreme i može se iskoristiti samo jednom.</p>
+                                <p style="font-size: 14px; color: #fde047;">Ako nisi ti zatražio/la promenu, ignoriši ovaj mejl i tvoja adresa ostaje ista. Preporučujemo da promeniš lozinku.</p>
+
+                                <hr style="border: none; border-top: 1px solid #047857; margin: 20px 0;" />
+
+                                <p style="margin-bottom: 0;">Srdačan pozdrav,<br/><strong><span style="color: #f59e0b;">Code</span>WithMixx</strong></p>
+                            </div>
+                        </body>
+                        </html>
+                        """;
+        
+        var message = new EmailMessage
+        {
+            From = _fromEmail,
+            To = email,
+            HtmlBody = htmlBody,
+            Subject = "Token za reset email adrese"
         };
         
         await resend.EmailSendAsync(message);
