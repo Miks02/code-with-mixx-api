@@ -20,9 +20,9 @@ public class TokenService(
     UserManager<User> userManager,
     IUserProvider userProvider) : ITokenService
 {
-    public async Task<TokenResponseDto> AssignAuthTokens(User user)
+    public async Task<TokenResponseDto> AssignAuthTokens(User user, string userAgent, Guid sessionId)
     {
-        var refreshToken = await AssignRefreshToken(user);
+        var refreshToken = await AssignRefreshToken(user, userAgent, sessionId);
         var accessToken = await GenerateAccessToken(user);
         
         return new TokenResponseDto
@@ -88,7 +88,7 @@ public class TokenService(
     
     private string CreateRawRefreshToken() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
-    private async Task<string> AssignRefreshToken(User user)
+    private async Task<string> AssignRefreshToken(User user, string userAgent, Guid sessionId)
     {
         var refreshToken = CreateRawRefreshToken();
         var refreshTokenHash = HashRefreshToken(refreshToken);
@@ -97,7 +97,9 @@ public class TokenService(
             tokenHash: refreshTokenHash,
             userId: user.Id,
             userIp: userProvider.GetUserIpAddress(),
-            expiresAt: DateTime.UtcNow.AddDays(configuration.GetValue<int>("RefreshConfig:ExpirationInDays"))
+            expiresAt: DateTime.UtcNow.AddDays(configuration.GetValue<int>("RefreshConfig:ExpirationInDays")),
+            userAgent: userAgent,
+            sessionId: sessionId
         );
         
         context.RefreshTokens.Add(newRefreshToken);

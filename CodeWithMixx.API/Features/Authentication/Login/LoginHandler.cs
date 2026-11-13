@@ -1,5 +1,6 @@
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
+using CodeWithMixx.API.Domain.Entities.RefreshTokens;
 using CodeWithMixx.API.Domain.Entities.Users;
 using CodeWithMixx.API.Domain.ErrorCatalog;
 using CodeWithMixx.API.Infrastructure.Persistence;
@@ -12,7 +13,8 @@ public class LoginHandler(
     UserManager<User> userManager,
     ITokenService tokenService,
     AppDbContext context,
-    ICookieProvider cookieProvider) : IHandler<LoginRequest, Result<LoginResponse>>
+    ICookieProvider cookieProvider,
+    IUserProvider userProvider) : IHandler<LoginRequest, Result<LoginResponse>>
 {
 
     public async Task<Result<LoginResponse>> HandleAsync(LoginRequest request, CancellationToken ct = default)
@@ -32,7 +34,10 @@ public class LoginHandler(
             if (user.AccountStatus == AccountStatus.Deactivated)
                 return Result<LoginResponse>.Failure(AuthError.AccountDeactivated(user.Id));
 
-            var tokens = await tokenService.AssignAuthTokens(user);
+            var sessionId = RefreshToken.GenerateSessionId();
+            var userAgent = userProvider.GetUserAgent();
+            
+            var tokens = await tokenService.AssignAuthTokens(user, userAgent, sessionId);
             
             cookieProvider.SetAccessTokenCookie(tokens.AccessToken);
             cookieProvider.SetRefreshTokenCookie(tokens.RefreshToken);

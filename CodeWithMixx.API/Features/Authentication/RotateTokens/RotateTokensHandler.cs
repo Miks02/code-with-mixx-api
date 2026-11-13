@@ -30,7 +30,7 @@ public class RotateTokensHandler(
             return Result.Failure(AuthError.ExpiredToken());
         }
         
-        var tokens = await tokenService.AssignAuthTokens(oldToken.User);
+        var tokens = await tokenService.AssignAuthTokens(oldToken.User, oldToken.UserAgent, oldToken.SessionId);
         
         var newHashedRefreshToken = tokenService.HashRefreshToken(tokens.RefreshToken);
         
