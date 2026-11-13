@@ -280,6 +280,9 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                     b.Property<DateTime?>("RevokedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("TokenHash")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -287,6 +290,10 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -745,7 +752,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.RefreshTokens.RefreshToken", b =>
                 {
                     b.HasOne("CodeWithMixx.API.Domain.Entities.Users.User", "User")
-                        .WithMany()
+                        .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -868,6 +875,8 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Users.User", b =>
                 {
                     b.Navigation("Admin");
+
+                    b.Navigation("RefreshTokens");
 
                     b.Navigation("Student");
                 });

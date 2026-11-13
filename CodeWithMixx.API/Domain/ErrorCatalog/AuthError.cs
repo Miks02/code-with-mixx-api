@@ -51,5 +51,7 @@ public class AuthError
         => new("Auth.InvalidInvitationToken", message, ErrorType.Validation);
     public static Error InvalidEmailResetToken(string message = "Invalid email reset token")
         => new("Auth.InvalidEmailResetToken", message, ErrorType.Validation);
+    public static Error SessionNotFound(string sessionId) 
+        => new("Auth.SessionNotFound", $"Session with id {sessionId} not found", ErrorType.NotFound);
     
 }

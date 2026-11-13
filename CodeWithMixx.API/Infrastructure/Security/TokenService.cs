@@ -20,10 +20,10 @@ public class TokenService(
     UserManager<User> userManager,
     IUserProvider userProvider) : ITokenService
 {
-    public async Task<TokenResponseDto> AssignAuthTokens(User user)
+    public async Task<TokenResponseDto> AssignAuthTokens(User user, string userAgent, Guid sessionId)
     {
-        var refreshToken = await AssignRefreshToken(user);
-        var accessToken = await GenerateAccessToken(user);
+        var refreshToken = await AssignRefreshToken(user, userAgent, sessionId);
+        var accessToken = await GenerateAccessToken(user, sessionId);
         
         return new TokenResponseDto
         {
@@ -56,7 +56,7 @@ public class TokenService(
         return Convert.ToBase64String(hash);
     }
     
-    private async Task<string> GenerateAccessToken(User user)
+    private async Task<string> GenerateAccessToken(User user, Guid sessionId)
     {
         var secretKey = configuration["JwtConfig:Token"]!;
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -71,6 +71,7 @@ public class TokenService(
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Sid, sessionId.ToString())
             ]),
             Expires = DateTimeOffset.UtcNow.AddMinutes(configuration.GetValue<int>("JwtConfig:ExpirationInMinutes")).UtcDateTime,
             SigningCredentials = signingCreds,
@@ -88,7 +89,7 @@ public class TokenService(
     
     private string CreateRawRefreshToken() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
-    private async Task<string> AssignRefreshToken(User user)
+    private async Task<string> AssignRefreshToken(User user, string userAgent, Guid sessionId)
     {
         var refreshToken = CreateRawRefreshToken();
         var refreshTokenHash = HashRefreshToken(refreshToken);
@@ -97,7 +98,9 @@ public class TokenService(
             tokenHash: refreshTokenHash,
             userId: user.Id,
             userIp: userProvider.GetUserIpAddress(),
-            expiresAt: DateTime.UtcNow.AddDays(configuration.GetValue<int>("RefreshConfig:ExpirationInDays"))
+            expiresAt: DateTime.UtcNow.AddDays(configuration.GetValue<int>("RefreshConfig:ExpirationInDays")),
+            userAgent: userAgent,
+            sessionId: sessionId
         );
         
         context.RefreshTokens.Add(newRefreshToken);
