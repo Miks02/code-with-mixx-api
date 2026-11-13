@@ -35,6 +35,7 @@ public class GetMeHandler(IUserProvider userProvider, Parser uaParser, AppDbCont
                         ActiveSince = rt.CreatedAt,
                         Browser = uaParser.Parse(rt.UserAgent).UA.Family,
                         Os = uaParser.Parse(rt.UserAgent).OS.Family,
+                        Device = SessionDeviceResolver.Resolve(uaParser.Parse(rt.UserAgent)),
                         IsCurrentSession = rt.SessionId.ToString() == currentSession
                     })
                     .ToList()
