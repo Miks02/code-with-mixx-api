@@ -10,7 +10,8 @@ public class UpdatePasswordHandler(
     UserManager<User> userManager,
     ITokenService tokenService,
     ICookieProvider cookieProvider,
-    IUserProvider userProvider) : IHandler<UpdatePasswordRequest, Result>
+    IUserProvider userProvider,
+    IAuthEmailSender emailSender) : IHandler<UpdatePasswordRequest, Result>
 {
     public async Task<Result> HandleAsync(UpdatePasswordRequest request, CancellationToken ct = default)
     {
@@ -28,6 +29,9 @@ public class UpdatePasswordHandler(
         
         await tokenService.RevokeAllUserTokensAsync(user.Id);
         cookieProvider.RemoveAuthCookies();
+        
+        await emailSender.SendPasswordChangeConfirmationAsync(user.Email!);
+        
         return Result.Success();
     }
 }
