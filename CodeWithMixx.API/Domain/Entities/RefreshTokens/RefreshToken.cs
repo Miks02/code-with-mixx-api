@@ -18,9 +18,12 @@ public class RefreshToken : IAuditable
     public User User { get; private set; } = null!;
     public string UserId { get; private set; } = null!;
     
+    public string UserAgent { get; private set; } = null!; 
+    public Guid SessionId { get; private set; }
+    
     private RefreshToken() {}
 
-    public static RefreshToken CreateRefreshToken(string tokenHash, string userId, string userIp, DateTime expiresAt)
+    public static RefreshToken CreateRefreshToken(string tokenHash, string userId, string userIp, DateTime expiresAt, string userAgent, Guid sessionId)
     {
         if (string.IsNullOrWhiteSpace(tokenHash) || tokenHash.Length != 44)
             throw new ArgumentException("Token hash must be a valid 44-character SHA-256 Base64 string.", nameof(tokenHash));
@@ -30,9 +33,13 @@ public class RefreshToken : IAuditable
             UserId = userId,
             TokenHash = tokenHash,
             CreatedByIp = userIp,
-            ExpiresAt = expiresAt
+            ExpiresAt = expiresAt,
+            UserAgent = userAgent,
+            SessionId = sessionId
         };
     }
+    
+    public static Guid GenerateSessionId() => Guid.NewGuid();
 
     public void Revoke(string? replacedByTokenHash = null)
     {
