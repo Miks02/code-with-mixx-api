@@ -14,6 +14,9 @@ namespace CodeWithMixx.UnitTests.Infrastructure.Security;
 
 public class TokenServiceTests
 {
+    private const string UserAgent = "Mozilla/5.0 (UnitTests)";
+    private static readonly Guid SessionId = Guid.NewGuid();
+
     private readonly IUserProvider _userProvider;
     private readonly AppDbContext _context;
     private readonly UserManager<User> _userManager;
@@ -54,7 +57,7 @@ public class TokenServiceTests
     {
         var user = User.CreateUser("Marko", "Markovic", "marko@test.com", "123456789");
 
-        var result = await _sut.AssignAuthTokens(user);
+        var result = await _sut.AssignAuthTokens(user, UserAgent, SessionId);
 
         result.Should().NotBeNull();
         result.AccessToken.Should().NotBeNullOrEmpty();
@@ -67,7 +70,7 @@ public class TokenServiceTests
         var user = User.CreateUser("Marko", "Markovic", "marko@test.com", "123456789");
         _userManager.GetRolesAsync(user).Returns(new List<string> { "Admin", "User" });
 
-        var result = await _sut.AssignAuthTokens(user);
+        var result = await _sut.AssignAuthTokens(user, UserAgent, SessionId);
 
         var jwt = new JwtSecurityTokenHandler().ReadJwtToken(result.AccessToken);
 
@@ -84,7 +87,7 @@ public class TokenServiceTests
     {
         var user = User.CreateUser("Marko", "Markovic", "marko@test.com", "123456789");
 
-        var result = await _sut.AssignAuthTokens(user);
+        var result = await _sut.AssignAuthTokens(user, UserAgent, SessionId);
 
         var storedToken = await _context.RefreshTokens
             .SingleOrDefaultAsync(rt => rt.UserId == user.Id);
@@ -92,6 +95,8 @@ public class TokenServiceTests
         storedToken.Should().NotBeNull();
         storedToken!.TokenHash.Should().Be(_sut.HashRefreshToken(result.RefreshToken));
         storedToken.ExpiresAt.Should().BeCloseTo(DateTime.UtcNow.AddDays(7), TimeSpan.FromSeconds(5));
+        storedToken.UserAgent.Should().Be(UserAgent);
+        storedToken.SessionId.Should().Be(SessionId);
     }
 
     [Fact]
@@ -99,7 +104,7 @@ public class TokenServiceTests
     {
         var user = User.CreateUser("Marko", "Markovic", "marko@test.com", "123456789");
 
-        await _sut.AssignAuthTokens(user);
+        await _sut.AssignAuthTokens(user, UserAgent, SessionId);
 
         _userProvider.Received(1).GetUserIpAddress();
     }

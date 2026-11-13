@@ -23,7 +23,7 @@ public class TokenService(
     public async Task<TokenResponseDto> AssignAuthTokens(User user, string userAgent, Guid sessionId)
     {
         var refreshToken = await AssignRefreshToken(user, userAgent, sessionId);
-        var accessToken = await GenerateAccessToken(user);
+        var accessToken = await GenerateAccessToken(user, sessionId);
         
         return new TokenResponseDto
         {
@@ -56,7 +56,7 @@ public class TokenService(
         return Convert.ToBase64String(hash);
     }
     
-    private async Task<string> GenerateAccessToken(User user)
+    private async Task<string> GenerateAccessToken(User user, Guid sessionId)
     {
         var secretKey = configuration["JwtConfig:Token"]!;
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -71,6 +71,7 @@ public class TokenService(
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Sid, sessionId.ToString())
             ]),
             Expires = DateTimeOffset.UtcNow.AddMinutes(configuration.GetValue<int>("JwtConfig:ExpirationInMinutes")).UtcDateTime,
             SigningCredentials = signingCreds,
