@@ -10,4 +10,5 @@ public record LoginResponse
     public string PhoneNumber { get; init; } = null!;
     public AccountStatus AccountStatus { get; init; }
     public IReadOnlyList<string> Roles { get; init; } = [];
+    public int ActiveSessions { get; init; }
 };

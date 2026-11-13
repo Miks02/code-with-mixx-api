@@ -4,6 +4,7 @@ using CodeWithMixx.API.Domain.Entities.Users;
 using CodeWithMixx.API.Domain.ErrorCatalog;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Authentication.Login;
 
@@ -20,7 +21,7 @@ public class LoginHandler(
 
         try
         {
-            var user = await userManager.FindByEmailAsync(request.Email);
+            var user = await userManager.Users.Include(u => u.RefreshTokens).FirstOrDefaultAsync(u => u.Email == request.Email, ct);
             if (user is null)
                 return Result<LoginResponse>.Failure(AuthError.LoginFailed($"User with email {request.Email} has not been found."));
 
@@ -50,7 +51,8 @@ public class LoginHandler(
                 Email = user.Email!,
                 PhoneNumber = user.PhoneNumber!,
                 AccountStatus = user.AccountStatus,
-                Roles = userRoles
+                Roles = userRoles,
+                ActiveSessions = user.RefreshTokens.Count(rt => rt.RevokedAt == null && rt.ExpiresAt > DateTime.UtcNow)
             });
         }
         catch (Exception)

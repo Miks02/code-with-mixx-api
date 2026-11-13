@@ -20,7 +20,8 @@ public class GetMeHandler(UserManager<User> userManager, IUserProvider userProvi
                 Email = u.Email!,
                 PhoneNumber = u.PhoneNumber!,
                 AccountStatus = u.AccountStatus,
-                Roles = userProvider.GetUserRoles()
+                Roles = userProvider.GetUserRoles(),
+                ActiveSessions = u.RefreshTokens.Count(rt => rt.RevokedAt == null && rt.ExpiresAt > DateTime.UtcNow)
             })
             .FirstOrDefaultAsync(ct);
         
