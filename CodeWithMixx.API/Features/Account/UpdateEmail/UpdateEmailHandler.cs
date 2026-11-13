@@ -16,44 +16,48 @@ public class UpdateEmailHandler(
 {
     public async Task<Result<UpdateEmailResponse>> HandleAsync(UpdateEmailRequest request, CancellationToken ct = default)
     {
+        await using var transaction = await context.Database.BeginTransactionAsync(ct);
+
         var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userProvider.GetUserId(), ct);
         if(user is null)
             return Result<UpdateEmailResponse>.Failure(UserError.NotFound());
-        
+
         var oldEmail = user.Email!;
-        
-        if(string.Compare(user.Email, request.NewEmail, StringComparison.OrdinalIgnoreCase) == 0) 
+
+        if(string.Compare(user.Email, request.NewEmail, StringComparison.OrdinalIgnoreCase) == 0)
             return Result<UpdateEmailResponse>.Failure(AuthError.CannotChangeEmailToSameEmail(user.Id));
-        
+
         if(!await userManager.CheckPasswordAsync(user, request.Password))
             return Result<UpdateEmailResponse>.Failure(AuthError.InvalidCurrentPassword());
-        
+
         var emailUpdateResult = await userManager.ChangeEmailAsync(user, request.NewEmail, request.Token);
 
         if (!emailUpdateResult.Succeeded)
         {
             var error = emailUpdateResult.Errors.First();
-            if(error.Code == "DuplicateUserName" || error.Code == "DuplicateEmail")
+            if (error.Code == "DuplicateUserName" || error.Code == "DuplicateEmail")
                 return Result<UpdateEmailResponse>.Failure(AuthError.EmailAlreadyInUse(user.Id, request.NewEmail));
             if (error.Code == "InvalidToken")
                 return Result<UpdateEmailResponse>.Failure(AuthError.InvalidEmailResetToken());
 
             return Result<UpdateEmailResponse>.Failure(error);
         }
-        
+
         var setUserNameResult = await userManager.SetUserNameAsync(user, request.NewEmail);
 
         if (!setUserNameResult.Succeeded)
         {
             var error = setUserNameResult.Errors.First();
-            if(error.Code == "DuplicateUserName" || error.Code == "DuplicateEmail")
+            if (error.Code == "DuplicateUserName" || error.Code == "DuplicateEmail")
                 return Result<UpdateEmailResponse>.Failure(AuthError.EmailAlreadyInUse(user.Id, request.NewEmail));
 
             return Result<UpdateEmailResponse>.Failure(error);
         }
-        
+
+        await transaction.CommitAsync(ct);
+
         await emailSender.SendEmailChangeConfirmationAsync(oldEmail);
 
-        return Result<UpdateEmailResponse>.Success(new UpdateEmailResponse { Email = user.Email!});
+        return Result<UpdateEmailResponse>.Success(new UpdateEmailResponse { Email = request.NewEmail });
     }
 }
