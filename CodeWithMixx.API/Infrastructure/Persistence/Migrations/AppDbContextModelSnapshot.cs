@@ -30,7 +30,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Admins", (string)null);
+                    b.ToTable("Admins");
                 });
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Classes.Class", b =>
@@ -82,7 +82,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("Classes", null, t =>
+                    b.ToTable("Classes", t =>
                         {
                             t.HasCheckConstraint("CK_Class_EndsAtAfterStartsAt", "\"EndsAt\" > \"StartsAt\"");
 
@@ -144,7 +144,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasIndex("TransactionDate");
 
-                    b.ToTable("PaymentTransactions", null, t =>
+                    b.ToTable("PaymentTransactions", t =>
                         {
                             t.HasCheckConstraint("CK_PaymentTransactions_Amount_Positive", "\"Amount\" > 0");
                         });
@@ -215,7 +215,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("Projects", null, t =>
+                    b.ToTable("Projects", t =>
                         {
                             t.HasCheckConstraint("CK_Projects_Dates", "\"StartDate\" > '2000-01-01' AND \"StartDate\" <= \"EndDate\"");
 
@@ -280,6 +280,9 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                     b.Property<DateTime?>("RevokedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("TokenHash")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -287,6 +290,10 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -299,7 +306,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasIndex("UserId", "TokenHash");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Reservations.Reservation", b =>
@@ -377,7 +384,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Reservations", null, t =>
+                    b.ToTable("Reservations", t =>
                         {
                             t.HasCheckConstraint("CK_Reservations_Bonus_Positive", "\"Bonus\" >= 0");
 
@@ -406,7 +413,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Students", (string)null);
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Subjects.Subject", b =>
@@ -444,7 +451,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Subjects", (string)null);
+                    b.ToTable("Subjects");
                 });
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Users.User", b =>
@@ -745,7 +752,7 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.RefreshTokens.RefreshToken", b =>
                 {
                     b.HasOne("CodeWithMixx.API.Domain.Entities.Users.User", "User")
-                        .WithMany()
+                        .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -868,6 +875,8 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Users.User", b =>
                 {
                     b.Navigation("Admin");
+
+                    b.Navigation("RefreshTokens");
 
                     b.Navigation("Student");
                 });
