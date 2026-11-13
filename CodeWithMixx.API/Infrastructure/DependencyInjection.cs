@@ -28,6 +28,7 @@ public static class DependencyInjection
         services.AddSecurity(configuration);
         services.AddEmailServices(configuration);
         services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+        services.AddExceptionHandler<UnauthorizedAccessExceptionHandler>();
         services.AddExceptionHandler<TokensRevokedExceptionHandler>();
         services.AddExceptionHandler<SecurityDbUpdateExceptionHandler>();
         services.AddExceptionHandler<GlobalExceptionHandler>();
