@@ -29,8 +29,11 @@ namespace CodeWithMixx.API.Features.Students.DeleteStudent
 
             if (studentToDelete.Student.Reservations.Any())
             {
+                var deleteResult = studentToDelete.DeleteUser();
+                if (!deleteResult.IsSuccess)
+                    return deleteResult;
+
                 await tokenService.RevokeAllUserTokensAsync(studentToDelete.Id);
-                studentToDelete.DeleteUser();
                 await userManager.UpdateAsync(studentToDelete);
             }
             else 
