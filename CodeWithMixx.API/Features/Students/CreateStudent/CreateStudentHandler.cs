@@ -29,7 +29,12 @@ namespace CodeWithMixx.API.Features.Students.CreateStudent
                 if (!roleAssignResult.Succeeded)
                     return roleAssignResult.HandleIdentityResult(new CreateStudentResponse());
 
-                var newStudent = Student.Create(newUser.Id, request.University);
+                var studentResult = Student.Create(newUser.Id, request.University);
+
+                if (!studentResult.IsSuccess)
+                    return Result<CreateStudentResponse>.Failure(studentResult.Errors[0]);
+
+                var newStudent = studentResult.Payload!;
 
                 context.Add(newStudent);
                 await context.SaveChangesAsync(ct);
@@ -43,7 +48,7 @@ namespace CodeWithMixx.API.Features.Students.CreateStudent
                     LastName = request.LastName,
                     Email = request.Email,
                     PhoneNumber = request.PhoneNumber,
-                    University = request.University
+                    University = newStudent.University
                 };
 
                 return Result<CreateStudentResponse>.Success(response);

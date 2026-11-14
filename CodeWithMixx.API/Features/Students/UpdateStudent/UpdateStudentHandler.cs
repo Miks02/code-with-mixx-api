@@ -29,7 +29,9 @@ public class UpdateStudentHandler(
         if (!changeNameResult.IsSuccess)
             return Result<UpdateStudentResponse>.Failure(changeNameResult.Errors[0]);
 
-        student.ChangeUniversity(request.University);
+        var changeUniversityResult = student.ChangeUniversity(request.University);
+        if (!changeUniversityResult.IsSuccess)
+            return Result<UpdateStudentResponse>.Failure(changeUniversityResult.Errors[0]);
         
         if (!string.Equals(student.User.Email, request.Email, StringComparison.OrdinalIgnoreCase))
         {

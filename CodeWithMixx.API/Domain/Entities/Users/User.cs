@@ -129,6 +129,13 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
         if (IsDeleted)
             return Result.Failure(UserError.AlreadyDeleted(Id));
 
+        if (Student is not null)
+        {
+            var studentDeleteResult = Student.Delete();
+            if (!studentDeleteResult.IsSuccess)
+                return studentDeleteResult;
+        }
+
         IsDeleted = true;
         DeletedAt = DateTime.UtcNow;
         Email = "deleted_" + Id + "@deleted.invalid";
@@ -138,7 +145,6 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
         FirstName = "Deleted";
         LastName = "Deleted";
         AccountStatus = AccountStatus.Deleted;
-        Student?.Delete();
         return Result.Success();
     }
 
