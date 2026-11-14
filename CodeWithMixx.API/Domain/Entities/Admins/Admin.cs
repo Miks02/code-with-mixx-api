@@ -1,3 +1,4 @@
+using CodeWithMixx.API.Domain.Entities.Inquiries;
 using CodeWithMixx.API.Domain.Entities.Reservations;
 using CodeWithMixx.API.Domain.Entities.Users;
 
@@ -7,6 +8,9 @@ public class Admin
 {
     public User User { get; private set; } = null!;
     public string UserId { get; private set; } = null!;
+
+    private readonly List<Inquiry> _inquiries = [];
+    public IReadOnlyCollection<Inquiry> Inquiries => _inquiries.AsReadOnly();
 
     private readonly List<Reservation> _reservations = [];
     public IReadOnlyCollection<Reservation> Reservations => _reservations.AsReadOnly();

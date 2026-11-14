@@ -94,6 +94,75 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Inquiries.Inquiry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("InquiryType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ResolvedByAdmin")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("InquiryType");
+
+                    b.HasIndex("ResolvedAt");
+
+                    b.HasIndex("ResolvedByAdmin");
+
+                    b.ToTable("Inquiries", t =>
+                        {
+                            t.HasCheckConstraint("CK_Inquiries_ResolvedAtAfterCreatedAt", "\"ResolvedAt\" IS NULL OR \"ResolvedAt\" > \"CreatedAt\"");
+                        });
+                });
+
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.PaymentTransactions.PaymentTransaction", b =>
                 {
                     b.Property<int>("Id")
@@ -710,6 +779,16 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
                     b.Navigation("Subject");
                 });
 
+            modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Inquiries.Inquiry", b =>
+                {
+                    b.HasOne("CodeWithMixx.API.Domain.Entities.Admins.Admin", "Admin")
+                        .WithMany("Inquiries")
+                        .HasForeignKey("ResolvedByAdmin")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Admin");
+                });
+
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.PaymentTransactions.PaymentTransaction", b =>
                 {
                     b.HasOne("CodeWithMixx.API.Domain.Entities.Reservations.Reservation", "Reservation")
@@ -843,6 +922,8 @@ namespace CodeWithMixx.API.Infrastructure.Migrations
 
             modelBuilder.Entity("CodeWithMixx.API.Domain.Entities.Admins.Admin", b =>
                 {
+                    b.Navigation("Inquiries");
+
                     b.Navigation("Reservations");
                 });
 
