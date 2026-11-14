@@ -5,7 +5,7 @@ using CodeWithMixx.API.Domain.Entities.Admins;
 
 namespace CodeWithMixx.API.Domain.Entities.Inquiries;
 
-public class Inquiry : IAuditable, ISoftDeletable
+public class Inquiry : IAuditable
 {
     public int Id { get; private set; }
     public string FirstName { get; private set; } = null!;
@@ -19,8 +19,6 @@ public class Inquiry : IAuditable, ISoftDeletable
     public DateTime? ResolvedAt { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
-    public bool IsDeleted { get; private set; }
-    public DateTime? DeletedAt { get; private set; }
 
     private Inquiry() {}
 
@@ -63,13 +61,6 @@ public class Inquiry : IAuditable, ISoftDeletable
 
         ResolvedByAdmin = resolvedByAdmin;
         ResolvedAt = resolvedAt;
-        return Result.Success();
-    }
-
-    public Result Delete()
-    {
-        DeletedAt = DateTime.UtcNow;
-        IsDeleted = true;
         return Result.Success();
     }
 
