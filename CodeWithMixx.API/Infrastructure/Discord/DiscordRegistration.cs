@@ -1,4 +1,4 @@
-using CodeWithMixx.API.Infrastructure.BackgroundServices;
+using CodeWithMixx.API.Common.Interfaces;
 using Discord;
 using Discord.WebSocket;
 
@@ -10,9 +10,10 @@ public static class DiscordRegistration
     {
         var discordConfig = new DiscordSocketConfig
         {
-            GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
+            GatewayIntents = GatewayIntents.Guilds
         };
         services.AddSingleton(new DiscordSocketClient(discordConfig));
         services.AddHostedService<DiscordBotService>();
+        services.AddScoped<IInquirySender, DiscordInquirySender>();
     }
 }

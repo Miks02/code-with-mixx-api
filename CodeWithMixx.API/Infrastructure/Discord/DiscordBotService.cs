@@ -1,7 +1,7 @@
 using Discord;
 using Discord.WebSocket;
 
-namespace CodeWithMixx.API.Infrastructure.BackgroundServices;
+namespace CodeWithMixx.API.Infrastructure.Discord;
 
 public class DiscordBotService(
     ILogger<DiscordBotService> logger,
