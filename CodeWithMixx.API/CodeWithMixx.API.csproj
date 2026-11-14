@@ -38,6 +38,7 @@
 
     <ItemGroup>
       <Folder Include="Features\Account\UpdateName\" />
+      <Folder Include="Features\Inquiries\" />
     </ItemGroup>
 
 </Project>
