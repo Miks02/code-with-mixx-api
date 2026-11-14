@@ -63,6 +63,17 @@ public class Inquiry : IAuditable
         ResolvedAt = resolvedAt;
         return Result.Success();
     }
+    
+    public string MapInquiryTypeToLocalizedName()
+    {
+        return InquiryType switch
+        {
+            InquiryType.ClassPackage => "Paket časova",
+            InquiryType.IndividualClasses => "Individualni časovi",
+            InquiryType.Project => "Seminarski/Diplomski rad",
+            _ => "Ostalo"
+        };
+    }
 
     private static Result Validate(string firstName, string lastName, string email, string phoneNumber, string message, InquiryType inquiryType)
     {
