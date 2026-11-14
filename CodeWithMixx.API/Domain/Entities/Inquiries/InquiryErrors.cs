@@ -61,7 +61,7 @@ public static class InquiryError
             resolvedAt is null
                 ? "Inquiry is already resolved"
                 : $"Inquiry is already resolved at {resolvedAt.Value.ToUniversalTime():yyyy-MM-dd HH:mm:ss} UTC",
-            ErrorType.Validation);
+            ErrorType.Conflict);
     
     public static Error InvalidResolvedAt()
         => new("Inquiry.InvalidResolvedAt", "Resolved at date is not valid. Must be after 'CreatedAt'", ErrorType.Validation);
