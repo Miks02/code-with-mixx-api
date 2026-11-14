@@ -2,6 +2,7 @@ using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Infrastructure.BackgroundServices;
 using CodeWithMixx.API.Infrastructure.Cors;
 using CodeWithMixx.API.Infrastructure.Decorators;
+using CodeWithMixx.API.Infrastructure.Discord;
 using CodeWithMixx.API.Infrastructure.Emails;
 using CodeWithMixx.API.Infrastructure.Exceptions.Handlers;
 using CodeWithMixx.API.Infrastructure.Persistence;
@@ -28,6 +29,7 @@ public static class DependencyInjection
         services.AddPersistence(connectionString);
         services.AddSecurity(configuration);
         services.AddEmailServices(configuration);
+        services.AddDiscord();
         services.AddValidatorsFromAssembly(typeof(Program).Assembly);
         services.AddExceptionHandler<UnauthorizedAccessExceptionHandler>();
         services.AddExceptionHandler<TokensRevokedExceptionHandler>();
