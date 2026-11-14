@@ -468,7 +468,7 @@ public class UserTests
     [Fact]
     public void DeleteUser_WithStudentProfile_ShouldAlsoSoftDeleteStudent()
     {
-        var student = Student.Create(_sut.Id, "ETF Beograd");
+        var student = Student.Create(_sut.Id, "ETF Beograd").Payload!;
         AttachStudent(_sut, student);
 
         _sut.DeleteUser();
@@ -498,7 +498,7 @@ public class UserTests
     [Fact]
     public void DeleteUser_WhenAlreadyDeleted_ShouldNotTouchStudentAgain()
     {
-        var student = Student.Create(_sut.Id, "ETF Beograd");
+        var student = Student.Create(_sut.Id, "ETF Beograd").Payload!;
         AttachStudent(_sut, student);
         _sut.DeleteUser();
         var studentDeletedAt = student.DeletedAt;
@@ -508,7 +508,24 @@ public class UserTests
         student.DeletedAt.Should().Be(studentDeletedAt);
     }
 
-    // Student is a get-only navigation set by EF Core; tests populate it the same way (via backing field).
+    [Fact]
+    public void DeleteUser_WhenStudentAlreadyDeleted_ShouldFailAndLeaveUserUntouched()
+    {
+        var student = Student.Create(_sut.Id, "ETF Beograd").Payload!;
+        student.Delete();
+        AttachStudent(_sut, student);
+
+        var result = _sut.DeleteUser();
+
+        result.IsSuccess.Should().BeFalse();
+        result.Errors.Should().ContainSingle().Which.Should().Be(StudentError.AlreadyDeleted(_sut.Id));
+        _sut.IsDeleted.Should().BeFalse();
+        _sut.DeletedAt.Should().BeNull();
+        _sut.Email.Should().Be(Email);
+        _sut.FirstName.Should().Be(FirstName);
+        _sut.AccountStatus.Should().Be(AccountStatus.Pending);
+    }
+
     private static void AttachStudent(User user, Student student)
     {
         var field = typeof(User).GetField("<Student>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
