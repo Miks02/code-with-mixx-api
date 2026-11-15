@@ -4,6 +4,18 @@ namespace CodeWithMixx.API.Domain.Entities.Subjects;
 
 public static class SubjectError
 {
+    public static Error NameRequired()
+        => new("Subject.NameRequired", "Subject name is required", ErrorType.Validation);
+
+    public static Error NameTooLong()
+        => new("Subject.NameTooLong", $"Subject name cannot exceed {SubjectConstants.MaxNameLength} characters", ErrorType.Validation);
+
+    public static Error DescriptionRequired()
+        => new("Subject.DescriptionRequired", "Subject description is required", ErrorType.Validation);
+
+    public static Error DescriptionTooLong()
+        => new("Subject.DescriptionTooLong", $"Subject description cannot exceed {SubjectConstants.MaxDescriptionLength} characters", ErrorType.Validation);
+
     public static Error NotFound(int? identifier = null)
     {
         string message = identifier == null
