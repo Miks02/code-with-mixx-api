@@ -48,7 +48,7 @@ namespace CodeWithMixx.API.Infrastructure.Persistence.Configurations
                 .HasConversion<string>();
 
             builder.Property(r => r.Description)
-                .HasMaxLength(500);
+                .HasMaxLength(ReservationConstants.MaxDescriptionLength);
 
             builder.HasIndex(r => r.PaymentStatus);
             builder.HasIndex(r => r.ReservationStatus);

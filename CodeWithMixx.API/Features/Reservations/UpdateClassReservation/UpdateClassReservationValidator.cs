@@ -1,5 +1,6 @@
 using CodeWithMixx.API.Domain.Entities.Classes;
 using CodeWithMixx.API.Features.Reservations.Common;
+using CodeWithMixx.API.Domain.Entities.Reservations;
 using FluentValidation;
 
 namespace CodeWithMixx.API.Features.Reservations.UpdateClassReservation;
@@ -18,7 +19,7 @@ public class UpdateClassReservationRequestValidator : AbstractValidator<UpdateCl
             .GreaterThanOrEqualTo(0).WithMessage("Paid amount cannot be negative.");
         
         RuleFor(x => x.Description)
-            .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
+            .MaximumLength(ReservationConstants.MaxDescriptionLength).WithMessage($"Description cannot exceed {ReservationConstants.MaxDescriptionLength} characters.");
 
         RuleFor(x => x.ReservationStatus)
             .IsInEnum().WithMessage("Invalid reservation status.");
