@@ -1,3 +1,4 @@
+using CodeWithMixx.API.Domain.Entities.Projects;
 using FluentValidation;
 
 namespace CodeWithMixx.API.Features.Projects.UpdateProject;
@@ -25,6 +26,6 @@ public class UpdateProjectValidator : AbstractValidator<UpdateProjectRequest>
 
         RuleForEach(x => x.NotesToAdd)
             .NotEmpty().WithMessage("Project note content cannot be empty.")
-            .MaximumLength(500).WithMessage("Project note cannot exceed 500 characters.");
+            .MaximumLength(ProjectConstants.MaxNoteLength).WithMessage($"Project note cannot exceed {ProjectConstants.MaxNoteLength} characters.");
     }
 }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using CodeWithMixx.API.Domain.Entities.Projects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -14,7 +15,7 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
         {
             t.HasCheckConstraint("CK_Projects_Price_NonNegative", "\"Price\" >= 0");
             t.HasCheckConstraint("CK_Projects_Progress_Range", "\"Progress\" >= 0 AND \"Progress\" <= 100");
-            t.HasCheckConstraint("CK_Projects_Dates", "\"StartDate\" > '2000-01-01' AND \"StartDate\" <= \"EndDate\"");
+            t.HasCheckConstraint("CK_Projects_Dates", $"\"StartDate\" > '{ProjectConstants.MinStartDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}' AND \"StartDate\" <= \"EndDate\"");
         });
         
         builder.HasMany(p => p.ProjectNotes)

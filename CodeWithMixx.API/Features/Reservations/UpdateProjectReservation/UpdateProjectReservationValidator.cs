@@ -1,4 +1,5 @@
 using CodeWithMixx.API.Common.Interfaces;
+using CodeWithMixx.API.Domain.Entities.Projects;
 using FluentValidation;
 
 namespace CodeWithMixx.API.Features.Reservations.UpdateProjectReservation;
@@ -60,6 +61,7 @@ internal class UpdateProjectItemValidator : AbstractValidator<UpdateProjectReser
 
         RuleFor(x => x.StartDate)
             .NotEmpty().WithMessage("Start date is required.")
+            .GreaterThan(ProjectConstants.MinStartDate).WithMessage($"Start date must be after {ProjectConstants.MinStartDate:yyyy-MM-dd}.")
             .GreaterThanOrEqualTo(x => x.ReservedAt).WithMessage("Start date cannot be before reservation date of a project.")
             .GreaterThanOrEqualTo(reservationReservedAt).WithMessage("Start date cannot be before reservation date.");
 
@@ -91,6 +93,7 @@ public class ProjectNoteValidator : AbstractValidator<UpdateProjectReservationRe
     public ProjectNoteValidator()
     {
         RuleFor(x => x.Content)
-            .NotEmpty().WithMessage("Project note content cannot be empty.");
+            .NotEmpty().WithMessage("Project note content cannot be empty.")
+            .MaximumLength(ProjectConstants.MaxNoteLength).WithMessage($"Project note cannot exceed {ProjectConstants.MaxNoteLength} characters.");
     }
 }
