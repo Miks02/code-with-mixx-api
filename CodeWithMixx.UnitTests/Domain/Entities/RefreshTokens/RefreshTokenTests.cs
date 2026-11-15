@@ -150,8 +150,6 @@ public class RefreshTokenTests
         _sut.SessionId.Should().Be(SessionId);
     }
 
-    // Edge case: Revoke is not idempotent - a second call overwrites RevokedAt and ReplacedByTokenHash.
-    // Handlers only revoke tokens queried with RevokedAt == null, so this isn't reachable through the API.
     [Fact]
     public void Revoke_WhenAlreadyRevoked_ShouldCurrentlyOverwriteRevocation()
     {
