@@ -129,7 +129,7 @@ public class ClassTests
 
     [Fact]
     public void Create_WithDefaultReservedAt_ShouldCurrentlyBeAccepted()
-        => CreateValid(reservedAt: default).IsSuccess.Should().BeTrue();
+        => CreateValid(reservedAt: DateOnly.MinValue).IsSuccess.Should().BeTrue();
 
     [Fact]
     public void Update_WithValidValues_ShouldSucceedAndReplaceValues()
