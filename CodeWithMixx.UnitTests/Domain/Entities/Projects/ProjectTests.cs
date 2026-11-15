@@ -197,24 +197,24 @@ public class ProjectTests
 
     [Fact]
     public void Create_WithGithubLinkAtMaxLength_ShouldSucceed()
-        => Project.Create(CreateData() with { GithubLink = new string('a', 200) }).IsSuccess.Should().BeTrue();
+        => Project.Create(CreateData() with { GithubLink = new string('a', ProjectConstants.MaxLinkLength) }).IsSuccess.Should().BeTrue();
 
     [Fact]
     public void Create_WithGithubLinkOverMaxLength_ShouldReturnGithubLinkIsTooLong()
     {
-        var link = new string('a', 201);
+        var link = new string('a', ProjectConstants.MaxLinkLength + 1);
 
         AssertFails(Project.Create(CreateData() with { GithubLink = link }), ProjectError.GithubLinkIsTooLong(link));
     }
 
     [Fact]
     public void Create_WithDownloadLinkAtMaxLength_ShouldSucceed()
-        => Project.Create(CreateData() with { DownloadLink = new string('a', 200) }).IsSuccess.Should().BeTrue();
+        => Project.Create(CreateData() with { DownloadLink = new string('a', ProjectConstants.MaxLinkLength) }).IsSuccess.Should().BeTrue();
 
     [Fact]
     public void Create_WithDownloadLinkOverMaxLength_ShouldReturnDownloadLinkIsTooLong()
     {
-        var link = new string('a', 201);
+        var link = new string('a', ProjectConstants.MaxLinkLength + 1);
 
         AssertFails(Project.Create(CreateData() with { DownloadLink = link }), ProjectError.DownloadLinkIsTooLong(link));
     }
@@ -222,7 +222,7 @@ public class ProjectTests
     [Fact]
     public void Create_WithMultipleInvalidValues_ShouldReportSubjectFirst()
     {
-        var data = CreateData(notes: [""]) with { SubjectId = 0, Price = -1, Progress = 200, GithubLink = new string('a', 201) };
+        var data = CreateData(notes: [""]) with { SubjectId = 0, Price = -1, Progress = 200, GithubLink = new string('a', ProjectConstants.MaxLinkLength + 1) };
 
         AssertFails(Project.Create(data), SubjectError.NotFound(0));
     }

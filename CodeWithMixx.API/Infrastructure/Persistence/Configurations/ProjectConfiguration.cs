@@ -46,10 +46,10 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
             .HasPrecision(18, 2);
         
         builder.Property(p => p.GithubLink)
-            .HasMaxLength(200);
+            .HasMaxLength(ProjectConstants.MaxLinkLength);
         
         builder.Property(p => p.DownloadLink)
-            .HasMaxLength(200);
+            .HasMaxLength(ProjectConstants.MaxLinkLength);
         
         builder.Property(p => p.Progress)
             .IsRequired()

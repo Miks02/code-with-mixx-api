@@ -17,9 +17,9 @@ public static class ProjectError
         => new Error("Project.InvalidDateRange", $"The project start date '{startDate}' cannot be after the end date '{endDate}'.", ErrorType.Validation);
     
     public static Error GithubLinkIsTooLong(string githubLink)
-        => new Error("Project.GithubLinkIsTooLong", $"The GitHub link '{githubLink}' is too long. It must be less than 200 characters.", ErrorType.Validation);
+        => new Error("Project.GithubLinkIsTooLong", $"The GitHub link '{githubLink}' is too long. It must be less than {ProjectConstants.MaxLinkLength} characters.", ErrorType.Validation);
     public static Error DownloadLinkIsTooLong(string downloadLink)
-        => new Error("Project.DownloadLinkIsTooLong", $"The download link '{downloadLink}' is too long. It must be less than 200 characters.", ErrorType.Validation);
+        => new Error("Project.DownloadLinkIsTooLong", $"The download link '{downloadLink}' is too long. It must be less than {ProjectConstants.MaxLinkLength} characters.", ErrorType.Validation);
     
     public static Error EmptyProjectNote()
         => new Error("Project.EmptyProjectNote", "The project note cannot be empty.", ErrorType.Validation);

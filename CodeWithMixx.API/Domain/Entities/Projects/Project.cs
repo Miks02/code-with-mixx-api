@@ -149,10 +149,10 @@ public class Project : IAuditable, ISoftDeletable
         if(startDate < reservedAt)
             return Result.Failure(ProjectError.StartDateBeforeReservedAt(startDate, reservedAt));
 
-        if(githubLink is not null && githubLink.Length > 200)
+        if(githubLink is not null && githubLink.Length > ProjectConstants.MaxLinkLength)
             return Result.Failure(ProjectError.GithubLinkIsTooLong(githubLink));
 
-        if(downloadLink is not null && downloadLink.Length > 200)
+        if(downloadLink is not null && downloadLink.Length > ProjectConstants.MaxLinkLength)
             return Result.Failure(ProjectError.DownloadLinkIsTooLong(downloadLink));
 
         return Result.Success();

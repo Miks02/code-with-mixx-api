@@ -1,5 +1,6 @@
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Domain.Entities.Projects;
+using CodeWithMixx.API.Domain.Entities.Reservations;
 using FluentValidation;
 
 namespace CodeWithMixx.API.Features.Reservations.UpdateProjectReservation;
@@ -15,7 +16,7 @@ public class UpdateProjectReservationValidator : AbstractValidator<UpdateProject
             .GreaterThanOrEqualTo(0).WithMessage("Total price cannot be negative.");
         
         RuleFor(x => x.Description)
-            .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
+            .MaximumLength(ReservationConstants.MaxDescriptionLength).WithMessage($"Description cannot exceed {ReservationConstants.MaxDescriptionLength} characters.");
 
         RuleFor(x => x.ReservedAt)
             .NotEmpty().WithMessage("Reservation date is required.")
@@ -74,11 +75,11 @@ internal class UpdateProjectItemValidator : AbstractValidator<UpdateProjectReser
             .LessThanOrEqualTo(clock.Today).WithMessage("Reservation date cannot be in the future.");
 
         RuleFor(x => x.GithubLink)
-            .MaximumLength(200).WithMessage("GitHub link must be less than 200 characters.")
+            .MaximumLength(ProjectConstants.MaxLinkLength).WithMessage($"GitHub link must be less than {ProjectConstants.MaxLinkLength} characters.")
             .When(x => x.GithubLink is not null);
 
         RuleFor(x => x.DownloadLink)
-            .MaximumLength(200).WithMessage("Download link must be less than 200 characters.")
+            .MaximumLength(ProjectConstants.MaxLinkLength).WithMessage($"Download link must be less than {ProjectConstants.MaxLinkLength} characters.")
             .When(x => x.DownloadLink is not null);
 
         RuleForEach(x => x.Notes)
