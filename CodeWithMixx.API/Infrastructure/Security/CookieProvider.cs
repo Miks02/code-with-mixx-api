@@ -18,9 +18,12 @@ public class CookieProvider(IConfiguration configuration, IHttpContextAccessor h
 
     public void SetSessionCookie()
     {
+        var domain = configuration.GetValue<string?>("CookieConfig:Domain");
+
         Context.Response.Cookies.Append("Session", "", new CookieOptions
         {
             Path = "/",
+            Domain = domain,
             HttpOnly = false,
             Secure = true,
             SameSite = SameSiteMode.Lax,
