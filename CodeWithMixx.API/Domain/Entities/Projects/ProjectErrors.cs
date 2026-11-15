@@ -24,6 +24,12 @@ public static class ProjectError
     public static Error EmptyProjectNote()
         => new Error("Project.EmptyProjectNote", "The project note cannot be empty.", ErrorType.Validation);
     
+    public static Error NoteTooLong()
+        => new Error("Project.NoteTooLong", $"The project note cannot exceed {ProjectConstants.MaxNoteLength} characters.", ErrorType.Validation);
+
+    public static Error StartDateTooEarly(DateOnly startDate)
+        => new Error("Project.StartDateTooEarly", $"The project start date '{startDate}' must be after '{ProjectConstants.MinStartDate}'.", ErrorType.Validation);
+    
     public static Error NoteNotFound(int identifier) 
         => new Error("Project.NoteNotFound", $"The project note '{identifier}' was not found.", ErrorType.Validation);
     
