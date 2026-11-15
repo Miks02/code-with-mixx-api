@@ -99,4 +99,5 @@ EF Core + Npgsql (PostgreSQL). `AppDbContext` (`Infrastructure/Persistence/AppDb
 
 - xUnit + AwesomeAssertions (`.Should()`) + NSubstitute + `Microsoft.EntityFrameworkCore.InMemory` for `AppDbContext` + `MockQueryable` where the in-memory provider isn't a good fit.
 - Test class per SUT, named `<Type>Tests`, mirroring the API folder structure, with the system under test built in the constructor and assigned to `_sut`.
-- Existing coverage: `Common/Results/`, `Infrastructure/Security/`, `Infrastructure/Utilities/` (`UserClock`). Domain entities and `Features/*` handlers do not yet have unit tests.
+- Existing coverage: `Common/Results/`, `Infrastructure/Security/`, `Infrastructure/Utilities/` (`UserClock`), and every domain entity under `Domain/Entities/` (plus error catalogs). `Features/*` handlers and validators do not yet have unit tests.
+- Domain tests use a fixed `Today` and `DateTimeKind.Utc` dates; ids and audit fields set by EF are assigned via reflection when a test needs them.
