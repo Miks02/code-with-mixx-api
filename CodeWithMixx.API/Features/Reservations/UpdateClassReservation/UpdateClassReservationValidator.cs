@@ -47,7 +47,7 @@ public class ClassItemValidator : AbstractValidator<ClassItem>
             .GreaterThan(0).WithMessage("SubjectId must be a valid identifier.");
 
         RuleFor(x => x.Price)
-            .GreaterThanOrEqualTo(0).WithMessage("Class price cannot be negative.");
+            .GreaterThan(0).WithMessage("Class price cannot be negative or zero.");
 
         RuleFor(x => x.StartsAt)
             .NotEmpty().WithMessage("Start time is required.");
