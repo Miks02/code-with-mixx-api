@@ -14,6 +14,15 @@ public static class CorsRegistration
                     .AllowAnyMethod()
                     .AllowCredentials();
             });
+            
+            options.AddPolicy("ProdCors", policyBuilder =>
+            {
+                policyBuilder
+                    .WithOrigins("https://codewithmixx.com", "https://www.codewithmixx.com")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
         });
     }
 }

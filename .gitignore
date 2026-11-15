@@ -42,9 +42,10 @@ Rider.Backend.log
 /tools/packages/
 /artifacts/
 
-# Local configuration files
+# Local configuration files and secrets
 appsettings.Development.json
 connectionstrings.json
+.env
 
 # Test results
 TestResults/

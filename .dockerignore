@@ -1,0 +1,25 @@
+**/bin/
+**/obj/
+
+# Secrets and configs
+.env
+**/appsettings.Development.json
+
+# Git and tools
+.git/
+.gitignore
+.github/
+.idea/
+.vs/
+.vscode/
+.claude/
+CLAUDE.md
+
+# Docker
+*.md
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Tests
+CodeWithMixx.UnitTests

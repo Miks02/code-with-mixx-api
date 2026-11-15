@@ -14,10 +14,10 @@ builder.Services.Configure<JsonOptions>(options =>
 builder.Services.AddInfrastructure(builder.Configuration);
 
 
+
 var app = builder.Build();
 await app.MapSeeders();
 app.UseExceptionHandler();
-app.UseCors("DevCors");
 
 
 app.MapEndpoints();
@@ -27,6 +27,11 @@ if (app.Environment.IsDevelopment())
 {
     app.MapScalarApiReference();
     app.MapOpenApi();
+    app.UseCors("DevCors");
+}
+else
+{
+    app.UseCors("ProdCors");
 }
 app.UseForwardedHeaders();
 app.UseRateLimiter();
