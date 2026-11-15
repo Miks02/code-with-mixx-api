@@ -137,7 +137,10 @@ public class Project : IAuditable, ISoftDeletable
         if(progress < 0 || progress > 100)
             return Result.Failure(ProjectError.InvalidProgress(progress));
 
-        if(startDate <= DateOnly.MinValue || startDate > endDate)
+        if(startDate <= ProjectConstants.MinStartDate)
+            return Result.Failure(ProjectError.StartDateTooEarly(startDate));
+
+        if(startDate > endDate)
             return Result.Failure(ProjectError.InvalidDateRange(startDate, endDate));
 
         if(reservedAt <= DateOnly.MinValue || reservedAt > today)
@@ -146,10 +149,10 @@ public class Project : IAuditable, ISoftDeletable
         if(startDate < reservedAt)
             return Result.Failure(ProjectError.StartDateBeforeReservedAt(startDate, reservedAt));
 
-        if(githubLink is not null && githubLink.Length > 200)
+        if(githubLink is not null && githubLink.Length > ProjectConstants.MaxLinkLength)
             return Result.Failure(ProjectError.GithubLinkIsTooLong(githubLink));
 
-        if(downloadLink is not null && downloadLink.Length > 200)
+        if(downloadLink is not null && downloadLink.Length > ProjectConstants.MaxLinkLength)
             return Result.Failure(ProjectError.DownloadLinkIsTooLong(downloadLink));
 
         return Result.Success();

@@ -16,6 +16,9 @@ public class ProjectNote : IAuditable
     {
         if(string.IsNullOrWhiteSpace(content))
             return Result<ProjectNote>.Failure(ProjectError.EmptyProjectNote());
+
+        if(content.Length > ProjectConstants.MaxNoteLength)
+            return Result<ProjectNote>.Failure(ProjectError.NoteTooLong());
         
         var newProjectNote = new ProjectNote
         {

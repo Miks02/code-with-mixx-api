@@ -17,10 +17,9 @@ public class ArchiveSubjectHandler(AppDbContext context) : IHandler<ArchiveSubje
         if (subject is null)
             return Result.Failure(SubjectError.NotFound(request.Id));
 
-        if (subject.IsDeleted)
-            return Result.Failure(SubjectError.AlreadyArchived(request.Id));
-
-        subject.Archive();
+        var archiveResult = subject.Archive();
+        if (!archiveResult.IsSuccess)
+            return archiveResult;
 
         await context.SaveChangesAsync(ct);
 

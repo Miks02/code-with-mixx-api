@@ -1,3 +1,4 @@
+using CodeWithMixx.API.Domain.Entities.Projects;
 using FluentValidation;
 
 namespace CodeWithMixx.API.Features.Projects.UpdateProject;
@@ -13,11 +14,11 @@ public class UpdateProjectValidator : AbstractValidator<UpdateProjectRequest>
             .InclusiveBetween(0, 100).WithMessage("Progress must be between 0 and 100.");
 
         RuleFor(x => x.GithubLink)
-            .MaximumLength(200).WithMessage("GitHub link must be less than 200 characters.")
+            .MaximumLength(ProjectConstants.MaxLinkLength).WithMessage($"GitHub link must be less than {ProjectConstants.MaxLinkLength} characters.")
             .When(x => x.GithubLink is not null);
 
         RuleFor(x => x.DownloadLink)
-            .MaximumLength(200).WithMessage("Download link must be less than 200 characters.")
+            .MaximumLength(ProjectConstants.MaxLinkLength).WithMessage($"Download link must be less than {ProjectConstants.MaxLinkLength} characters.")
             .When(x => x.DownloadLink is not null);
 
         RuleFor(x => x.NotesToDelete)
@@ -25,6 +26,6 @@ public class UpdateProjectValidator : AbstractValidator<UpdateProjectRequest>
 
         RuleForEach(x => x.NotesToAdd)
             .NotEmpty().WithMessage("Project note content cannot be empty.")
-            .MaximumLength(500).WithMessage("Project note cannot exceed 500 characters.");
+            .MaximumLength(ProjectConstants.MaxNoteLength).WithMessage($"Project note cannot exceed {ProjectConstants.MaxNoteLength} characters.");
     }
 }

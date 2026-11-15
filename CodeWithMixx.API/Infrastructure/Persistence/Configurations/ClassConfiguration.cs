@@ -13,7 +13,7 @@ namespace CodeWithMixx.API.Infrastructure.Persistence.Configurations
                 t.HasCheckConstraint($"CK_{nameof(Class)}_Price_Positive", "\"Price\" >= 0");
                 t.HasCheckConstraint($"CK_{nameof(Class)}_EndsAtAfterStartsAt", "\"EndsAt\" > \"StartsAt\"");
                 t.HasCheckConstraint($"CK_{nameof(Class)}_ReservedAtBeforeStartsAt", "\"ReservedAt\" <= (\"StartsAt\" AT TIME ZONE 'Europe/Belgrade')::date");
-                t.HasCheckConstraint($"CK_{nameof(Class)}_MaxDuration45Min", "\"EndsAt\" - \"StartsAt\" <= interval '45 minutes'");
+                t.HasCheckConstraint($"CK_{nameof(Class)}_MaxDuration45Min", $"\"EndsAt\" - \"StartsAt\" <= interval '{ClassConstants.MaxDurationInMinutes} minutes'");
             });
             
             builder.Property(r => r.Price)

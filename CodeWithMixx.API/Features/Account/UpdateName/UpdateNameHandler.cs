@@ -19,7 +19,10 @@ public class UpdateNameHandler(
         if (user is null)
             return Result<UpdateNameResponse>.Failure(UserError.NotFound(userId));
 
-        user.ChangeName(request.FirstName.Trim(), request.LastName.Trim());
+        var changeNameResult = user.ChangeName(request.FirstName, request.LastName);
+        if (!changeNameResult.IsSuccess)
+            return Result<UpdateNameResponse>.Failure(changeNameResult.Errors[0]);
+
         await context.SaveChangesAsync(ct);
 
         var response = new UpdateNameResponse

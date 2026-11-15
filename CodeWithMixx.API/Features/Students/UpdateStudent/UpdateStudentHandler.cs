@@ -25,8 +25,13 @@ public class UpdateStudentHandler(
         
         await using var transaction = await context.Database.BeginTransactionAsync(ct);
         
-        student.User.ChangeName(request.FirstName, request.LastName);
-        student.ChangeUniversity(request.University);
+        var changeNameResult = student.User.ChangeName(request.FirstName, request.LastName);
+        if (!changeNameResult.IsSuccess)
+            return Result<UpdateStudentResponse>.Failure(changeNameResult.Errors[0]);
+
+        var changeUniversityResult = student.ChangeUniversity(request.University);
+        if (!changeUniversityResult.IsSuccess)
+            return Result<UpdateStudentResponse>.Failure(changeUniversityResult.Errors[0]);
         
         if (!string.Equals(student.User.Email, request.Email, StringComparison.OrdinalIgnoreCase))
         {

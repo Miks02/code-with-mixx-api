@@ -15,6 +15,9 @@ public record TransactionNote
         
         if(paymentType == PaymentTransactionType.Reversal && string.IsNullOrWhiteSpace(note))
             return Result<TransactionNote>.Failure(TransactionNoteError.NoteIsRequiredForReversal());
+
+        if (note is not null && note.Length > TransactionNoteConstants.MaxNoteLength)
+            return Result<TransactionNote>.Failure(TransactionNoteError.NoteTooLong());
         
         return Result<TransactionNote>.Success(new TransactionNote { Note = note });
     }

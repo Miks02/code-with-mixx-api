@@ -48,6 +48,21 @@ public class UserError
     public static Error AlreadyDeactivated(string identifier) 
         => new("User.AlreadyDeactivated", $"User with identifier '{identifier}' is already deactivated", ErrorType.Conflict);
 
+    public static Error AlreadyDeleted(string identifier)
+        => new("User.AlreadyDeleted", $"User with identifier '{identifier}' is already deleted", ErrorType.Conflict);
+
+    public static Error FirstNameRequired()
+        => new("User.FirstNameRequired", "First name is required", ErrorType.Validation);
+
+    public static Error FirstNameTooLong()
+        => new("User.FirstNameTooLong", $"First name cannot exceed {UserConstants.MaxNameLength} characters", ErrorType.Validation);
+
+    public static Error LastNameRequired()
+        => new("User.LastNameRequired", "Last name is required", ErrorType.Validation);
+
+    public static Error LastNameTooLong()
+        => new("User.LastNameTooLong", $"Last name cannot exceed {UserConstants.MaxNameLength} characters", ErrorType.Validation);
+
     public static Error CannotUpdatePhoneNumber(string identifier, string? identityErrorCode = null)
     {
         return string.IsNullOrWhiteSpace(identityErrorCode)

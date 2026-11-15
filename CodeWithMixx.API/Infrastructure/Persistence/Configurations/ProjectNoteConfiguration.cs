@@ -13,7 +13,7 @@ public class ProjectNoteConfiguration : IEntityTypeConfiguration<ProjectNote>
         
         builder.Property(pn => pn.Content)
             .IsRequired()
-            .HasMaxLength(500);
+            .HasMaxLength(ProjectConstants.MaxNoteLength);
         
         builder.Property(pn => pn.CreatedAt)
             .IsRequired()

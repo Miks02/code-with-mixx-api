@@ -210,7 +210,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
             _paymentTransactions.Add(newTransactionResult.Payload!);
 
-            PaidAmount -= amount;
+            PaidAmount -= newTransactionResult.Payload!.Amount.Value;
 
             PaymentStatus = DeterminePaymentStatus(PaidAmount, TotalPrice, today);
             Bonus = CalculateBonus(TotalPrice, PaidAmount);
@@ -220,7 +220,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
         
         public Result UpdateDescription(string? description)
         {
-            if (!string.IsNullOrWhiteSpace(description) && description.Length > 500)
+            if (description is not null && description.Length > ReservationConstants.MaxDescriptionLength)
                 return Result.Failure(ReservationError.DescriptionTooLong(Id == 0 ? null : Id));
             
             Description = description;
@@ -506,11 +506,14 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
 
         private Result ValidateReservedAt(DateOnly reservedAt, DateOnly today)
         {
-            var startOfAFirstService = ReservationType == ReservationType.Class 
-                ? DateOnly.FromDateTime(_classes.Min(c => c.StartsAt))
-                : _projects.Min(p => p.StartDate);
-            
-            if(reservedAt <= DateOnly.MinValue || reservedAt > today || reservedAt > startOfAFirstService)
+            if(reservedAt <= DateOnly.MinValue || reservedAt > today)
+                return Result.Failure(ReservationError.InvalidReservedAt(reservedAt));
+
+            DateOnly? startOfAFirstService = ReservationType == ReservationType.Class
+                ? _classes.Count > 0 ? DateOnly.FromDateTime(_classes.Min(c => c.StartsAt)) : null
+                : _projects.Count > 0 ? _projects.Min(p => p.StartDate) : null;
+
+            if(startOfAFirstService is not null && reservedAt > startOfAFirstService)
                 return Result.Failure(ReservationError.InvalidReservedAt(reservedAt));
             
             return Result.Success();

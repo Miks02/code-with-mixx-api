@@ -10,12 +10,16 @@ public class CreateSubjectHandler(AppDbContext context) : IHandler<CreateSubject
 {
     public async Task<Result<CreateSubjectResponse>> HandleAsync(CreateSubjectRequest request, CancellationToken ct = default)
     {
-        var subjectExists = await context.Subjects.AnyAsync(s => EF.Functions.ILike(s.Name, request.SubjectName), ct);
+        var subjectResult = Subject.Create(request.SubjectName, request.SubjectDescription);
+        if (!subjectResult.IsSuccess)
+            return Result<CreateSubjectResponse>.Failure(subjectResult.Errors[0]);
+
+        var newSubject = subjectResult.Payload!;
+
+        var subjectExists = await context.Subjects.AnyAsync(s => EF.Functions.ILike(s.Name, newSubject.Name), ct);
         
         if(subjectExists)
-            return Result<CreateSubjectResponse>.Failure(SubjectError.AlreadyExists(request.SubjectName));
-        
-        var newSubject = Subject.Create(request.SubjectName, request.SubjectDescription);
+            return Result<CreateSubjectResponse>.Failure(SubjectError.AlreadyExists(newSubject.Name));
 
         context.Add(newSubject);
         await context.SaveChangesAsync(ct);

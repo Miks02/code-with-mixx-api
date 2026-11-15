@@ -1,3 +1,4 @@
+using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Domain.Entities.Classes;
 using CodeWithMixx.API.Domain.Entities.Projects;
 
@@ -21,35 +22,69 @@ public class Subject : IAuditable, ISoftDeletable
     
     private Subject() {}
     
-    public static Subject Create(string name, string description)
+    public static Result<Subject> Create(string name, string description)
     {
-        return new Subject
+        var validationResult = Validate(name, description);
+        if (!validationResult.IsSuccess)
+            return Result<Subject>.Failure(validationResult.Errors[0]);
+
+        return Result<Subject>.Success(new Subject
         {
-            Name = name,
-            Description = description,
-        };
+            Name = name.Trim(),
+            Description = description.Trim()
+        });
     }
 
-    public void Delete()
+    public Result Update(string name, string description)
     {
-        Archive();
+        var validationResult = Validate(name, description);
+        if (!validationResult.IsSuccess)
+            return validationResult;
+
+        Name = name.Trim();
+        Description = description.Trim();
+        return Result.Success();
     }
 
-    public void Archive()
+    public Result Delete()
     {
+        return Archive();
+    }
+
+    public Result Archive()
+    {
+        if (IsDeleted)
+            return Result.Failure(SubjectError.AlreadyArchived(Id));
+
         IsDeleted = true;
         DeletedAt = DateTime.UtcNow;
+        return Result.Success();
     }
 
-    public void Restore()
+    public Result Restore()
     {
+        if (!IsDeleted)
+            return Result.Failure(SubjectError.NotArchived(Id));
+
         IsDeleted = false;
         DeletedAt = null;
+        return Result.Success();
     }
 
-    public void Update(string name, string description)
+    private static Result Validate(string name, string description)
     {
-        Name = name;
-        Description = description;
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure(SubjectError.NameRequired());
+
+        if (name.Trim().Length > SubjectConstants.MaxNameLength)
+            return Result.Failure(SubjectError.NameTooLong());
+
+        if (string.IsNullOrWhiteSpace(description))
+            return Result.Failure(SubjectError.DescriptionRequired());
+
+        if (description.Trim().Length > SubjectConstants.MaxDescriptionLength)
+            return Result.Failure(SubjectError.DescriptionTooLong());
+
+        return Result.Success();
     }
 }

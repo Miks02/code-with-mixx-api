@@ -27,7 +27,7 @@ public class PaymentTransactionConfiguration : IEntityTypeConfiguration<PaymentT
         {
             note.Property(n => n.Note)
                 .HasColumnName(nameof(TransactionNote.Note))
-                .HasMaxLength(300)
+                .HasMaxLength(TransactionNoteConstants.MaxNoteLength)
                 .IsRequired(false);
         });
 

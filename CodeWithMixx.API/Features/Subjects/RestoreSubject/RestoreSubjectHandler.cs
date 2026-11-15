@@ -17,10 +17,9 @@ public class RestoreSubjectHandler(AppDbContext context) : IHandler<RestoreSubje
         if (subject is null)
             return Result.Failure(SubjectError.NotFound(request.Id));
 
-        if (!subject.IsDeleted)
-            return Result.Failure(SubjectError.NotArchived(request.Id));
-
-        subject.Restore();
+        var restoreResult = subject.Restore();
+        if (!restoreResult.IsSuccess)
+            return restoreResult;
 
         await context.SaveChangesAsync(ct);
 

@@ -1,4 +1,6 @@
 using CodeWithMixx.API.Common.Interfaces;
+using CodeWithMixx.API.Domain.Entities.Projects;
+using CodeWithMixx.API.Domain.Entities.Reservations;
 using FluentValidation;
 
 namespace CodeWithMixx.API.Features.Reservations.CreateProjectReservation;
@@ -19,7 +21,7 @@ public class CreateProjectReservationValidator : AbstractValidator<CreateProject
             .LessThanOrEqualTo(x => clock.Today).WithMessage("Reservation date cannot be in the future");
 
         RuleFor(x => x.Description)
-            .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
+            .MaximumLength(ReservationConstants.MaxDescriptionLength).WithMessage($"Description cannot exceed {ReservationConstants.MaxDescriptionLength} characters.");
 
         RuleFor(x => x.ReservationStatus)
             .IsInEnum().WithMessage("Invalid reservation status.");
@@ -50,6 +52,7 @@ internal class ProjectItemValidator : AbstractValidator<CreateProjectReservation
 
         RuleFor(x => x.StartDate)
             .NotEmpty().WithMessage("Start date is required.")
+            .GreaterThan(ProjectConstants.MinStartDate).WithMessage($"Start date must be after {ProjectConstants.MinStartDate:yyyy-MM-dd}.")
             .GreaterThanOrEqualTo(x => x.ReservedAt).WithMessage("Start date cannot be before reservation date of a project.")
             .GreaterThanOrEqualTo(reservationReservedAt).WithMessage("Start date cannot be before reservation date.");
 
@@ -62,11 +65,11 @@ internal class ProjectItemValidator : AbstractValidator<CreateProjectReservation
             .LessThanOrEqualTo(clock.Today).WithMessage("Reservation date cannot be in the future.");
 
         RuleFor(x => x.GithubLink)
-            .MaximumLength(200).WithMessage("GitHub link must be less than 200 characters.")
+            .MaximumLength(ProjectConstants.MaxLinkLength).WithMessage($"GitHub link must be less than {ProjectConstants.MaxLinkLength} characters.")
             .When(x => x.GithubLink is not null);
 
         RuleFor(x => x.DownloadLink)
-            .MaximumLength(200).WithMessage("Download link must be less than 200 characters.")
+            .MaximumLength(ProjectConstants.MaxLinkLength).WithMessage($"Download link must be less than {ProjectConstants.MaxLinkLength} characters.")
             .When(x => x.DownloadLink is not null);
 
         RuleForEach(x => x.Notes)
@@ -79,6 +82,7 @@ public class ProjectNoteValidator : AbstractValidator<CreateProjectReservationRe
     public ProjectNoteValidator()
     {
         RuleFor(x => x.Content)
-            .NotEmpty().WithMessage("Project note content cannot be empty.");
+            .NotEmpty().WithMessage("Project note content cannot be empty.")
+            .MaximumLength(ProjectConstants.MaxNoteLength).WithMessage($"Project note cannot exceed {ProjectConstants.MaxNoteLength} characters.");
     }
 }

@@ -16,16 +16,20 @@ public class UpdateSubjectHandler(AppDbContext context) : IHandler<UpdateSubject
         if (subject is null)
             return Result<UpdateSubjectResponse>.Failure(SubjectError.NotFound(request.Id));
 
-        if(!subject.Name.Equals(request.SubjectName, StringComparison.OrdinalIgnoreCase))
+        var previousName = subject.Name;
+
+        var updateResult = subject.Update(request.SubjectName, request.SubjectDescription);
+        if (!updateResult.IsSuccess)
+            return Result<UpdateSubjectResponse>.Failure(updateResult.Errors[0]);
+
+        if(!previousName.Equals(subject.Name, StringComparison.OrdinalIgnoreCase))
         {
             var subjectExists = await context.Subjects
-                .AnyAsync(s => EF.Functions.ILike(s.Name, request.SubjectName), ct);
+                .AnyAsync(s => s.Id != subject.Id && EF.Functions.ILike(s.Name, subject.Name), ct);
 
             if (subjectExists)
-                return Result<UpdateSubjectResponse>.Failure(SubjectError.AlreadyExists(request.SubjectName));
+                return Result<UpdateSubjectResponse>.Failure(SubjectError.AlreadyExists(subject.Name));
         }
-
-        subject.Update(request.SubjectName, request.SubjectDescription);
 
         await context.SaveChangesAsync(ct);
 

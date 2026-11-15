@@ -1,3 +1,4 @@
+using CodeWithMixx.API.Domain.Entities.PaymentTransactions.TransactionNotes;
 using FluentValidation;
 
 namespace CodeWithMixx.API.Features.PaymentTransactions.RegisterPayment;
@@ -14,7 +15,8 @@ public class RegisterPaymentValidator : AbstractValidator<RegisterPaymentBody>
             .LessThanOrEqualTo(_ => DateTimeOffset.UtcNow).WithMessage("Transaction date cannot be in the future.");
         
         RuleFor(x => x.Note)
-            .MinimumLength(20).WithMessage("Note must be at least 20 characters long.");
+            .MinimumLength(20).WithMessage("Note must be at least 20 characters long.")
+            .MaximumLength(TransactionNoteConstants.MaxNoteLength).WithMessage($"Note must not exceed {TransactionNoteConstants.MaxNoteLength} characters.");
 
     }
 }

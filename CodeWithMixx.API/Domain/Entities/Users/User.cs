@@ -55,10 +55,26 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
         };
     }
 
-    public void ChangeName(string firstName, string lastName)
+    public Result ChangeName(string firstName, string lastName)
     {
-        FirstName = firstName;
-        LastName = lastName;
+        var trimmedFirstName = firstName.Trim();
+        var trimmedLastName = lastName.Trim();
+
+        if (trimmedFirstName.Length == 0)
+            return Result.Failure(UserError.FirstNameRequired());
+
+        if (trimmedFirstName.Length > UserConstants.MaxNameLength)
+            return Result.Failure(UserError.FirstNameTooLong());
+
+        if (trimmedLastName.Length == 0)
+            return Result.Failure(UserError.LastNameRequired());
+
+        if (trimmedLastName.Length > UserConstants.MaxNameLength)
+            return Result.Failure(UserError.LastNameTooLong());
+
+        FirstName = trimmedFirstName;
+        LastName = trimmedLastName;
+        return Result.Success();
     }
     
     public void UpdateLastLogin()
@@ -75,11 +91,16 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
         if(AccountStatus == AccountStatus.Active) 
             return Result.Failure(UserError.AlreadyActivated(Id));
         
-        if(PasswordHash is null) 
-            AccountStatus = AccountStatus.Pending; 
-        else 
-            AccountStatus = AccountStatus.Active;
-        
+        if (PasswordHash is null)
+        {
+            if (AccountStatus == AccountStatus.Pending)
+                return Result.Failure(UserError.CannotActivateWithNullPassword(Id));
+
+            AccountStatus = AccountStatus.Pending;
+            return Result.Success();
+        }
+
+        AccountStatus = AccountStatus.Active;
         return Result.Success();
     }
 
@@ -103,8 +124,18 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
         return Result.Success();
     }
 
-    public void DeleteUser()
+    public Result DeleteUser()
     {
+        if (IsDeleted)
+            return Result.Failure(UserError.AlreadyDeleted(Id));
+
+        if (Student is not null)
+        {
+            var studentDeleteResult = Student.Delete();
+            if (!studentDeleteResult.IsSuccess)
+                return studentDeleteResult;
+        }
+
         IsDeleted = true;
         DeletedAt = DateTime.UtcNow;
         Email = "deleted_" + Id + "@deleted.invalid";
@@ -114,7 +145,7 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
         FirstName = "Deleted";
         LastName = "Deleted";
         AccountStatus = AccountStatus.Deleted;
-        Student?.Delete();
+        return Result.Success();
     }
 
 
