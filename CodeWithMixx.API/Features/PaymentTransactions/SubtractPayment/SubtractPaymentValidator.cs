@@ -1,4 +1,5 @@
 using CodeWithMixx.API.Domain.Entities.PaymentTransactions;
+using CodeWithMixx.API.Domain.Entities.PaymentTransactions.TransactionNotes;
 using FluentValidation;
 
 namespace CodeWithMixx.API.Features.PaymentTransactions.SubtractPayment;
@@ -16,7 +17,8 @@ public class SubtractPaymentValidator : AbstractValidator<SubtractPaymentBody>
         
         RuleFor(x => x.Note)
             .NotEmpty().WithMessage("Note is required for subtracting transactions.")
-            .MinimumLength(20).WithMessage("Note must be at least 20 characters long.");
+            .MinimumLength(20).WithMessage("Note must be at least 20 characters long.")
+            .MaximumLength(TransactionNoteConstants.MaxNoteLength).WithMessage($"Note must not exceed {TransactionNoteConstants.MaxNoteLength} characters.");
         
         RuleFor(x => x.PaymentType)
             .IsInEnum().WithMessage("Invalid payment type.")

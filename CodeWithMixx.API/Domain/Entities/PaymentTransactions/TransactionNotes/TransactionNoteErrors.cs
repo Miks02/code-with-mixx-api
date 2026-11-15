@@ -9,4 +9,7 @@ public static class TransactionNoteError
     
     public static Error NoteIsRequiredForRefund()
         => new("TransactionNote.RequiredForRefund", "Note is required for refunded transaction.", ErrorType.Validation);
+
+    public static Error NoteTooLong()
+        => new("TransactionNote.TooLong", $"Note cannot exceed {TransactionNoteConstants.MaxNoteLength} characters.", ErrorType.Validation);
 }
