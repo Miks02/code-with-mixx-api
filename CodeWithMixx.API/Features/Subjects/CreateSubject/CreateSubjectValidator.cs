@@ -1,3 +1,4 @@
+using CodeWithMixx.API.Domain.Entities.Subjects;
 using FluentValidation;
 
 namespace CodeWithMixx.API.Features.Subjects.CreateSubject;
@@ -8,10 +9,10 @@ public class CreateSubjectValidator : AbstractValidator<CreateSubjectRequest>
     {
         RuleFor(x => x.SubjectName)
             .NotEmpty().WithMessage("Subject name is required.")
-            .MaximumLength(100).WithMessage("Subject name must not exceed 100 characters.");
+            .MaximumLength(SubjectConstants.MaxNameLength).WithMessage($"Subject name must not exceed {SubjectConstants.MaxNameLength} characters.");
         
         RuleFor(x => x.SubjectDescription)
             .NotEmpty().WithMessage("Subject description is required.")
-            .MaximumLength(500).WithMessage("Subject description must not exceed 500 characters.");
+            .MaximumLength(SubjectConstants.MaxDescriptionLength).WithMessage($"Subject description must not exceed {SubjectConstants.MaxDescriptionLength} characters.");
     }
 }
