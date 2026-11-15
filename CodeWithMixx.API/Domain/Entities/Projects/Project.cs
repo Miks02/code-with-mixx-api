@@ -137,7 +137,10 @@ public class Project : IAuditable, ISoftDeletable
         if(progress < 0 || progress > 100)
             return Result.Failure(ProjectError.InvalidProgress(progress));
 
-        if(startDate <= DateOnly.MinValue || startDate > endDate)
+        if(startDate <= ProjectConstants.MinStartDate)
+            return Result.Failure(ProjectError.StartDateTooEarly(startDate));
+
+        if(startDate > endDate)
             return Result.Failure(ProjectError.InvalidDateRange(startDate, endDate));
 
         if(reservedAt <= DateOnly.MinValue || reservedAt > today)
