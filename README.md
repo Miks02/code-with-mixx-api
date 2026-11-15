@@ -21,32 +21,19 @@ This repository contains the backend REST API. The web client is available at [c
 - Serilog (console, debug and Seq sinks)
 - OpenAPI with Scalar
 - Resend (transactional email)
-- Handle authentication, account activation, password recovery and session management.
-- Serve as a real world reference project for the technologies that are taught: from the database to the user interface.
-
-## Technology Stack
-
-- .NET 10, ASP.NET Core Minimal API
-- Entity Framework Core with PostgreSQL (Npgsql)
-- ASP.NET Core Identity, JWT Bearer authentication
-- FluentValidation
-- Scrutor
-- Serilog (console, debug and Seq sinks)
-- OpenAPI with Scalar
-- Resend (transactional email)
 - Discord.Net (inquiry notifications)
 - xUnit, NSubstitute, AwesomeAssertions, MockQueryable
 
 ## Features
 
 | Module               | Responsibility                                                                    |
-| -------------------- | --------------------------------------------------------------------------------
+| -------------------- | --------------------------------------------------------------------------------- |
 | Authentication       | Login, logout, logout from all or a specific session, token rotation, account activation, password reset |
 | Account              | Updating name, email, phone number and password                                   |
 | Subjects             | Creating, updating, archiving, restoring and deleting subjects, public catalog and lookups |
 | Students             | Student management, activation and deactivation, invitations, search and summaries |
 | Reservations         | Class and project reservations, status changes, archiving and restoring, paged lists and summaries |
-| Classes and Projects | Managing the individual classes and projects within a reservation
+| Classes and Projects | Managing the individual classes and projects within a reservation                 |
 | PaymentTransactions  | Registering and subtracting payments per reservation                              |
 | Inquiries            | Receiving inquiries from the public site, resolving and deleting them             |
 | Analytics            | Aggregated data for the admin dashboard                                           |
@@ -68,7 +55,7 @@ CodeWithMixx.UnitTests/
 
 ### Vertical slices
 
-The API is organized by feature rather than by technical layer. Every use case lives in its own folder ans:
+The API is organized by feature rather than by technical layer. Every use case lives in its own folder and contains everything it needs:
 
 ```
 Features/Subjects/CreateSubject/
@@ -79,11 +66,11 @@ Features/Subjects/CreateSubject/
   CreateSubjectValidator.cs
 ```
 
-Endpoints implement `IEndpoint` and are discovered by reflection at startup, then registered under the `/plement `IHandler<TRequest, TResponse>` and are registered automatically with Scrutor.
+Endpoints implement `IEndpoint` and are discovered by reflection at startup, then registered under the `/api` route group together with the validation and ProblemDetails filters. Handlers implement `IHandler<TRequest, TResponse>` and are registered automatically with Scrutor.
 
 ### Domain model
 
-Business rules are enforced inside the entities rather than in handlers. Entities such as `Reservation` eand explicit mutation methods, keep their setters private and expose their collections as read only.Monetary values are represented by a `Money` value object. Each entity defines its own domain errors (for example `ReservationErrors`, `SubjectErrors`).
+Business rules are enforced inside the entities rather than in handlers. Entities such as `Reservation` expose static factory methods and explicit mutation methods, keep their setters private and expose their collections as read only. Monetary values are represented by a `Money` value object. Each entity defines its own domain errors (for example `ReservationError`, `SubjectError`).
 
 ### Result pattern
 
@@ -93,7 +80,7 @@ Expected failures are not modeled as exceptions. Domain methods and handlers ret
 
 - **Validation:** an endpoint filter runs the FluentValidation validator for the request and returns a `400` response with an `errors` dictionary on failure.
 - **Logging decorator:** every handler is wrapped in a decorator that logs the start, duration and outcome of the request, including error codes for failed results.
-- **Exception handlers:** dedicated handlers cover unauthorized access, revoked tokens and security relatobal handler as the final fallback.
+- **Exception handlers:** dedicated handlers cover unauthorized access, revoked tokens and security related database errors, with a global handler as the final fallback.
 
 ### Error handling
 
@@ -121,7 +108,7 @@ A global limiter applies to all requests, with stricter dedicated policies for a
 ### Background jobs
 
 - **CleanExpiredTokensJob:** periodically removes expired and revoked refresh tokens.
-- **MarkOverdueReservationsJob:** periodically marks reservations with unpaid balances past their end dat
+- **MarkOverdueReservationsJob:** periodically marks reservations with unpaid balances past their end date as overdue.
 
 ### Integrations
 
@@ -130,8 +117,18 @@ A global limiter applies to all requests, with stricter dedicated policies for a
 
 ### Observability
 
-Structured logging with Serilog, enriched with thread and process information. Request logs include the ae development environment the API exposes an OpenAPI document and a Scalar reference UI.
+Structured logging with Serilog, enriched with thread and process information. Request logs include the authenticated user id. In the development environment the API exposes an OpenAPI document and a Scalar reference UI.
 
 ## Testing
 
-Unit tests are written with xUnit, NSubstitute and AwesomeAssertions. They cover the Result pattern and its extensions, the token, cookie and user providers, and time handling.
+Unit tests are written with xUnit, NSubstitute and AwesomeAssertions and mirror the structure of the API project.
+
+- **Domain:** every entity is tested in isolation, without a database: `Reservation`, `Class`, `Project` and `ProjectNote`, `PaymentTransaction` and `TransactionNote`, `Subject`, `Student`, `User`, `Inquiry` and `RefreshToken`, together with their domain error catalogs. The tests cover factory methods and behavior methods, input validation and boundary values (lengths, amounts, dates, durations), the order in which errors are reported, state transitions such as archiving, restoring and deleting, and the payment calculations of a reservation (total price, discount rate, bonus and payment status).
+- **Common:** the Result pattern, errors and the mapping of results to HTTP responses.
+- **Infrastructure:** the token service, the cookie and user providers, and time handling.
+
+Run them from the repository root:
+
+```
+dotnet test
+```
