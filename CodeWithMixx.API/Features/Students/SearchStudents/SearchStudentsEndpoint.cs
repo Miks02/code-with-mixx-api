@@ -6,7 +6,7 @@ namespace CodeWithMixx.API.Features.Students.SearchStudents
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapGet("/students/search", 
+            app.MapGet("admin/students/search", 
                 async (
                     [AsParameters] SearchStudentsRequest request, 
                     IHandler<SearchStudentsRequest,
