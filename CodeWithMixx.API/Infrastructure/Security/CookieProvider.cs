@@ -33,9 +33,17 @@ public class CookieProvider(IConfiguration configuration, IHttpContextAccessor h
 
     public void RemoveAuthCookies()
     {
-        Context.Response.Cookies.Delete("AccessToken");
-        Context.Response.Cookies.Delete("RefreshToken");
-        Context.Response.Cookies.Delete("Session");
+        var deleteOptions = new CookieOptions
+        {
+            Path = "/",
+            Domain = configuration.GetValue<string?>("CookieConfig:Domain"),
+            Secure = true,
+            SameSite = SameSiteMode.Lax
+        };
+
+        Context.Response.Cookies.Delete("AccessToken", deleteOptions);
+        Context.Response.Cookies.Delete("RefreshToken", deleteOptions);
+        Context.Response.Cookies.Delete("Session", deleteOptions);
     }
 
     private void AppendCookie(string name, string value, DateTimeOffset expires)
