@@ -87,6 +87,7 @@ public class GetProjectReservationsSummaryHandler(AppDbContext context, IUserClo
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
                 DeletedAt = r.DeletedAt,
+                ReservedAt = r.ReservedAt,
                 IsHardDeletable = !r.RequiresHistoryRetention(clock.Today),
                 Projects = r.Projects
                     .OrderBy(p => p.StartDate)
