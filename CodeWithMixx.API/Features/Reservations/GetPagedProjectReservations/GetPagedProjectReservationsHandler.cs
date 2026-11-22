@@ -85,6 +85,7 @@ public class GetPagedProjectReservationsHandler(AppDbContext context, IUserClock
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
                 DeletedAt = r.DeletedAt,
+                ReservedAt = r.ReservedAt,
                 IsHardDeletable = !r.RequiresHistoryRetention(userClock.Today),
                 Projects = r.Projects
                     .OrderBy(p => p.StartDate)
