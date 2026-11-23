@@ -92,6 +92,7 @@ public class GetPagedProjectReservationsHandler(AppDbContext context, IUserClock
                     .Select(p => new ProjectItem
                     {
                         Id = p.Id,
+                        Name = p.Name,
                         SubjectId = p.SubjectId,
                         SubjectName = p.Subject.Name,
                         ProjectType = p.ProjectType,
