@@ -2,6 +2,7 @@ namespace CodeWithMixx.API.Domain.Entities.Projects;
 
 public record ProjectCreateData
 {
+    public string Name { get; init; } = null!;
     public int SubjectId { get; init; }
     public ProjectType ProjectType { get; init; }
     public DateOnly StartDate { get; init; }

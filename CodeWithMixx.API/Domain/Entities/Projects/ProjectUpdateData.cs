@@ -2,6 +2,7 @@ namespace CodeWithMixx.API.Domain.Entities.Projects;
 
 public record ProjectUpdateData
 {
+    public string Name { get; init; } = null!;
     public int Id { get; init; }
     public int SubjectId { get; init; }
     public ProjectType ProjectType { get; init; }

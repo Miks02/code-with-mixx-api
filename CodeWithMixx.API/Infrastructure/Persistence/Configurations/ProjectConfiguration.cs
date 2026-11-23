@@ -38,7 +38,7 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
 
         builder.Property(p => p.Name)
             .IsRequired()
-            .HasMaxLength(100);
+            .HasMaxLength(ProjectConstants.MaxNameLength);
 
         builder.Property(p => p.ProjectType)
             .IsRequired()
