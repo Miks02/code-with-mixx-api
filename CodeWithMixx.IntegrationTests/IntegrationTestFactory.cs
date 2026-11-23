@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Features.Authentication.Login;
+using CodeWithMixx.IntegrationTests.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -17,14 +18,10 @@ namespace CodeWithMixx.IntegrationTests;
 public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _db = new PostgreSqlBuilder("postgres:17").Build();
-    private const string AdminEmail = "admin@test.com";
-    private const string AdminPassword = "Admin123!";
     private string? _adminAccessToken;
     
     private Respawner _respawner = null!;
     private NpgsqlConnection _connection = null!;
-    
-
     private IAuthEmailSender AuthEmailSender { get; } = Substitute.For<IAuthEmailSender>();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -39,11 +36,11 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
         builder.UseSetting("RefreshConfig:RetentionThresholdInDays", "7");
         builder.UseSetting("RefreshConfig:CleanupIntervalInDays", "1");
         builder.UseSetting("CookieConfig:Domain", "localhost");
-        builder.UseSetting("Admin:Email", "admin@test.com");
-        builder.UseSetting("Admin:Password", "Admin123!");
-        builder.UseSetting("Admin:FirstName", "Admin");
-        builder.UseSetting("Admin:LastName", "Test");
-        builder.UseSetting("Admin:PhoneNumber", "0600000000");
+        builder.UseSetting("Admin:Email", TestConstants.AdminEmail);
+        builder.UseSetting("Admin:Password", TestConstants.AdminPassword);
+        builder.UseSetting("Admin:FirstName", TestConstants.AdminFirstName);
+        builder.UseSetting("Admin:LastName", TestConstants.AdminLastName);
+        builder.UseSetting("Admin:PhoneNumber", TestConstants.AdminPhoneNumber);
 
         builder.ConfigureTestServices(services =>
         {
@@ -87,7 +84,7 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
     
     public async Task<HttpClient> CreateAdminClientAsync()
     {
-        _adminAccessToken ??= await LoginAndGetAccessTokenAsync(AdminEmail, AdminPassword);
+        _adminAccessToken ??= await LoginAndGetAccessTokenAsync(TestConstants.AdminEmail, TestConstants.AdminPassword);
         return CreateClientWithAccessToken(_adminAccessToken);
     }
     
