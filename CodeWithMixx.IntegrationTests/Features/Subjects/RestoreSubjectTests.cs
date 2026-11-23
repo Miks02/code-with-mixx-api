@@ -10,7 +10,7 @@ public class RestoreSubjectTests : IClassFixture<IntegrationTestFactory>, IAsync
     private readonly IntegrationTestFactory _factory;
     private HttpClient _httpClient;
 
-    public RestoreSubjectTests(IntegrationTestFactory factory, ITestOutputHelper testOutputHelper)
+    public RestoreSubjectTests(IntegrationTestFactory factory)
     {   
         _factory = factory;
         _httpClient = _factory.CreateClient();

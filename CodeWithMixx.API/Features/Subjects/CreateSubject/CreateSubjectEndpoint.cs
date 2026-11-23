@@ -1,3 +1,4 @@
+using System.Net;
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
 
@@ -10,7 +11,7 @@ public class CreateSubjectEndpoint : IEndpoint
         app.MapPost("/admin/subjects", async (CreateSubjectRequest request, IHandler<CreateSubjectRequest, Result<CreateSubjectResponse>> createSubjectHandler) =>
         {
             var result = await createSubjectHandler.HandleAsync(request);
-            return result.ToTypedResult();
+            return result.ToTypedResult(HttpStatusCode.Created);
         })
         .RequireAuthorization("AdminOnly")
         .WithTags("Subjects")
