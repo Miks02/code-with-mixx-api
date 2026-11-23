@@ -7,7 +7,7 @@ public class ArchiveSubjectTests : IClassFixture<IntegrationTestFactory>
 {
     private const string Url = "/api/admin/subjects/";
     private readonly IntegrationTestFactory _factory;
-    private readonly HttpClient _httpClient;
+    private HttpClient _httpClient;
 
     public ArchiveSubjectTests(IntegrationTestFactory factory)
     {   
@@ -16,30 +16,33 @@ public class ArchiveSubjectTests : IClassFixture<IntegrationTestFactory>
     }
 
     [Fact]
-    public async Task Archive_WhenSubjectIsArchived_ShouldReturnNotFound()
+    public async Task Archive_WhenSubjectIsArchived_ShouldReturnConflict()
     {
+        _httpClient = await _factory.CreateAdminClientAsync();
         await _factory.ResetDatabaseAsync();
         var subject = _factory.CreateSubjectAsync("Test description", "Test description", true);
 
         var response = await ArchiveSubjectAsync(subject.Id);
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
     
     [Fact]
     public async Task Archive_WhenSubjectDoesNotExist_ShouldReturnNotFound()
     {
+        _httpClient = await _factory.CreateAdminClientAsync();
         var response = await ArchiveSubjectAsync(0);
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
     
     [Fact]
-    public async Task Archive_WhenSubjectIsNotArchived_ShouldReturnOk()
+    public async Task Archive_WhenSubjectIsNotArchived_ShouldReturnNoContent()
     {
+        _httpClient = await _factory.CreateAdminClientAsync();
         await _factory.ResetDatabaseAsync();
         var subject = _factory.CreateSubjectAsync("Test description", "Test description", false);
 
         var response = await ArchiveSubjectAsync(subject.Id);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
     
     
