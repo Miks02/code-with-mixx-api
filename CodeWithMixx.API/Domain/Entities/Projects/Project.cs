@@ -7,6 +7,7 @@ namespace CodeWithMixx.API.Domain.Entities.Projects;
 public class Project : IAuditable, ISoftDeletable
 {
     public int Id { get; private set; }
+    public string Name { get; private set; } = null!;
     public ProjectType ProjectType { get; private set; }
     public decimal Price { get; private set; }
     public string? GithubLink { get; private set; }
