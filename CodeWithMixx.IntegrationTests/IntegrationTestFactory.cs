@@ -1,8 +1,11 @@
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Features.Authentication.Login;
 using CodeWithMixx.IntegrationTests.Common;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,6 +52,11 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
             services.RemoveAll<IInquirySender>();
             services.AddSingleton(AuthEmailSender);
             services.AddSingleton(Substitute.For<IInquirySender>());
+            services.Configure<JsonOptions>(options =>
+            {
+                options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            });
         });
     }
 
