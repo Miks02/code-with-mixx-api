@@ -13,7 +13,7 @@ public class AuthEmailSender(IConfiguration configuration, IResend resend) : IAu
     {
         token = UrlEncoder.Default.Encode(token);
         
-        var invitationUrl = $"{_clientUrl}/activate-account?token={token}&userId={userId}";
+        var invitationUrl = $"{_clientUrl}/auth/activate-account?token={token}&userId={userId}";
        
         var htmlBody = $"""
                          <!DOCTYPE html>
@@ -70,8 +70,8 @@ public class AuthEmailSender(IConfiguration configuration, IResend resend) : IAu
     {
         token = UrlEncoder.Default.Encode(token);
         
-        var resetUrl = $"{_clientUrl}/reset-password?token={token}&userId={userId}";
-        
+        var resetUrl = $"{_clientUrl}auth/reset-password?token={token}&userId={userId}";
+            
         var htmlBody = $"""
                          <!DOCTYPE html>
                          <html lang="sr">
