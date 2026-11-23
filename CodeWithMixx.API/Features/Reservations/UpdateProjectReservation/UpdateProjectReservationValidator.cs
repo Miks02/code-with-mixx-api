@@ -48,6 +48,10 @@ internal class UpdateProjectItemValidator : AbstractValidator<UpdateProjectReser
         RuleFor(x => x.Id)
             .GreaterThanOrEqualTo(0).WithMessage("Project id must be 0 (new project) or a valid identifier.");
 
+        RuleFor(x => x.Name)
+            .NotEmpty().WithMessage("Project name is required.")
+            .MaximumLength(100).WithMessage("Project name must not be more than 100 characters.");
+
         RuleFor(x => x.SubjectId)
             .GreaterThan(0).WithMessage("SubjectId must be a valid identifier.");
 

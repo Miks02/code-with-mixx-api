@@ -105,6 +105,7 @@ public class UpdateProjectReservationHandler(AppDbContext context, IUserClock cl
             .Select(p => new ProjectUpdateData
             {
                 Id = p.Id,
+                Name = p.Name,
                 SubjectId = p.SubjectId,
                 ProjectType = p.ProjectType,
                 StartDate = p.StartDate,
@@ -143,6 +144,7 @@ public class UpdateProjectReservationHandler(AppDbContext context, IUserClock cl
             .Select(p => new ProjectCreateData
             {
                 SubjectId = p.SubjectId,
+                Name = p.Name,
                 ProjectType = p.ProjectType,
                 StartDate = p.StartDate,
                 EndDate = p.EndDate,
