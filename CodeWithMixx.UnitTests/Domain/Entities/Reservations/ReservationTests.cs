@@ -19,6 +19,7 @@ public class ReservationTests
     private const int ReservationId = 11;
     private const decimal ClassPrice = ClassConstants.DefaultPrice;
     private const decimal ProjectPrice = 25000m;
+    private const string ProjectName = "Web aplikacija izradjena u ASP.NET Core MVC";
     private const string RefundNote = "Povraćaj zbog otkazanog časa.";
 
     private static readonly DateOnly Today = new(2026, 11, 15);
@@ -1058,6 +1059,7 @@ public class ReservationTests
     private static ProjectCreateData ProjectData() => new()
     {
         SubjectId = SubjectId,
+        Name = ProjectName,
         ProjectType = ProjectType.Seminar,
         ReservedAt = ReservedAt,
         StartDate = new DateOnly(2027, 1, 10),
@@ -1070,6 +1072,7 @@ public class ReservationTests
     {
         Id = id,
         SubjectId = SubjectId,
+        Name = ProjectName,
         ProjectType = ProjectType.Seminar,
         ReservedAt = ReservedAt,
         StartDate = new DateOnly(2027, 1, 10),
