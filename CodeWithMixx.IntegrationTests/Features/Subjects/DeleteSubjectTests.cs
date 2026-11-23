@@ -1,5 +1,7 @@
 using System.Net;
 using AwesomeAssertions;
+using CodeWithMixx.API.Common.Results;
+using CodeWithMixx.IntegrationTests.Common;
 
 namespace CodeWithMixx.IntegrationTests.Features.Subjects;
 
@@ -22,8 +24,8 @@ public class DeleteSubjectTests : IClassFixture<IntegrationTestFactory>, IAsyncL
     [Fact]
     public async Task Delete_WhenUserIsNotAdmin_ShouldReturnUnauthorized()
     {
-        var response = await DeleteSubjectAsync(1);
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        var response = await DeleteSubjectAsync(0);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
@@ -32,7 +34,9 @@ public class DeleteSubjectTests : IClassFixture<IntegrationTestFactory>, IAsyncL
         _httpClient = await _factory.CreateAdminClientAsync();
 
         var response = await DeleteSubjectAsync(0);
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ProblemDetails.Should().NotBeNull();
+        response.ProblemDetails.Status.Should().Be((int)HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -43,7 +47,9 @@ public class DeleteSubjectTests : IClassFixture<IntegrationTestFactory>, IAsyncL
         await _factory.CreateClassReservationAsync(subject.Id);
 
         var response = await DeleteSubjectAsync(subject.Id);
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.ProblemDetails.Should().NotBeNull();
+        response.ProblemDetails.Status.Should().Be((int)HttpStatusCode.Conflict);
 
         var persisted = await _factory.FindSubjectAsync(subject.Id);
         persisted.Should().NotBeNull();
@@ -56,14 +62,16 @@ public class DeleteSubjectTests : IClassFixture<IntegrationTestFactory>, IAsyncL
         var subject = await _factory.CreateSubjectAsync("Test", "Description", false);
 
         var response = await DeleteSubjectAsync(subject.Id);
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.ProblemDetails.Should().BeNull();
 
         var persisted = await _factory.FindSubjectAsync(subject.Id);
         persisted.Should().BeNull();
     }
 
-    private async Task<HttpResponseMessage> DeleteSubjectAsync(int id)
+    private async Task<EndpointResponse<Result>> DeleteSubjectAsync(int id)
     {
-        return await _httpClient.DeleteAsync(Url + id);
+        var response = await _httpClient.DeleteAsync(Url + id);
+        return await response.ToEndpointResponse<Result>();
     }
 }

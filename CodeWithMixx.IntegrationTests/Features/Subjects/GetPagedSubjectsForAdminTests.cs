@@ -1,8 +1,8 @@
 using System.Net;
-using System.Net.Http.Json;
 using AwesomeAssertions;
 using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Features.Subjects.GetPagedSubjectsForAdmin;
+using CodeWithMixx.IntegrationTests.Common;
 
 namespace CodeWithMixx.IntegrationTests.Features.Subjects;
 
@@ -25,8 +25,9 @@ public class GetPagedSubjectsForAdminTests : IClassFixture<IntegrationTestFactor
     [Fact]
     public async Task GetPagedForAdmin_WhenUserIsNotAdmin_ShouldReturnUnauthorized()
     {
-        var response = await _httpClient.GetAsync(Url);
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        var response = await GetPagedAsync("pageNumber=1&pageSize=10&onlyArchived=false");
+        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Data.Should().BeNull();
     }
 
     [Fact]
@@ -36,9 +37,11 @@ public class GetPagedSubjectsForAdminTests : IClassFixture<IntegrationTestFactor
         var active = await _factory.CreateSubjectAsync("Web", "Description", false);
         await _factory.CreateSubjectAsync("Baze", "Description", true);
 
-        var body = await GetPagedAsync("pageNumber=1&pageSize=10&onlyArchived=false");
+        var response = await GetPagedAsync("pageNumber=1&pageSize=10&onlyArchived=false");
 
-        body.Items.Should().ContainSingle()
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.Items.Should().ContainSingle()
             .Which.Id.Should().Be(active.Id);
     }
 
@@ -49,9 +52,11 @@ public class GetPagedSubjectsForAdminTests : IClassFixture<IntegrationTestFactor
         await _factory.CreateSubjectAsync("Web", "Description", false);
         var archived = await _factory.CreateSubjectAsync("Baze", "Description", true);
 
-        var body = await GetPagedAsync("pageNumber=1&pageSize=10&onlyArchived=true");
+        var response = await GetPagedAsync("pageNumber=1&pageSize=10&onlyArchived=true");
 
-        var item = body.Items.Should().ContainSingle().Subject;
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        var item = response.Data.Items.Should().ContainSingle().Subject;
         item.Id.Should().Be(archived.Id);
         item.DeletedAt.Should().NotBeNull();
     }
@@ -64,9 +69,11 @@ public class GetPagedSubjectsForAdminTests : IClassFixture<IntegrationTestFactor
         var byDescription = await _factory.CreateSubjectAsync("Algoritmi", "Osnove web razvoja", false);
         await _factory.CreateSubjectAsync("Baze Podataka", "Relacione baze", false);
 
-        var body = await GetPagedAsync("pageNumber=1&pageSize=10&onlyArchived=false&searchTerm=WEB");
+        var response = await GetPagedAsync("pageNumber=1&pageSize=10&onlyArchived=false&searchTerm=WEB");
 
-        body.Items.Select(s => s.Id).Should().BeEquivalentTo([byName.Id, byDescription.Id]);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.Items.Select(s => s.Id).Should().BeEquivalentTo([byName.Id, byDescription.Id]);
     }
 
     [Fact]
@@ -77,9 +84,11 @@ public class GetPagedSubjectsForAdminTests : IClassFixture<IntegrationTestFactor
         await _factory.CreateSubjectAsync("Algoritmi", "Description", false);
         await _factory.CreateSubjectAsync("Baze", "Description", false);
 
-        var body = await GetPagedAsync("pageNumber=1&pageSize=10&onlyArchived=false&sortBy=SubjectNameAscending");
+        var response = await GetPagedAsync("pageNumber=1&pageSize=10&onlyArchived=false&sortBy=SubjectNameAscending");
 
-        body.Items.Select(s => s.SubjectName).Should().Equal("Algoritmi", "Baze", "Web");
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.Items.Select(s => s.SubjectName).Should().Equal("Algoritmi", "Baze", "Web");
     }
 
     [Fact]
@@ -90,9 +99,11 @@ public class GetPagedSubjectsForAdminTests : IClassFixture<IntegrationTestFactor
         await _factory.CreateSubjectAsync("Algoritmi", "Description", false);
         await _factory.CreateSubjectAsync("Baze", "Description", false);
 
-        var body = await GetPagedAsync("pageNumber=1&pageSize=10&onlyArchived=false&sortBy=CreatedAtDescending");
+        var response = await GetPagedAsync("pageNumber=1&pageSize=10&onlyArchived=false&sortBy=CreatedAtDescending");
 
-        body.Items.Select(s => s.SubjectName).Should().Equal("Baze", "Algoritmi", "Web");
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.Items.Select(s => s.SubjectName).Should().Equal("Baze", "Algoritmi", "Web");
     }
 
     [Fact]
@@ -103,9 +114,11 @@ public class GetPagedSubjectsForAdminTests : IClassFixture<IntegrationTestFactor
         await _factory.CreateClassReservationAsync(subject.Id);
         await _factory.CreateClassReservationAsync(subject.Id);
 
-        var body = await GetPagedAsync("pageNumber=1&pageSize=10&onlyArchived=false");
+        var response = await GetPagedAsync("pageNumber=1&pageSize=10&onlyArchived=false");
 
-        var item = body.Items.Should().ContainSingle().Subject;
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        var item = response.Data.Items.Should().ContainSingle().Subject;
         item.ClassesCount.Should().Be(2);
         item.StudentsCount.Should().Be(2);
     }
@@ -118,19 +131,18 @@ public class GetPagedSubjectsForAdminTests : IClassFixture<IntegrationTestFactor
         await _factory.CreateSubjectAsync("Baze", "Description", false);
         await _factory.CreateSubjectAsync("Algoritmi", "Description", false);
 
-        var body = await GetPagedAsync("pageNumber=2&pageSize=2&onlyArchived=false");
+        var response = await GetPagedAsync("pageNumber=2&pageSize=2&onlyArchived=false");
 
-        body.Items.Should().ContainSingle();
-        body.TotalCount.Should().Be(3);
-        body.TotalPages.Should().Be(2);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.Items.Should().ContainSingle();
+        response.Data.TotalCount.Should().Be(3);
+        response.Data.TotalPages.Should().Be(2);
     }
 
-    private async Task<PagedResult<SubjectItem>> GetPagedAsync(string query)
+    private async Task<EndpointResponse<PagedResult<SubjectItem>>> GetPagedAsync(string query)
     {
         var response = await _httpClient.GetAsync($"{Url}?{query}");
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var body = await response.Content.ReadFromJsonAsync<PagedResult<SubjectItem>>();
-        return body!;
+        return await response.ToEndpointResponse<PagedResult<SubjectItem>>();
     }
 }

@@ -1,8 +1,8 @@
 using System.Net;
-using System.Net.Http.Json;
 using AwesomeAssertions;
 using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Features.Subjects.GetPagedSubjects;
+using CodeWithMixx.IntegrationTests.Common;
 
 namespace CodeWithMixx.IntegrationTests.Features.Subjects;
 
@@ -25,12 +25,12 @@ public class GetPagedSubjectsTests : IClassFixture<IntegrationTestFactory>, IAsy
     [Fact]
     public async Task GetPaged_WhenNoSubjectsExist_ShouldReturnOkWithEmptyPage()
     {
-        var response = await _httpClient.GetAsync($"{Url}?pageNumber=1&pageSize=10");
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var response = await GetPagedAsync("pageNumber=1&pageSize=10");
 
-        var body = await response.Content.ReadFromJsonAsync<PagedResult<GetPagedSubjectsResponse>>();
-        body!.Items.Should().BeEmpty();
-        body.TotalCount.Should().Be(0);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.Items.Should().BeEmpty();
+        response.Data.TotalCount.Should().Be(0);
     }
 
     [Fact]
@@ -39,18 +39,18 @@ public class GetPagedSubjectsTests : IClassFixture<IntegrationTestFactory>, IAsy
         var active = await _factory.CreateSubjectAsync("Web", "Description", false);
         await _factory.CreateSubjectAsync("Baze", "Description", true);
 
-        var response = await _httpClient.GetAsync($"{Url}?pageNumber=1&pageSize=10");
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var response = await GetPagedAsync("pageNumber=1&pageSize=10");
 
-        var body = await response.Content.ReadFromJsonAsync<PagedResult<GetPagedSubjectsResponse>>();
-        body!.Items.Should().ContainSingle()
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.Items.Should().ContainSingle()
             .Which.Should().BeEquivalentTo(new GetPagedSubjectsResponse
             {
                 Id = active.Id,
                 Name = active.Name,
                 Description = active.Description
             });
-        body.TotalCount.Should().Be(1);
+        response.Data.TotalCount.Should().Be(1);
     }
 
     [Fact]
@@ -60,11 +60,11 @@ public class GetPagedSubjectsTests : IClassFixture<IntegrationTestFactory>, IAsy
         var byDescription = await _factory.CreateSubjectAsync("Algoritmi", "Osnove web razvoja", false);
         await _factory.CreateSubjectAsync("Baze Podataka", "Relacione baze", false);
 
-        var response = await _httpClient.GetAsync($"{Url}?pageNumber=1&pageSize=10&searchTerm=WEB");
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var response = await GetPagedAsync("pageNumber=1&pageSize=10&searchTerm=WEB");
 
-        var body = await response.Content.ReadFromJsonAsync<PagedResult<GetPagedSubjectsResponse>>();
-        body!.Items.Select(s => s.Id).Should().BeEquivalentTo([byName.Id, byDescription.Id]);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.Items.Select(s => s.Id).Should().BeEquivalentTo([byName.Id, byDescription.Id]);
     }
 
     [Fact]
@@ -74,14 +74,20 @@ public class GetPagedSubjectsTests : IClassFixture<IntegrationTestFactory>, IAsy
         await _factory.CreateSubjectAsync("Baze", "Description", false);
         await _factory.CreateSubjectAsync("Algoritmi", "Description", false);
 
-        var response = await _httpClient.GetAsync($"{Url}?pageNumber=2&pageSize=2");
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var response = await GetPagedAsync("pageNumber=2&pageSize=2");
 
-        var body = await response.Content.ReadFromJsonAsync<PagedResult<GetPagedSubjectsResponse>>();
-        body!.Items.Should().ContainSingle();
-        body.PageNumber.Should().Be(2);
-        body.PageSize.Should().Be(2);
-        body.TotalCount.Should().Be(3);
-        body.TotalPages.Should().Be(2);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.Items.Should().ContainSingle();
+        response.Data.PageNumber.Should().Be(2);
+        response.Data.PageSize.Should().Be(2);
+        response.Data.TotalCount.Should().Be(3);
+        response.Data.TotalPages.Should().Be(2);
+    }
+
+    private async Task<EndpointResponse<PagedResult<GetPagedSubjectsResponse>>> GetPagedAsync(string query)
+    {
+        var response = await _httpClient.GetAsync($"{Url}?{query}");
+        return await response.ToEndpointResponse<PagedResult<GetPagedSubjectsResponse>>();
     }
 }

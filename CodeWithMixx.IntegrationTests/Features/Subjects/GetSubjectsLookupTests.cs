@@ -1,9 +1,9 @@
 using System.Net;
-using System.Net.Http.Json;
 using AwesomeAssertions;
 using CodeWithMixx.API.Domain.Entities.Subjects;
 using CodeWithMixx.API.Features.Subjects.GetSubjectsLookup;
 using CodeWithMixx.API.Infrastructure.Persistence;
+using CodeWithMixx.IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CodeWithMixx.IntegrationTests.Features.Subjects;
@@ -28,13 +28,11 @@ public class GetSubjectsLookupTests : IClassFixture<IntegrationTestFactory>, IAs
     [Fact]
     public async Task GetLookup_WhenNoSubjectsExist_ShouldReturnOkWithEmptyList()
     {
-        var response = await _httpClient.GetAsync(Url);
+        var response = await GetLookupAsync();
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType!.MediaType.Should().Be("application/json");
-
-        var body = await response.Content.ReadFromJsonAsync<List<GetSubjectsLookupResponse>>();
-        body.Should().NotBeNull().And.BeEmpty();
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Response.Content.Headers.ContentType!.MediaType.Should().Be("application/json");
+        response.Data.Should().NotBeNull().And.BeEmpty();
     }
 
     [Fact]
@@ -43,12 +41,10 @@ public class GetSubjectsLookupTests : IClassFixture<IntegrationTestFactory>, IAs
         var web = await SeedSubjectAsync("Web Programiranje", "Predmet se bavi izučavanjem modernih web tehnologija.");
         var db = await SeedSubjectAsync("Baze Podataka", "Predmet se bavi relacionim bazama podataka.");
 
-        var response = await _httpClient.GetAsync(Url);
+        var response = await GetLookupAsync();
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var body = await response.Content.ReadFromJsonAsync<List<GetSubjectsLookupResponse>>();
-        body.Should().BeEquivalentTo(
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().BeEquivalentTo(
         [
             new GetSubjectsLookupResponse { Id = web.Id, SubjectName = web.Name },
             new GetSubjectsLookupResponse { Id = db.Id, SubjectName = db.Name }
@@ -61,12 +57,10 @@ public class GetSubjectsLookupTests : IClassFixture<IntegrationTestFactory>, IAs
         var active = await SeedSubjectAsync("Web Programiranje", "Predmet se bavi izučavanjem modernih web tehnologija.");
         await SeedSubjectAsync("Baze Podataka", "Predmet se bavi relacionim bazama podataka.", archived: true);
 
-        var response = await _httpClient.GetAsync(Url);
+        var response = await GetLookupAsync();
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var body = await response.Content.ReadFromJsonAsync<List<GetSubjectsLookupResponse>>();
-        body.Should().ContainSingle()
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().ContainSingle()
             .Which.Should().BeEquivalentTo(new GetSubjectsLookupResponse { Id = active.Id, SubjectName = active.Name });
     }
 
@@ -76,8 +70,16 @@ public class GetSubjectsLookupTests : IClassFixture<IntegrationTestFactory>, IAs
         await SeedSubjectAsync("Web Programiranje", "Predmet se bavi izučavanjem modernih web tehnologija.");
 
         var response = await _factory.CreateHttpsClients().GetAsync(Url);
+        var endpointResponse = await response.ToEndpointResponse<List<GetSubjectsLookupResponse>>();
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        endpointResponse.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        endpointResponse.ProblemDetails.Should().BeNull();
+    }
+
+    private async Task<EndpointResponse<List<GetSubjectsLookupResponse>>> GetLookupAsync()
+    {
+        var response = await _httpClient.GetAsync(Url);
+        return await response.ToEndpointResponse<List<GetSubjectsLookupResponse>>();
     }
 
     private async Task<Subject> SeedSubjectAsync(string name, string description, bool archived = false)

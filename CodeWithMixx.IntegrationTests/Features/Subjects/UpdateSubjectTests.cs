@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using AwesomeAssertions;
 using CodeWithMixx.API.Features.Subjects.UpdateSubject;
+using CodeWithMixx.IntegrationTests.Common;
 
 namespace CodeWithMixx.IntegrationTests.Features.Subjects;
 
@@ -24,8 +25,9 @@ public class UpdateSubjectTests : IClassFixture<IntegrationTestFactory>, IAsyncL
     [Fact]
     public async Task Update_WhenUserIsNotAdmin_ShouldReturnUnauthorized()
     {
-        var response = await UpdateSubjectAsync(1, "Test", "Description");
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        var response = await UpdateSubjectAsync(0, "Test", "Description");
+        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Data.Should().BeNull();
     }
 
     [Fact]
@@ -34,7 +36,10 @@ public class UpdateSubjectTests : IClassFixture<IntegrationTestFactory>, IAsyncL
         _httpClient = await _factory.CreateAdminClientAsync();
 
         var response = await UpdateSubjectAsync(0, "Test", "Description");
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.Data.Should().BeNull();
+        response.ProblemDetails.Should().NotBeNull();
+        response.ProblemDetails.Status.Should().Be((int)HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -44,7 +49,10 @@ public class UpdateSubjectTests : IClassFixture<IntegrationTestFactory>, IAsyncL
         var subject = await _factory.CreateSubjectAsync("Test", "Description", false);
 
         var response = await UpdateSubjectAsync(subject.Id, "", "Description");
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Data.Should().BeNull();
+        response.ProblemDetails.Should().NotBeNull();
+        response.ProblemDetails.Status.Should().Be((int)HttpStatusCode.BadRequest);
     }
 
     [Fact]
@@ -55,7 +63,10 @@ public class UpdateSubjectTests : IClassFixture<IntegrationTestFactory>, IAsyncL
         var subject = await _factory.CreateSubjectAsync("Baze", "Description", false);
 
         var response = await UpdateSubjectAsync(subject.Id, "WEB", "Description");
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.Data.Should().BeNull();
+        response.ProblemDetails.Should().NotBeNull();
+        response.ProblemDetails.Status.Should().Be((int)HttpStatusCode.Conflict);
     }
 
     [Fact]
@@ -65,7 +76,9 @@ public class UpdateSubjectTests : IClassFixture<IntegrationTestFactory>, IAsyncL
         var subject = await _factory.CreateSubjectAsync("web", "Description", false);
 
         var response = await UpdateSubjectAsync(subject.Id, "Web", "Description");
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.SubjectName.Should().Be("Web");
     }
 
     [Fact]
@@ -76,22 +89,21 @@ public class UpdateSubjectTests : IClassFixture<IntegrationTestFactory>, IAsyncL
         await _factory.CreateClassReservationAsync(subject.Id);
 
         var response = await UpdateSubjectAsync(subject.Id, "  Updated  ", "Updated description");
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var body = await response.Content.ReadFromJsonAsync<UpdateSubjectResponse>();
-        body.Should().NotBeNull();
-        body.Id.Should().Be(subject.Id);
-        body.SubjectName.Should().Be("Updated");
-        body.SubjectDescription.Should().Be("Updated description");
-        body.ClassesCount.Should().Be(1);
-        body.StudentsCount.Should().Be(1);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.ProblemDetails.Should().BeNull();
+        response.Data.Should().NotBeNull();
+        response.Data.Id.Should().Be(subject.Id);
+        response.Data.SubjectName.Should().Be("Updated");
+        response.Data.SubjectDescription.Should().Be("Updated description");
+        response.Data.ClassesCount.Should().Be(1);
+        response.Data.StudentsCount.Should().Be(1);
 
         var persisted = await _factory.FindSubjectAsync(subject.Id);
         persisted!.Name.Should().Be("Updated");
         persisted.Description.Should().Be("Updated description");
     }
 
-    private async Task<HttpResponseMessage> UpdateSubjectAsync(int id, string subjectName, string subjectDescription)
+    private async Task<EndpointResponse<UpdateSubjectResponse>> UpdateSubjectAsync(int id, string subjectName, string subjectDescription)
     {
         var request = new UpdateSubjectRequest
         {
@@ -99,6 +111,7 @@ public class UpdateSubjectTests : IClassFixture<IntegrationTestFactory>, IAsyncL
             SubjectDescription = subjectDescription
         };
 
-        return await _httpClient.PutAsJsonAsync(Url + id, request);
+        var response = await _httpClient.PutAsJsonAsync(Url + id, request);
+        return await response.ToEndpointResponse<UpdateSubjectResponse>();
     }
 }

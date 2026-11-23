@@ -1,7 +1,7 @@
 using System.Net;
-using System.Net.Http.Json;
 using AwesomeAssertions;
 using CodeWithMixx.API.Features.Subjects.GetSubjectById;
+using CodeWithMixx.IntegrationTests.Common;
 
 namespace CodeWithMixx.IntegrationTests.Features.Subjects;
 
@@ -24,8 +24,9 @@ public class GetSubjectByIdTests : IClassFixture<IntegrationTestFactory>, IAsync
     [Fact]
     public async Task GetById_WhenUserIsAnonymous_ShouldReturnUnauthorized()
     {
-        var response = await GetSubjectAsync(1);
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        var response = await GetSubjectAsync(0);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Data.Should().BeNull();
     }
 
     [Fact]
@@ -34,7 +35,10 @@ public class GetSubjectByIdTests : IClassFixture<IntegrationTestFactory>, IAsync
         _httpClient = await _factory.CreateAdminClientAsync();
 
         var response = await GetSubjectAsync(0);
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.Data.Should().BeNull();
+        response.ProblemDetails.Should().NotBeNull();
+        response.ProblemDetails.Status.Should().Be((int)HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -44,7 +48,9 @@ public class GetSubjectByIdTests : IClassFixture<IntegrationTestFactory>, IAsync
         var subject = await _factory.CreateSubjectAsync("Test", "Description", true);
 
         var response = await GetSubjectAsync(subject.Id);
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ProblemDetails.Should().NotBeNull();
+        response.ProblemDetails.Status.Should().Be((int)HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -54,18 +60,18 @@ public class GetSubjectByIdTests : IClassFixture<IntegrationTestFactory>, IAsync
         var subject = await _factory.CreateSubjectAsync("Test", "Description", false);
 
         var response = await GetSubjectAsync(subject.Id);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var body = await response.Content.ReadFromJsonAsync<GetSubjectByIdResponse>();
-        body.Should().NotBeNull();
-        body.Id.Should().Be(subject.Id);
-        body.SubjectName.Should().Be("Test");
-        body.Description.Should().Be("Description");
-        body.CreatedAt.Should().BeCloseTo(subject.CreatedAt, TimeSpan.FromMilliseconds(1));
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.ProblemDetails.Should().BeNull();
+        response.Data.Should().NotBeNull();
+        response.Data.Id.Should().Be(subject.Id);
+        response.Data.SubjectName.Should().Be("Test");
+        response.Data.Description.Should().Be("Description");
+        response.Data.CreatedAt.Should().BeCloseTo(subject.CreatedAt, TimeSpan.FromMilliseconds(1));
     }
 
-    private async Task<HttpResponseMessage> GetSubjectAsync(int id)
+    private async Task<EndpointResponse<GetSubjectByIdResponse>> GetSubjectAsync(int id)
     {
-        return await _httpClient.GetAsync(Url + id);
+        var response = await _httpClient.GetAsync(Url + id);
+        return await response.ToEndpointResponse<GetSubjectByIdResponse>();
     }
 }

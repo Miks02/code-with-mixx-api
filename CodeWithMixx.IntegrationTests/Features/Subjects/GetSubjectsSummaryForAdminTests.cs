@@ -1,7 +1,7 @@
 using System.Net;
-using System.Net.Http.Json;
 using AwesomeAssertions;
 using CodeWithMixx.API.Features.Subjects.GetSubjectsSummaryForAdmin;
+using CodeWithMixx.IntegrationTests.Common;
 
 namespace CodeWithMixx.IntegrationTests.Features.Subjects;
 
@@ -24,8 +24,9 @@ public class GetSubjectsSummaryForAdminTests : IClassFixture<IntegrationTestFact
     [Fact]
     public async Task GetSummary_WhenUserIsNotAdmin_ShouldReturnUnauthorized()
     {
-        var response = await _httpClient.GetAsync(Url);
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        var response = await GetSummaryAsync("pageNumber=1&pageSize=10&onlyArchived=false");
+        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Data.Should().BeNull();
     }
 
     [Fact]
@@ -33,13 +34,15 @@ public class GetSubjectsSummaryForAdminTests : IClassFixture<IntegrationTestFact
     {
         _httpClient = await _factory.CreateAdminClientAsync();
 
-        var body = await GetSummaryAsync("pageNumber=1&pageSize=10&onlyArchived=false");
+        var response = await GetSummaryAsync("pageNumber=1&pageSize=10&onlyArchived=false");
 
-        body.PagedSubjects.Items.Should().BeEmpty();
-        body.TotalSubjects.Should().Be(0);
-        body.TaughtSubjects.Should().Be(0);
-        body.UntaughtSubjects.Should().Be(0);
-        body.MostPopularSubject.Should().BeNull();
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.PagedSubjects.Items.Should().BeEmpty();
+        response.Data.TotalSubjects.Should().Be(0);
+        response.Data.TaughtSubjects.Should().Be(0);
+        response.Data.UntaughtSubjects.Should().Be(0);
+        response.Data.MostPopularSubject.Should().BeNull();
     }
 
     [Fact]
@@ -53,16 +56,18 @@ public class GetSubjectsSummaryForAdminTests : IClassFixture<IntegrationTestFact
         await _factory.CreateClassReservationAsync(popular.Id);
         await _factory.CreateClassReservationAsync(taught.Id);
 
-        var body = await GetSummaryAsync("pageNumber=1&pageSize=10&onlyArchived=false");
+        var response = await GetSummaryAsync("pageNumber=1&pageSize=10&onlyArchived=false");
 
-        body.PagedSubjects.Items.Should().HaveCount(3);
-        body.TotalSubjects.Should().Be(3);
-        body.TaughtSubjects.Should().Be(2);
-        body.UntaughtSubjects.Should().Be(1);
-        body.MostPopularSubject.Should().NotBeNull();
-        body.MostPopularSubject.Id.Should().Be(popular.Id);
-        body.MostPopularSubject.ClassesCount.Should().Be(2);
-        body.MostPopularSubject.StudentsCount.Should().Be(2);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.PagedSubjects.Items.Should().HaveCount(3);
+        response.Data.TotalSubjects.Should().Be(3);
+        response.Data.TaughtSubjects.Should().Be(2);
+        response.Data.UntaughtSubjects.Should().Be(1);
+        response.Data.MostPopularSubject.Should().NotBeNull();
+        response.Data.MostPopularSubject.Id.Should().Be(popular.Id);
+        response.Data.MostPopularSubject.ClassesCount.Should().Be(2);
+        response.Data.MostPopularSubject.StudentsCount.Should().Be(2);
     }
 
     [Fact]
@@ -72,11 +77,13 @@ public class GetSubjectsSummaryForAdminTests : IClassFixture<IntegrationTestFact
         await _factory.CreateSubjectAsync("Web", "Description", false);
         await _factory.CreateSubjectAsync("Baze", "Description", true);
 
-        var body = await GetSummaryAsync("pageNumber=1&pageSize=10&onlyArchived=false");
+        var response = await GetSummaryAsync("pageNumber=1&pageSize=10&onlyArchived=false");
 
-        body.PagedSubjects.Items.Should().ContainSingle();
-        body.TotalSubjects.Should().Be(1);
-        body.UntaughtSubjects.Should().Be(1);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.PagedSubjects.Items.Should().ContainSingle();
+        response.Data.TotalSubjects.Should().Be(1);
+        response.Data.UntaughtSubjects.Should().Be(1);
     }
 
     [Fact]
@@ -86,9 +93,11 @@ public class GetSubjectsSummaryForAdminTests : IClassFixture<IntegrationTestFact
         await _factory.CreateSubjectAsync("Web", "Description", false);
         var archived = await _factory.CreateSubjectAsync("Baze", "Description", true);
 
-        var body = await GetSummaryAsync("pageNumber=1&pageSize=10&onlyArchived=true");
+        var response = await GetSummaryAsync("pageNumber=1&pageSize=10&onlyArchived=true");
 
-        body.PagedSubjects.Items.Should().ContainSingle()
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.PagedSubjects.Items.Should().ContainSingle()
             .Which.Id.Should().Be(archived.Id);
     }
 
@@ -99,19 +108,18 @@ public class GetSubjectsSummaryForAdminTests : IClassFixture<IntegrationTestFact
         var web = await _factory.CreateSubjectAsync("Web", "Description", false);
         await _factory.CreateSubjectAsync("Baze", "Description", false);
 
-        var body = await GetSummaryAsync("pageNumber=1&pageSize=10&onlyArchived=false&searchTerm=web");
+        var response = await GetSummaryAsync("pageNumber=1&pageSize=10&onlyArchived=false&searchTerm=web");
 
-        body.PagedSubjects.Items.Should().ContainSingle()
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Data.Should().NotBeNull();
+        response.Data.PagedSubjects.Items.Should().ContainSingle()
             .Which.Id.Should().Be(web.Id);
-        body.TotalSubjects.Should().Be(2);
+        response.Data.TotalSubjects.Should().Be(2);
     }
 
-    private async Task<GetSubjectsSummaryForAdminResponse> GetSummaryAsync(string query)
+    private async Task<EndpointResponse<GetSubjectsSummaryForAdminResponse>> GetSummaryAsync(string query)
     {
         var response = await _httpClient.GetAsync($"{Url}?{query}");
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var body = await response.Content.ReadFromJsonAsync<GetSubjectsSummaryForAdminResponse>();
-        return body!;
+        return await response.ToEndpointResponse<GetSubjectsSummaryForAdminResponse>();
     }
 }
