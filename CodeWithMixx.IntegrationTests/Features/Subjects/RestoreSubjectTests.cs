@@ -23,7 +23,7 @@ public class RestoreSubjectTests : IClassFixture<IntegrationTestFactory>, IAsync
     [Fact]
     public async Task Restore_WhenUserIsNotAdmin_ShouldReturnUnauthorized()
     {
-        var response = await RestoreSubjectAsync(1);
+        var response = await RestoreSubjectAsync(0);
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -31,7 +31,7 @@ public class RestoreSubjectTests : IClassFixture<IntegrationTestFactory>, IAsync
     public async Task Restore_WhenSubjectIsNotFound_ShouldReturnNotFound()
     {
         _httpClient = await _factory.CreateAdminClientAsync();
-        var response = await RestoreSubjectAsync(1);
+        var response = await RestoreSubjectAsync(0);
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);   
     }
     

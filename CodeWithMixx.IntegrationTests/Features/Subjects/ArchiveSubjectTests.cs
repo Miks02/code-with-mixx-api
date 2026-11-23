@@ -39,7 +39,7 @@ public class ArchiveSubjectTests : IClassFixture<IntegrationTestFactory>
     {
         _httpClient = await _factory.CreateAdminClientAsync();
         await _factory.ResetDatabaseAsync();
-        var subject = _factory.CreateSubjectAsync("Test description", "Test description", false);
+        var subject = await _factory.CreateSubjectAsync("Test description", "Test description", false);
 
         var response = await ArchiveSubjectAsync(subject.Id);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
