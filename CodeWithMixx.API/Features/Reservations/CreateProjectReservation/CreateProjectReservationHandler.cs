@@ -47,6 +47,7 @@ public class CreateProjectReservationHandler (AppDbContext context, IUserProvide
             .Select(p => new ProjectCreateData
             {
                 SubjectId = p.SubjectId,
+                Name = p.Name, 
                 StartDate = p.StartDate,
                 EndDate = p.EndDate,
                 ProjectType = p.ProjectType,
@@ -89,6 +90,7 @@ public class CreateProjectReservationHandler (AppDbContext context, IUserProvide
             Projects = newReservation.Projects.Select(p => new CreateProjectReservationResponse.ProjectItem
             {
                 Id = p.Id,
+                Name = p.Name,
                 SubjectId = p.SubjectId,
                 SubjectName = p.Subject.Name,
                 StartDate = p.StartDate,

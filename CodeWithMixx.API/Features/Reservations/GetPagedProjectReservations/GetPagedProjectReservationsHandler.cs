@@ -85,12 +85,14 @@ public class GetPagedProjectReservationsHandler(AppDbContext context, IUserClock
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
                 DeletedAt = r.DeletedAt,
+                ReservedAt = r.ReservedAt,
                 IsHardDeletable = !r.RequiresHistoryRetention(userClock.Today),
                 Projects = r.Projects
                     .OrderBy(p => p.StartDate)
                     .Select(p => new ProjectItem
                     {
                         Id = p.Id,
+                        Name = p.Name,
                         SubjectId = p.SubjectId,
                         SubjectName = p.Subject.Name,
                         ProjectType = p.ProjectType,

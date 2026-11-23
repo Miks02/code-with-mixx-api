@@ -1,12 +1,14 @@
 using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Domain.Entities.Reservations;
 using CodeWithMixx.API.Domain.Entities.Subjects;
+using Discord.Commands;
 
 namespace CodeWithMixx.API.Domain.Entities.Projects;
 
 public class Project : IAuditable, ISoftDeletable
 {
     public int Id { get; private set; }
+    public string Name { get; private set; } = null!;
     public ProjectType ProjectType { get; private set; }
     public decimal Price { get; private set; }
     public string? GithubLink { get; private set; }
@@ -36,7 +38,7 @@ public class Project : IAuditable, ISoftDeletable
     public static Result<Project> Create(ProjectCreateData data)
     {
         var validationResult = Validate(data.SubjectId, data.Price, data.Progress, data.StartDate, data.EndDate,
-            data.ReservedAt, data.GithubLink, data.DownloadLink, data.Today);
+            data.ReservedAt, data.GithubLink, data.DownloadLink, data.Name ,data.Today);
 
         if(!validationResult.IsSuccess)
             return Result<Project>.Failure(validationResult.Errors[0]);
@@ -44,6 +46,7 @@ public class Project : IAuditable, ISoftDeletable
         var newProject = new Project
         {
             SubjectId = data.SubjectId,
+            Name = data.Name,
             Price = data.Price,
             ProjectType = data.ProjectType,
             GithubLink = data.GithubLink,
@@ -69,12 +72,13 @@ public class Project : IAuditable, ISoftDeletable
     public Result Update(ProjectUpdateData data)
     {
         var validationResult = Validate(data.SubjectId, data.Price, data.Progress, data.StartDate, data.EndDate,
-            data.ReservedAt, data.GithubLink, data.DownloadLink, data.Today);
+            data.ReservedAt, data.GithubLink, data.DownloadLink, data.Name ,data.Today);
 
         if(!validationResult.IsSuccess)
             return validationResult;
 
         SubjectId = data.SubjectId;
+        Name = data.Name;
         ProjectType = data.ProjectType;
         Price = data.Price;
         Progress = data.Progress;
@@ -126,8 +130,14 @@ public class Project : IAuditable, ISoftDeletable
     }
 
     private static Result Validate(int subjectId, decimal price, decimal progress, DateOnly startDate, DateOnly endDate,
-        DateOnly reservedAt, string? githubLink, string? downloadLink, DateOnly today)
+        DateOnly reservedAt, string? githubLink, string? downloadLink, string name, DateOnly today)
     {
+        if(string.IsNullOrWhiteSpace(name))
+            return Result.Failure(ProjectError.EmptyName());
+        
+        if(name.Length > 100)
+            return Result.Failure(ProjectError.NameTooLong(name));
+
         if(subjectId <= 0)
             return Result.Failure(SubjectError.NotFound(subjectId));
 

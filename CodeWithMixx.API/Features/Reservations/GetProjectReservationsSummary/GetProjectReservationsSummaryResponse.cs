@@ -15,6 +15,7 @@ public record GetProjectReservationsSummaryResponse
     public record ProjectReservation
     {
         public int Id { get; init; }
+        public string Name { get; init; } = null!;
         public string StudentId { get; init; } = null!;
         public string StudentFullName { get; init; } = null!;
         public ReservationStatus ReservationStatus { get; init; }
@@ -27,6 +28,7 @@ public record GetProjectReservationsSummaryResponse
         public DateTime CreatedAt { get; init; }
         public DateTime? UpdatedAt { get; init; }
         public DateTime? DeletedAt { get; init; }
+        public DateOnly ReservedAt { get; init; }
         public bool IsHardDeletable { get; init; }
         public IReadOnlyList<ProjectItem> Projects { get; init; } = [];
     }

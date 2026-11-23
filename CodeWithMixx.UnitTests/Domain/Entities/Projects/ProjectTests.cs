@@ -15,6 +15,7 @@ public class ProjectTests
     private const string DownloadLink = "https://drive.example.com/seminarski.zip";
     private const string FirstNote = "Klijent želi ASP.NET backend.";
     private const string SecondNote = "Rok za prvu verziju je kraj meseca.";
+    private const string ProjectName = "Web aplikacija izradjena u ASP.NET Core MVC";
 
     private static readonly DateOnly Today = new(2026, 11, 15);
     private static readonly DateOnly ReservedAt = new(2026, 11, 1);
@@ -36,6 +37,7 @@ public class ProjectTests
         result.IsSuccess.Should().BeTrue();
         var project = result.Payload!;
         project.SubjectId.Should().Be(SubjectId);
+        project.Name.Should().Be(ProjectName);
         project.ProjectType.Should().Be(ProjectType.Seminar);
         project.Price.Should().Be(Price);
         project.Progress.Should().Be(Progress);
@@ -500,6 +502,7 @@ public class ProjectTests
     private static ProjectCreateData CreateData(params string[] notes) => new()
     {
         SubjectId = SubjectId,
+        Name = ProjectName,
         ProjectType = ProjectType.Seminar,
         ReservedAt = ReservedAt,
         StartDate = StartDate,
@@ -515,6 +518,7 @@ public class ProjectTests
     private static ProjectUpdateData UpdateData() => new()
     {
         SubjectId = SubjectId,
+        Name = ProjectName,
         ProjectType = ProjectType.Seminar,
         ReservedAt = ReservedAt,
         StartDate = StartDate,

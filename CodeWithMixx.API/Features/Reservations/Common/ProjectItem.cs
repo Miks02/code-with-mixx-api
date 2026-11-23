@@ -5,6 +5,7 @@ namespace CodeWithMixx.API.Features.Reservations.Common;
 public record ProjectItem
 {
     public int Id { get; init; }
+    public string Name { get; init; } = null!;
     public int SubjectId { get; init; }
     public string SubjectName { get; init; } = null!;
     public ProjectType ProjectType { get; init; }

@@ -37,6 +37,7 @@ public class GetProjectReservationDetailsHandler(AppDbContext context)
                     .Select(p => new GetProjectReservationDetailsResponse.ProjectDetailsItem
                     {
                         Id = p.Id,
+                        Name = p.Name,
                         SubjectId = p.SubjectId,
                         SubjectName = p.Subject.Name,
                         ProjectType = p.ProjectType,

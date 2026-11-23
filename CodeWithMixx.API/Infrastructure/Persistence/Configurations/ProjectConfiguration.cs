@@ -36,6 +36,10 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
             .HasForeignKey(p => p.SubjectId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.Property(p => p.Name)
+            .IsRequired()
+            .HasMaxLength(ProjectConstants.MaxNameLength);
+
         builder.Property(p => p.ProjectType)
             .IsRequired()
             .HasDefaultValue(ProjectType.Seminar)
@@ -61,6 +65,8 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
         
         builder.Property(p => p.EndDate)
             .IsRequired();
-        
+
+        builder.HasIndex(p => p.Name)
+            .IsUnique();
     }
 }

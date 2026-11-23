@@ -31,6 +31,7 @@ public class UpdateProjectHandler(AppDbContext context, IUserClock clock) : IHan
         var updateData = new ProjectUpdateData
         {
             Id = project.Id,
+            Name = project.Name,
             SubjectId = project.SubjectId,
             ProjectType = project.ProjectType,
             StartDate = project.StartDate,

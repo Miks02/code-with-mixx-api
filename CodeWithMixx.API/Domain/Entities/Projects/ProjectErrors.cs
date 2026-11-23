@@ -7,6 +7,12 @@ public static class ProjectError
     public static Error NotFound(int identifier)
         => new Error("Project.NotFound", $"The project with identifier '{identifier}' was not found.", ErrorType.NotFound);
     
+    public static Error EmptyName() 
+        => new Error("Project.EmptyName", "The name of the project cannot be empty.", ErrorType.Validation);
+    
+    public static Error NameTooLong(string name)
+        => new Error("Project.NameTooLong", $"The name '{name}' is too long. It must be less than {ProjectConstants.MaxNameLength} characters.", ErrorType.Validation);
+    
     public static Error NegativePrice() 
         => new Error("Project.NegativePrice", "The price of the project cannot be negative.", ErrorType.Validation);    
     
