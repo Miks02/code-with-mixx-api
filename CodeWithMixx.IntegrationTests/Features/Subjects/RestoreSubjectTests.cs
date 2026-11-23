@@ -8,13 +8,11 @@ public class RestoreSubjectTests : IClassFixture<IntegrationTestFactory>, IAsync
 {
     private const string Url = "/api/admin/subjects/";
     private readonly IntegrationTestFactory _factory;
-    private readonly ITestOutputHelper _testOutputHelper;
     private HttpClient _httpClient;
 
     public RestoreSubjectTests(IntegrationTestFactory factory, ITestOutputHelper testOutputHelper)
     {   
         _factory = factory;
-        _testOutputHelper = testOutputHelper;
         _httpClient = _factory.CreateClient();
     }
     
