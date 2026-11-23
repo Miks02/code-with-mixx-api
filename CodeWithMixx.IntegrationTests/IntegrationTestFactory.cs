@@ -1,4 +1,6 @@
+using System.Net.Http.Json;
 using CodeWithMixx.API.Common.Interfaces;
+using CodeWithMixx.API.Features.Authentication.Login;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -15,9 +17,13 @@ namespace CodeWithMixx.IntegrationTests;
 public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _db = new PostgreSqlBuilder("postgres:17").Build();
-
+    private const string AdminEmail = "admin@test.com";
+    private const string AdminPassword = "Admin123!";
+    private string? _adminAccessToken;
+    
     private Respawner _respawner = null!;
     private NpgsqlConnection _connection = null!;
+    
 
     private IAuthEmailSender AuthEmailSender { get; } = Substitute.For<IAuthEmailSender>();
 
@@ -61,7 +67,7 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
         {
             DbAdapter = DbAdapter.Postgres,
             SchemasToInclude = ["public"],
-            TablesToIgnore = ["__EFMigrationsHistory", "Roles", "Users"]
+            TablesToIgnore = ["__EFMigrationsHistory", "Roles", "Users", "UserRoles"]
         });
     }
 
@@ -70,7 +76,7 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
     public HttpClient CreateHttpsClients() => CreateClient(new WebApplicationFactoryClientOptions
     {
         BaseAddress = new Uri("https://localhost"),
-        HandleCookies = true
+        HandleCookies = true,
     });
 
     public new async Task DisposeAsync()
@@ -78,4 +84,33 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
         await _connection.DisposeAsync();
         await _db.DisposeAsync();
     }
+    
+    public async Task<HttpClient> CreateAdminClientAsync()
+    {
+        _adminAccessToken ??= await LoginAndGetAccessTokenAsync(AdminEmail, AdminPassword);
+        return CreateClientWithAccessToken(_adminAccessToken);
+    }
+    
+    private async Task<string> LoginAndGetAccessTokenAsync(string email, string password)
+    {
+        var client = CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = false });
+
+        var response = await client.PostAsJsonAsync("api/auth/login",
+            new LoginRequest { Email = email, Password = password });
+
+        response.EnsureSuccessStatusCode();
+
+        var accessCookie = response.Headers.GetValues("Set-Cookie")      
+            .First(c => c.StartsWith("AccessToken="));                   
+
+        return accessCookie.Split(';')[0]["AccessToken=".Length..];     
+    }
+
+    private HttpClient CreateClientWithAccessToken(string accessToken)
+    {
+        var client = CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = false });
+        client.DefaultRequestHeaders.Add("Cookie", $"AccessToken={accessToken}");
+        return client;
+    }
+
 }
