@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 
 namespace CodeWithMixx.IntegrationTests.Common;
 
@@ -21,6 +22,14 @@ public static class HttpResponseExtensions
         var data = raw.Length > 0 ? JsonSerializer.Deserialize<T>(raw, JsonOptions) : null;
 
         return new EndpointResponse<T>(response, data, null);
+    }
+
+    public static SetCookieHeaderValue? GetCookie(this HttpResponseMessage response, string cookieName)
+    {
+        if(!response.Headers.TryGetValues("Set-Cookie", out var cookies))
+            return null;
+        
+        return SetCookieHeaderValue.Parse(cookies.SingleOrDefault(c => c.StartsWith(cookieName)));
     }
     
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
