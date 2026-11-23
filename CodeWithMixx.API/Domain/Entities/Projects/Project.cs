@@ -1,6 +1,7 @@
 using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Domain.Entities.Reservations;
 using CodeWithMixx.API.Domain.Entities.Subjects;
+using Discord.Commands;
 
 namespace CodeWithMixx.API.Domain.Entities.Projects;
 
@@ -45,6 +46,7 @@ public class Project : IAuditable, ISoftDeletable
         var newProject = new Project
         {
             SubjectId = data.SubjectId,
+            Name = data.Name,
             Price = data.Price,
             ProjectType = data.ProjectType,
             GithubLink = data.GithubLink,
@@ -76,6 +78,7 @@ public class Project : IAuditable, ISoftDeletable
             return validationResult;
 
         SubjectId = data.SubjectId;
+        Name = data.Name;
         ProjectType = data.ProjectType;
         Price = data.Price;
         Progress = data.Progress;
