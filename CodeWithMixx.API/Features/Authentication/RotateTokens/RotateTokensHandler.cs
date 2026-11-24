@@ -1,6 +1,7 @@
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
 using CodeWithMixx.API.Domain.ErrorCatalog;
+using CodeWithMixx.API.Infrastructure.Exceptions;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,10 +22,15 @@ public class RotateTokensHandler(
         
         var oldToken = await context.RefreshTokens
             .Include(rt => rt.User)
-            .Where(rt => rt.TokenHash == hashedRefreshToken && DateTime.UtcNow < rt.ExpiresAt && !rt.RevokedAt.HasValue)
-            .FirstOrDefaultAsync(ct);
+            .FirstOrDefaultAsync(rt => rt.TokenHash == hashedRefreshToken, ct);
 
-        if (oldToken is null)
+        if (oldToken?.ReplacedByTokenHash != null && oldToken.RevokedAt is not null)
+        {
+            await tokenService.RevokeAllUserTokensAsync(oldToken.UserId);
+            throw new RefreshTokenReuseException(oldToken.UserId, oldToken.SessionId);
+        }
+
+        if (oldToken is null || oldToken.RevokedAt.HasValue || oldToken.ExpiresAt <= DateTime.UtcNow)
         {
             cookieProvider.RemoveAuthCookies();
             return Result.Failure(AuthError.ExpiredToken());
