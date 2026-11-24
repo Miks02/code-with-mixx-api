@@ -23,6 +23,20 @@ public static class HttpResponseExtensions
 
         return new EndpointResponse<T>(response, data, null);
     }
+    
+    public static async Task<EndpointResponse> ToEndpointResponse(this HttpResponseMessage response)
+    {
+        var raw = await response.Content.ReadAsStringAsync();
+    
+        if (!response.IsSuccessStatusCode)
+        {
+            var problemDetails = raw.Length > 0 ? JsonSerializer.Deserialize<ProblemDetails>(raw, JsonOptions) : null;
+    
+            return new EndpointResponse(response, problemDetails);
+        }
+        
+        return new EndpointResponse(response, null);
+    }
 
     public static SetCookieHeaderValue? GetCookie(this HttpResponseMessage response, string cookieName)
     {
