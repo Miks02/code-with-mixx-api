@@ -23,6 +23,7 @@ This repository contains the backend REST API. The web client is available at [c
 - Resend (transactional email)
 - Discord.Net (inquiry notifications)
 - xUnit, NSubstitute, AwesomeAssertions, MockQueryable
+- WebApplicationFactory, Testcontainers (PostgreSQL), Respawn
 
 ## Features
 
@@ -50,7 +51,8 @@ CodeWithMixx.API/
   Features/        Vertical slices, one folder per use case
   Infrastructure/  Persistence, security, rate limiting, email, Discord,
                    background jobs, filters, decorators and exception handlers
-CodeWithMixx.UnitTests/
+CodeWithMixx.UnitTests/         Unit tests for the domain, Result pattern and infrastructure
+CodeWithMixx.IntegrationTests/  End to end endpoint tests against a real PostgreSQL database
 ```
 
 ### Vertical slices
@@ -121,14 +123,41 @@ Structured logging with Serilog, enriched with thread and process information. R
 
 ## Testing
 
+### Unit tests
+
 Unit tests are written with xUnit, NSubstitute and AwesomeAssertions and mirror the structure of the API project.
 
 - **Domain:** every entity is tested in isolation, without a database: `Reservation`, `Class`, `Project` and `ProjectNote`, `PaymentTransaction` and `TransactionNote`, `Subject`, `Student`, `User`, `Inquiry` and `RefreshToken`, together with their domain error catalogs. The tests cover factory methods and behavior methods, input validation and boundary values (lengths, amounts, dates, durations), the order in which errors are reported, state transitions such as archiving, restoring and deleting, and the payment calculations of a reservation (total price, discount rate, bonus and payment status).
 - **Common:** the Result pattern, errors and the mapping of results to HTTP responses.
 - **Infrastructure:** the token service, the cookie and user providers, and time handling.
 
-Run them from the repository root:
+### Integration tests
+
+Integration tests exercise the API end to end over HTTP, through the full pipeline: routing, authentication, validation, handlers, ProblemDetails mapping and persistence.
+
+- **Host:** `IntegrationTestFactory` boots the API with `WebApplicationFactory` in a `Testing` environment, with test JWT, refresh token, cookie and admin settings.
+- **Database:** a real PostgreSQL 17 instance is started per test class with Testcontainers, migrated and seeded with the admin account on startup. Respawn resets the data before every test, keeping the users, roles and migration history.
+- **Authentication:** an admin client is created by issuing real access and refresh tokens through the token service and sending them as auth cookies, the same way the web client does.
+- **Assertions:** each test asserts on the HTTP status, the response body or ProblemDetails `errorCode`, the auth cookies, and the resulting database state.
+
+Covered features:
+
+- **Authentication:** login (valid credentials, wrong password, unknown user, pending and deactivated accounts), logout, logout from all sessions, logout from a specific session (including clearing cookies when it is the current session), and refresh token rotation (missing or unknown token, successful rotation, and reuse of a rotated token revoking all sessions).
+- **Subjects:** create, update, archive, restore and delete, get by id, public paged list and lookup, the admin paged list (filtering, search, sorting, paging, class and student counts) and the admin summary. Each endpoint is tested for authorization, validation, not found and conflict cases as well as the success path.
+
+Integration tests require a running Docker daemon for Testcontainers.
+
+### Running tests
+
+Run all tests from the repository root:
 
 ```
 dotnet test
+```
+
+Or run a single test project:
+
+```
+dotnet test CodeWithMixx.UnitTests
+dotnet test CodeWithMixx.IntegrationTests
 ```
