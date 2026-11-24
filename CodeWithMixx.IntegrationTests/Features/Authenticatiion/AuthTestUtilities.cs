@@ -50,7 +50,7 @@ public static class AuthTestUtilities
         await context.SaveChangesAsync();
     }
 
-    public static async Task AssignRefreshTokenAsync(this IntegrationTestFactory factory, string email)
+    public static async Task<RefreshToken> AssignRefreshTokenAsync(this IntegrationTestFactory factory, string email)
     {
         await using var scope = factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -69,6 +69,8 @@ public static class AuthTestUtilities
 
         context.RefreshTokens.Add(token);
         await context.SaveChangesAsync();
+
+        return token;
     }
 
     public static async Task<List<RefreshToken>> GetAllUserRefreshTokens(this IntegrationTestFactory factory, string email)
@@ -85,5 +87,15 @@ public static class AuthTestUtilities
             .AsNoTracking()
             .Where(t => t.UserId == user.Id)
             .ToListAsync();
+    }
+    
+    public static async Task<RefreshToken?> GetRefreshTokenBySessionId(this IntegrationTestFactory factory, string sessionId)
+    {
+        await using var scope = factory.Services.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        return await context.RefreshTokens
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.SessionId.ToString() == sessionId);
     }
 }
