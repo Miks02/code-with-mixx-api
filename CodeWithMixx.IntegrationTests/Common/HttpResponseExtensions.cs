@@ -46,6 +46,11 @@ public static class HttpResponseExtensions
         return SetCookieHeaderValue.Parse(cookies.SingleOrDefault(c => c.StartsWith(cookieName)));
     }
     
+    public static void SetCookie(this HttpRequestMessage request, string name, string value)
+    {
+        request.Headers.Add("Cookie", $"{name}={value}");
+    }
+    
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         Converters = { new JsonStringEnumConverter() }

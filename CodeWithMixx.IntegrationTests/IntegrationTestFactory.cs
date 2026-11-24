@@ -32,6 +32,7 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
     private IAuthEmailSender AuthEmailSender { get; } = Substitute.For<IAuthEmailSender>();
 
     public string CurrentSessionId = null!;
+    public string CurrentRefreshToken = null!;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -99,7 +100,7 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
     public async Task<HttpClient> CreateAdminClientAsync()
     {
         _adminAccessToken = await LoginAndGetAccessTokenAsync();
-        return CreateClientWithAccessToken(_adminAccessToken);
+        return CreateClientWithAuthCookies(_adminAccessToken, CurrentRefreshToken);
     }
     
     private async Task<string> LoginAndGetAccessTokenAsync()
@@ -115,13 +116,15 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
         var accessCookie = tokens.AccessToken;
 
         CurrentSessionId = sessionId.ToString();
+        CurrentRefreshToken = tokens.RefreshToken;
         return accessCookie;
     }
 
-    private HttpClient CreateClientWithAccessToken(string accessToken)
+    private HttpClient CreateClientWithAuthCookies(string accessToken, string refreshToken)
     {
         var client = CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = false });
-        client.DefaultRequestHeaders.Add("Cookie", $"AccessToken={accessToken}");
+        client.DefaultRequestHeaders.Add("Cookie",
+            $"AccessToken={accessToken}; RefreshToken={Uri.EscapeDataString(refreshToken)}");
         return client;
     }
 
