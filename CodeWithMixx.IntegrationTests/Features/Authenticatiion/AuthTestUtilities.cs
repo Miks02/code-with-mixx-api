@@ -1,4 +1,4 @@
-using CodeWithMixx.API.Common.Results;
+using CodeWithMixx.API.Domain.Entities.RefreshTokens;
 using CodeWithMixx.API.Domain.Entities.Students;
 using CodeWithMixx.API.Domain.Entities.Users;
 using CodeWithMixx.API.Infrastructure.Persistence;
@@ -21,9 +21,10 @@ public static class AuthTestUtilities
 
         if (existingStudent is not null)
             return existingStudent;
-        
-        var user = User.CreateUser(TestConstants.StudentFirstName, TestConstants.StudentLastName, TestConstants.StudentEmail, TestConstants.StudentLastName);
-        
+
+        var user = User.CreateUser(TestConstants.StudentFirstName, TestConstants.StudentLastName,
+            TestConstants.StudentEmail, TestConstants.StudentLastName);
+
         await userManager.CreateAsync(user, TestConstants.StudentPassword);
         await userManager.AddToRoleAsync(user, "Student");
 
@@ -31,10 +32,10 @@ public static class AuthTestUtilities
         context.Add(student.Payload!);
 
         await context.SaveChangesAsync();
-        
+
         return user;
     }
-    
+
     public static async Task DeactivateStudentAsync(this IntegrationTestFactory factory, string userId)
     {
         await using var scope = factory.Services.CreateAsyncScope();
@@ -44,8 +45,45 @@ public static class AuthTestUtilities
 
         if (user is null)
             throw new KeyNotFoundException("Account deactivation failed. User not found.");
-        
+
         user.DeactivateAccount();
         await context.SaveChangesAsync();
+    }
+
+    public static async Task AssignRefreshTokenAsync(this IntegrationTestFactory factory, string email)
+    {
+        await using var scope = factory.Services.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+        if (user is null)
+            throw new KeyNotFoundException("Account deactivation failed. User not found.");
+
+        var token = RefreshToken.CreateRefreshToken(
+            user.Id,
+            "Unknown IP",
+            DateTime.UtcNow.AddDays(7),
+            "User-Agent",
+            Guid.NewGuid());
+
+        context.RefreshTokens.Add(token);
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task<List<RefreshToken>> GetAllUserRefreshTokens(this IntegrationTestFactory factory, string email)
+    {
+        await using var scope = factory.Services.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+        if (user is null)
+            throw new KeyNotFoundException("Account deactivation failed. User not found.");
+
+        return await context.RefreshTokens
+            .AsNoTracking()
+            .Where(t => t.UserId == user.Id)
+            .ToListAsync();
     }
 }
