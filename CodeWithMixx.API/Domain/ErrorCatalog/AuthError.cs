@@ -44,8 +44,7 @@ public class AuthError
     public static Error ExpiredToken(string message = "Refresh token has expired")
         => new("Auth.ExpiredToken", message, ErrorType.Unauthorized);
     public static Error MissingToken(string message = "Refresh token is missing")
-        => new("Auth.MissingToken", message, ErrorType.Unauthorized);
-    public static Error InvalidPasswordResetToken(string message = "Invalid password reset token")
+        => new("Auth.MissingToken", message, ErrorType.Unauthorized);    public static Error InvalidPasswordResetToken(string message = "Invalid password reset token")
         => new("Auth.InvalidPasswordResetToken", message, ErrorType.Validation);
     public static Error InvalidInvitationToken(string message = "Invalid invitation token")
         => new("Auth.InvalidInvitationToken", message, ErrorType.Validation);
