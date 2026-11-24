@@ -1,4 +1,5 @@
-using System.Text.RegularExpressions;
+using System.Security.Cryptography;
+using System.Text;
 using CodeWithMixx.API.Domain.Entities.Users;
 
 namespace CodeWithMixx.API.Domain.Entities.RefreshTokens;
@@ -39,11 +40,36 @@ public class RefreshToken : IAuditable
         };
     }
     
+    public static RefreshToken CreateRefreshToken(string userId, string userIp, DateTime expiresAt, string userAgent, Guid sessionId)
+    { 
+        var raw = CreateRawRefreshToken();
+        
+        return new RefreshToken
+        {
+            UserId = userId,
+            TokenHash = HashRefreshToken(raw),
+            CreatedByIp = userIp,
+            ExpiresAt = expiresAt,
+            UserAgent = userAgent,
+            SessionId = sessionId
+        };
+    }
+    
     public static Guid GenerateSessionId() => Guid.NewGuid();
 
     public void Revoke(string? replacedByTokenHash = null)
     {
         RevokedAt = DateTime.UtcNow;
         ReplacedByTokenHash = replacedByTokenHash;
+    }
+    
+    public static string CreateRawRefreshToken() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+
+    public static string HashRefreshToken(string refreshToken)
+    {
+        using var sha256 = SHA256.Create();
+        var bytes = Encoding.UTF8.GetBytes(refreshToken);
+        var hash = sha256.ComputeHash(bytes);
+        return Convert.ToBase64String(hash);
     }
 }

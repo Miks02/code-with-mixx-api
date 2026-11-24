@@ -34,6 +34,7 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(typeof(Program).Assembly);
         services.AddExceptionHandler<UnauthorizedAccessExceptionHandler>();
         services.AddExceptionHandler<TokensRevokedExceptionHandler>();
+        services.AddExceptionHandler<RefreshTokenReuseExceptionHandler>();
         services.AddExceptionHandler<SecurityDbUpdateExceptionHandler>();
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddHostedService<CleanExpiredTokensJob>();

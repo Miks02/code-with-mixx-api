@@ -6,11 +6,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Authentication.LogoutBySessionId;
 
-public class LogoutBySessionIdHandler(AppDbContext context, IUserProvider userProvider) : IHandler<LogoutBySessionIdRequest, Result>
+public class LogoutBySessionIdHandler(
+    AppDbContext context,
+    IUserProvider userProvider,
+    ICookieProvider cookieProvider) : IHandler<LogoutBySessionIdRequest, Result>
 {
     public async Task<Result> HandleAsync(LogoutBySessionIdRequest request, CancellationToken ct = default)
     {
         var userId = userProvider.GetUserId();
+        var currentSession = userProvider.GetSessionId();
         
         var session = await context.RefreshTokens
             .Where(rt => rt.RevokedAt == null && 
@@ -23,6 +27,9 @@ public class LogoutBySessionIdHandler(AppDbContext context, IUserProvider userPr
             return Result.Failure(AuthError.SessionNotFound(request.SessionId));
         
         session.Revoke();
+        
+        if(session.SessionId.ToString() == currentSession)
+            cookieProvider.RemoveAuthCookies();
         
         await context.SaveChangesAsync(ct);
 

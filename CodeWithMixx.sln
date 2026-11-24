@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeWithMixx.API", "CodeWit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeWithMixx.UnitTests", "CodeWithMixx.UnitTests\CodeWithMixx.UnitTests.csproj", "{C0EF4E1E-3581-43DD-9394-FE8065E11E05}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeWithMixx.IntegrationTests", "CodeWithMixx.IntegrationTests\CodeWithMixx.IntegrationTests.csproj", "{1D895BA0-3C4E-4175-8C3D-EC267FF96ACF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{C0EF4E1E-3581-43DD-9394-FE8065E11E05}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0EF4E1E-3581-43DD-9394-FE8065E11E05}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0EF4E1E-3581-43DD-9394-FE8065E11E05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D895BA0-3C4E-4175-8C3D-EC267FF96ACF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D895BA0-3C4E-4175-8C3D-EC267FF96ACF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D895BA0-3C4E-4175-8C3D-EC267FF96ACF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D895BA0-3C4E-4175-8C3D-EC267FF96ACF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

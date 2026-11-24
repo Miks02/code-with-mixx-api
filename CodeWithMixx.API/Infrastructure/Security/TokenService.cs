@@ -87,12 +87,11 @@ public class TokenService(
         return tokenHandler.WriteToken(token);
     }
     
-    private string CreateRawRefreshToken() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
     private async Task<string> AssignRefreshToken(User user, string userAgent, Guid sessionId)
     {
-        var refreshToken = CreateRawRefreshToken();
-        var refreshTokenHash = HashRefreshToken(refreshToken);
+        var refreshToken = RefreshToken.CreateRawRefreshToken();
+        var refreshTokenHash = RefreshToken.HashRefreshToken(refreshToken);
         
         var newRefreshToken = RefreshToken.CreateRefreshToken(
             tokenHash: refreshTokenHash,
