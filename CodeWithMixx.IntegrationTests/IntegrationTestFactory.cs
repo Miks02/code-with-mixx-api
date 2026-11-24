@@ -2,10 +2,14 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CodeWithMixx.API.Common.Interfaces;
+using CodeWithMixx.API.Domain.Entities.RefreshTokens;
+using CodeWithMixx.API.Domain.Entities.Users;
 using CodeWithMixx.API.Features.Authentication.Login;
+using CodeWithMixx.API.Infrastructure.Security;
 using CodeWithMixx.IntegrationTests.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +30,8 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
     private Respawner _respawner = null!;
     private NpgsqlConnection _connection = null!;
     private IAuthEmailSender AuthEmailSender { get; } = Substitute.For<IAuthEmailSender>();
+
+    public string CurrentSessionId = null!;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -87,28 +93,29 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
     public new async Task DisposeAsync()
     {
         await _connection.DisposeAsync();
-        await _db.DisposeAsync();
+        await _db.DisposeAsync(); 
     }
     
     public async Task<HttpClient> CreateAdminClientAsync()
     {
-        _adminAccessToken ??= await LoginAndGetAccessTokenAsync(TestConstants.AdminEmail, TestConstants.AdminPassword);
+        _adminAccessToken = await LoginAndGetAccessTokenAsync();
         return CreateClientWithAccessToken(_adminAccessToken);
     }
     
-    private async Task<string> LoginAndGetAccessTokenAsync(string email, string password)
+    private async Task<string> LoginAndGetAccessTokenAsync()
     {
-        var client = CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = false });
+        using var scope = Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+        var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
 
-        var response = await client.PostAsJsonAsync("api/auth/login",
-            new LoginRequest { Email = email, Password = password });
+        var admin = await userManager.FindByEmailAsync(TestConstants.AdminEmail);
+        var sessionId = RefreshToken.GenerateSessionId();
+        var tokens = await tokenService.AssignAuthTokens(admin!, "User-Agent", sessionId);
 
-        response.EnsureSuccessStatusCode();
+        var accessCookie = tokens.AccessToken;
 
-        var accessCookie = response.Headers.GetValues("Set-Cookie")      
-            .First(c => c.StartsWith("AccessToken="));                   
-
-        return accessCookie.Split(';')[0]["AccessToken=".Length..];     
+        CurrentSessionId = sessionId.ToString();
+        return accessCookie;
     }
 
     private HttpClient CreateClientWithAccessToken(string accessToken)
