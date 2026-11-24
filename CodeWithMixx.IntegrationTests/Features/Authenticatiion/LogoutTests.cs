@@ -28,7 +28,6 @@ public class LogoutTests : IClassFixture<IntegrationTestFactory>, IAsyncLifetime
         var response = await LogoutAsync();
         response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.ProblemDetails.Should().BeNull();
-        response.Data.Should().BeNull();
         response.Response.GetCookie("RefreshToken").Should().NotBeNull();
         response.Response.GetCookie("AccessToken").Should().NotBeNull();
         response.Response.GetCookie("Session").Should().NotBeNull();
@@ -42,16 +41,15 @@ public class LogoutTests : IClassFixture<IntegrationTestFactory>, IAsyncLifetime
         
         response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.ProblemDetails.Should().BeNull();
-        response.Data.Should().BeNull();
         response.Response.GetCookie("RefreshToken").Should().NotBeNull();
         response.Response.GetCookie("AccessToken").Should().NotBeNull();
         response.Response.GetCookie("Session").Should().NotBeNull();
     }
 
-    private async Task<EndpointResponse<Object>> LogoutAsync()
+    private async Task<EndpointResponse> LogoutAsync()
     {
         var response = await _httpClient.PostAsync(Url, null);
-        return await response.ToEndpointResponse<Object>();
+        return await response.ToEndpointResponse();
     }
     
 }
