@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeWithMixx.API.Features.Analytics.GetAnalyticsForStudent;
 
-public class GetAnalyticsForStudentHandler(AppDbContext context, IUserProvider userProvider, IUserClock userClock)
+public class GetAnalyticsForStudentHandler(AppDbContext context, IUserProvider userProvider)
     : IHandler<GetAnalyticsForStudentRequest, GetAnalyticsForStudentResponse>
 {
     private const int RecentPaymentsLimit = 5;
@@ -19,6 +19,12 @@ public class GetAnalyticsForStudentHandler(AppDbContext context, IUserProvider u
         var reservationStats = await GetReservationStats(studentId, ct);
         var classReservations = await GetClassReservations(studentId, now, ct);
         var activeProjects = await GetActiveProjects(studentId, ct);
+        var heldSubjects = await context.Classes
+            .Where(r => r.Reservation.StudentId == studentId && 
+                        r.StartsAt < now)
+            .Select(c => c.Subject.Id)
+            .Distinct()
+            .CountAsync(ct);
         var nonCancelledClassReservations = classReservations
             .Where(r => r.ReservationStatus != ReservationStatus.Cancelled)
             .ToList();
@@ -27,6 +33,7 @@ public class GetAnalyticsForStudentHandler(AppDbContext context, IUserProvider u
         {
             TotalPaid = reservationStats.TotalPaid,
             CompletedClasses = nonCancelledClassReservations.Sum(r => r.CompletedClassesCount),
+            HeldSubjects = heldSubjects,
             ActiveProjects = activeProjects.Count,
             UpcomingClasses = await GetUpcomingClasses(studentId, now, ct),
             ActiveProjectsList = activeProjects,
@@ -85,7 +92,7 @@ public class GetAnalyticsForStudentHandler(AppDbContext context, IUserProvider u
                 ReservationStatus = g.Key.ReservationStatus,
                 ScheduledClassesCount = g.Count(),
                 CompletedClassesCount = g.Count(c => c.EndsAt <= now),
-                TotalMinutes = g.Sum(c => (c.EndsAt - c.StartsAt).TotalMinutes)
+                TotalMinutes = g.Sum(c => (c.EndsAt - c.StartsAt).TotalMinutes),
             })
             .ToListAsync(ct);
     }
@@ -177,5 +184,6 @@ public class GetAnalyticsForStudentHandler(AppDbContext context, IUserProvider u
         public int CompletedClassesCount { get; init; }
         public DateOnly ReservedAt { get; init; }
         public double TotalMinutes { get; init; }
+        public int HeldSubjects { get; init; }
     }
 }

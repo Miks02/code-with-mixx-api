@@ -7,6 +7,7 @@ public record GetAnalyticsForStudentResponse
     public decimal TotalPaid { get; init; }
     public int CompletedClasses { get; init; }
     public int ActiveProjects { get; init; }
+    public int HeldSubjects { get; init; }
 
     public IReadOnlyList<UpcomingClass> UpcomingClasses { get; init; } = [];
     public IReadOnlyList<ActiveProject> ActiveProjectsList { get; init; } = [];
