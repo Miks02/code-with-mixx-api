@@ -40,6 +40,7 @@
     <ItemGroup>
       <Folder Include="Features\Account\UpdateName\" />
       <Folder Include="Features\Inquiries\" />
+      <Folder Include="Features\Reservations\GetReservationDetailsForStudent\" />
     </ItemGroup>
 
 </Project>
