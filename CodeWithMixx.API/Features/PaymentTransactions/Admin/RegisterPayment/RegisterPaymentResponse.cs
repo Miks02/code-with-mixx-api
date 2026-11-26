@@ -1,8 +1,8 @@
 using CodeWithMixx.API.Domain.Entities.PaymentTransactions;
 
-namespace CodeWithMixx.API.Features.PaymentTransactions.SubtractPayment;
+namespace CodeWithMixx.API.Features.PaymentTransactions.Admin.RegisterPayment;
 
-public record SubtractPaymentResponse
+public record RegisterPaymentResponse
 {
     public int Id { get; init; }
     public int ReservationId { get; init; }

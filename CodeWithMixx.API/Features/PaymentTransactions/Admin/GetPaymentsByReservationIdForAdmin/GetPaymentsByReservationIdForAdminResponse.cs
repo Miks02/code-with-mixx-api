@@ -1,8 +1,8 @@
 using CodeWithMixx.API.Features.PaymentTransactions.Common;
 
-namespace CodeWithMixx.API.Features.PaymentTransactions.GetPaymentsByReservationId;
+namespace CodeWithMixx.API.Features.PaymentTransactions.Admin.GetPaymentsByReservationIdForAdmin;
 
-public record GetPaymentsByReservationIdResponse
+public record GetPaymentsByReservationIdForAdminResponse
 {
     public int ReservationId { get; init; }
     public decimal RemainingAmount { get; init; }

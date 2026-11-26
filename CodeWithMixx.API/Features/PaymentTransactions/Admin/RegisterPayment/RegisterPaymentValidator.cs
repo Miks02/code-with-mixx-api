@@ -1,7 +1,7 @@
 using CodeWithMixx.API.Domain.Entities.PaymentTransactions.TransactionNotes;
 using FluentValidation;
 
-namespace CodeWithMixx.API.Features.PaymentTransactions.RegisterPayment;
+namespace CodeWithMixx.API.Features.PaymentTransactions.Admin.RegisterPayment;
 
 public class RegisterPaymentValidator : AbstractValidator<RegisterPaymentBody>
 {

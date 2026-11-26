@@ -1,4 +1,4 @@
-namespace CodeWithMixx.API.Features.PaymentTransactions.RegisterPayment;
+namespace CodeWithMixx.API.Features.PaymentTransactions.Admin.RegisterPayment;
 
 public record RegisterPaymentRequest
 {

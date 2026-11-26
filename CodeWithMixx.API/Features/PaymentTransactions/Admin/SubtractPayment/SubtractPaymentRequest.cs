@@ -1,6 +1,6 @@
 using CodeWithMixx.API.Domain.Entities.PaymentTransactions;
 
-namespace CodeWithMixx.API.Features.PaymentTransactions.SubtractPayment;
+namespace CodeWithMixx.API.Features.PaymentTransactions.Admin.SubtractPayment;
 
 public record SubtractPaymentRequest
 {

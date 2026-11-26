@@ -2,7 +2,7 @@ using CodeWithMixx.API.Domain.Entities.PaymentTransactions;
 using CodeWithMixx.API.Domain.Entities.PaymentTransactions.TransactionNotes;
 using FluentValidation;
 
-namespace CodeWithMixx.API.Features.PaymentTransactions.SubtractPayment;
+namespace CodeWithMixx.API.Features.PaymentTransactions.Admin.SubtractPayment;
 
 public class SubtractPaymentValidator : AbstractValidator<SubtractPaymentBody>
 {

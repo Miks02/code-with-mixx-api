@@ -4,7 +4,7 @@ using CodeWithMixx.API.Domain.Entities.Reservations;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace CodeWithMixx.API.Features.PaymentTransactions.SubtractPayment;
+namespace CodeWithMixx.API.Features.PaymentTransactions.Admin.SubtractPayment;
 
 public class SubtractPaymentHandler(AppDbContext context, IUserClock userClock) : IHandler<SubtractPaymentRequest, Result<SubtractPaymentResponse>>
 {

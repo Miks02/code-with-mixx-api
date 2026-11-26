@@ -6,12 +6,12 @@ using CodeWithMixx.API.Features.PaymentTransactions.Common;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace CodeWithMixx.API.Features.PaymentTransactions.GetPaymentsByReservationId;
+namespace CodeWithMixx.API.Features.PaymentTransactions.Admin.GetPaymentsByReservationIdForAdmin;
 
-public class GetPaymentsByReservationIdHandler(AppDbContext context) 
-    : IHandler<GetPaymentsByReservationIdRequest, Result<GetPaymentsByReservationIdResponse>>
+public class GetPaymentsByReservationIdForAdminHandler(AppDbContext context) 
+    : IHandler<GetPaymentsByReservationIdForAdminRequest, Result<GetPaymentsByReservationIdForAdminResponse>>
 {
-    public async Task<Result<GetPaymentsByReservationIdResponse>> HandleAsync(GetPaymentsByReservationIdRequest request, CancellationToken ct = default)
+    public async Task<Result<GetPaymentsByReservationIdForAdminResponse>> HandleAsync(GetPaymentsByReservationIdForAdminRequest request, CancellationToken ct = default)
     {
         var reservation = await context.Reservations
             .IgnoreQueryFilters()
@@ -20,7 +20,7 @@ public class GetPaymentsByReservationIdHandler(AppDbContext context)
             .FirstOrDefaultAsync(ct); 
         
         if(reservation is null) 
-            return Result<GetPaymentsByReservationIdResponse>.Failure(ReservationError.NotFound(request.ReservationId));
+            return Result<GetPaymentsByReservationIdForAdminResponse>.Failure(ReservationError.NotFound(request.ReservationId));
         
         var payments = reservation.PaymentTransactions
             .OrderByDescending(pt => pt.TransactionDate)
@@ -36,7 +36,7 @@ public class GetPaymentsByReservationIdHandler(AppDbContext context)
             })
             .ToList();
         
-        var response = new GetPaymentsByReservationIdResponse
+        var response = new GetPaymentsByReservationIdForAdminResponse
         {
             ReservationId = reservation.Id,
             RemainingAmount = reservation.RemainingAmount,
@@ -47,6 +47,6 @@ public class GetPaymentsByReservationIdHandler(AppDbContext context)
             Payments = payments
         };
 
-        return Result<GetPaymentsByReservationIdResponse>.Success(response);
+        return Result<GetPaymentsByReservationIdForAdminResponse>.Success(response);
     }
 }

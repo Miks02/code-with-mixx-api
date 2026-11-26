@@ -4,7 +4,7 @@ using CodeWithMixx.API.Domain.Entities.Reservations;
 using CodeWithMixx.API.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace CodeWithMixx.API.Features.PaymentTransactions.RegisterPayment;
+namespace CodeWithMixx.API.Features.PaymentTransactions.Admin.RegisterPayment;
 
 public class RegisterPaymentHandler(AppDbContext context, IUserClock userClock) : IHandler<RegisterPaymentRequest, Result<RegisterPaymentResponse>>
 {

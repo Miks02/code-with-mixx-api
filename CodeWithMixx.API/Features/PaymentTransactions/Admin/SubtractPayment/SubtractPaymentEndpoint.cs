@@ -1,19 +1,19 @@
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Common.Results;
 
-namespace CodeWithMixx.API.Features.PaymentTransactions.RegisterPayment;
+namespace CodeWithMixx.API.Features.PaymentTransactions.Admin.SubtractPayment;
 
-public class RegisterPaymentEndpoint : IEndpoint
+public class SubtractPaymentEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/admin/reservations/{reservationId:int}/payments/register", async (
+        app.MapPost("/admin/reservations/{reservationId:int}/payments/subtract", async (
                 int reservationId,
-                RegisterPaymentBody request,
-                IHandler<RegisterPaymentRequest, Result<RegisterPaymentResponse>> handler,
+                SubtractPaymentBody request,
+                IHandler<SubtractPaymentRequest, Result<SubtractPaymentResponse>> handler,
                 CancellationToken ct) =>
         {
-            var result = await handler.HandleAsync(new RegisterPaymentRequest
+            var result = await handler.HandleAsync(new SubtractPaymentRequest
             {
                 ReservationId = reservationId,
                 Body = request
@@ -24,7 +24,7 @@ public class RegisterPaymentEndpoint : IEndpoint
         .RequireAuthorization("AdminOnly")
         .WithTags("Payments")
         .ProducesValidationProblem()
-        .Produces<RegisterPaymentResponse>()
+        .Produces<SubtractPaymentResponse>()
         .Produces(StatusCodes.Status404NotFound);
     }
 }
