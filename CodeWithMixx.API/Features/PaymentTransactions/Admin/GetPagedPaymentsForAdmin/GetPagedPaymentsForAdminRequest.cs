@@ -13,5 +13,5 @@ public record GetPagedPaymentsForAdminRequest
     [FromQuery(Name = "paymentTypes")]
     public PaymentTransactionType[] PaymentTypes { get; init; } = [];
     [FromQuery(Name = "sortBy")]
-    public PaymentTransactionsSortBy SortBy { get; init; } = PaymentTransactionsSortBy.TransactionDateDescending;
+    public PaymentTransactionsSortBy? SortBy { get; init; } = PaymentTransactionsSortBy.TransactionDateDescending;
 }
