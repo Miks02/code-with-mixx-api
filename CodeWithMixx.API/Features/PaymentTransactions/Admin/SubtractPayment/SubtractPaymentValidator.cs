@@ -22,6 +22,6 @@ public class SubtractPaymentValidator : AbstractValidator<SubtractPaymentBody>
         
         RuleFor(x => x.PaymentType)
             .IsInEnum().WithMessage("Invalid payment type.")
-            .When(x => x.PaymentType == PaymentTransactionType.Payment).WithMessage("Invalid payment type for subtraction.");
+            .NotEqual(PaymentTransactionType.Payment).WithMessage("Invalid payment type for subtraction.");
     }
 }
