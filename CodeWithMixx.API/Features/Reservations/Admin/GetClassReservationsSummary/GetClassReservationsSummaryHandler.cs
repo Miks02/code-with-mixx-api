@@ -85,6 +85,7 @@ public class GetClassReservationsSummaryHandler(AppDbContext context, IUserClock
                 .Select(c => new ClassItem
                 {
                     Id = c.Id,
+                    Name = c.Name,
                     SubjectId = c.SubjectId,
                     SubjectName = c.Subject.Name,
                     Price = c.Price,
@@ -116,6 +117,7 @@ public class GetClassReservationsSummaryHandler(AppDbContext context, IUserClock
             .Select(c => new GetClassReservationsSummaryResponse.NextClass
             {
                 ReservationId = c.ReservationId,
+                ClassName = c.Name,
                 StudentFullName = c.Reservation.Student.User.FirstName + " " + c.Reservation.Student.User.LastName,
                 StartsAt = c.StartsAt,
                 University = c.Reservation.Student.University,

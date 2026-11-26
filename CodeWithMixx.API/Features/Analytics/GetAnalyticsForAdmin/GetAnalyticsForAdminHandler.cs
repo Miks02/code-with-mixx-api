@@ -48,6 +48,7 @@ public class GetAnalyticsForAdminHandler(AppDbContext context, IUserClock userCl
             .Select(c => new GetAnalyticsForAdminResponse.UpcomingClass
             {
                 ReservationId = c.ReservationId,
+                ClassName = c.Name,
                 StartsAt = c.StartsAt,
                 EndsAt = c.EndsAt,
                 SubjectName = c.Subject.Name,

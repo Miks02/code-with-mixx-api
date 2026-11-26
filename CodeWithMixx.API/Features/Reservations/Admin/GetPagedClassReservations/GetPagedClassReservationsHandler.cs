@@ -84,6 +84,7 @@ public class GetPagedClassReservationsHandler(AppDbContext context, IUserClock u
                 .Select(c => new ClassItem
                 {
                     Id = c.Id,
+                    Name = c.Name,
                     SubjectId = c.SubjectId,
                     SubjectName = c.Subject.Name,
                     Price = c.Price,

@@ -36,6 +36,7 @@ public record GetClassReservationsSummaryResponse
     public record NextClass
     {
         public int ReservationId { get; init; }
+        public string ClassName { get; init; } = null!;
         public string StudentFullName { get; init; } = null!;
         public DateTime StartsAt { get; init; }
         public string? University { get; init; }

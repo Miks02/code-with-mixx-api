@@ -107,6 +107,7 @@ public class GetAnalyticsForStudentHandler(AppDbContext context, IUserProvider u
             .Select(c => new GetAnalyticsForStudentResponse.UpcomingClass
             {
                 ReservationId = c.ReservationId,
+                ClassName = c.Name,
                 SubjectName = c.Subject.Name,
                 StartsAt = c.StartsAt,
                 EndsAt = c.EndsAt

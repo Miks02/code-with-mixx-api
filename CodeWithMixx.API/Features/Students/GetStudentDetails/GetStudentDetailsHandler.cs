@@ -77,6 +77,7 @@ public class GetStudentDetailsHandler(AppDbContext context)
                     .Select(c => new ClassItem
                     {
                         Id = c.Id,
+                        Name = c.Name,
                         SubjectId = c.SubjectId,
                         SubjectName = c.Subject.Name,
                         Price = c.Price,
