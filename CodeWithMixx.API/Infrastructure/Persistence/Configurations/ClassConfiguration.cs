@@ -31,6 +31,10 @@ namespace CodeWithMixx.API.Infrastructure.Persistence.Configurations
                 .WithMany(r => r.Classes)
                 .HasForeignKey(c => c.ReservationId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(c => c.Name)
+                .HasMaxLength(ClassConstants.MaxNameLength)
+                .IsRequired();
             
             builder.Property(c => c.ReservedAt)
                 .IsRequired();

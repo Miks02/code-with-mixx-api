@@ -13,6 +13,12 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
             return new Error("Class.NotFound", message, ErrorType.NotFound);
         }
 
+        public static Error EmptyName()
+            => new("Class.EmptyName", "The name of the class cannot be empty.", ErrorType.Validation);
+
+        public static Error NameTooLong(string name)
+            => new("Class.NameTooLong", $"The name '{name}' is too long. It must not be more than {ClassConstants.MaxNameLength} characters.", ErrorType.Validation);
+
         public static Error InvalidSchedule(DateTime startsAt, DateTime endsAt)
             => new("Class.InvalidSchedule", $"Class schedule is invalid: starts at '{startsAt:u}' and ends at '{endsAt:u}'", ErrorType.Validation);
         

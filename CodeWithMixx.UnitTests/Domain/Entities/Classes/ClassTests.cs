@@ -8,6 +8,7 @@ namespace CodeWithMixx.UnitTests.Domain.Entities.Classes;
 
 public class ClassTests
 {
+    private const string Name = "Intro to C#";
     private const int SubjectId = 3;
     private const decimal Price = ClassConstants.DefaultPrice;
 
@@ -29,6 +30,7 @@ public class ClassTests
 
         result.IsSuccess.Should().BeTrue();
         var cls = result.Payload!;
+        cls.Name.Should().Be(Name);
         cls.SubjectId.Should().Be(SubjectId);
         cls.Price.Should().Be(Price);
         cls.StartsAt.Should().Be(StartsAt);
@@ -46,6 +48,29 @@ public class ClassTests
         _sut.IsDeleted.Should().BeFalse();
         _sut.DeletedAt.Should().BeNull();
     }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public void Create_WithEmptyName_ShouldReturnEmptyName(string? name)
+        => AssertFails(CreateValid(name: name!), ClassError.EmptyName());
+
+    [Fact]
+    public void Create_WithNameAtMaxLength_ShouldSucceed()
+        => CreateValid(name: new string('a', ClassConstants.MaxNameLength)).IsSuccess.Should().BeTrue();
+
+    [Fact]
+    public void Create_WithNameOverMaxLength_ShouldReturnNameTooLong()
+    {
+        var name = new string('a', ClassConstants.MaxNameLength + 1);
+
+        AssertFails(CreateValid(name: name), ClassError.NameTooLong(name));
+    }
+
+    [Fact]
+    public void Create_WithInvalidNameAndSubject_ShouldReportNameFirst()
+        => AssertFails(CreateValid(name: "", subjectId: 0), ClassError.EmptyName());
 
     [Theory]
     [InlineData(0)]
@@ -110,7 +135,7 @@ public class ClassTests
     [Fact]
     public void Create_WithMultipleInvalidValues_ShouldReportSubjectFirst()
     {
-        var result = Class.Create(0, 0, StartsAt, StartsAt, DateOnly.FromDateTime(StartsAt).AddDays(1));
+        var result = Class.Create(Name, 0, 0, StartsAt, StartsAt, DateOnly.FromDateTime(StartsAt).AddDays(1));
 
         AssertFails(result, SubjectError.NotFound(0));
     }
@@ -138,10 +163,11 @@ public class ClassTests
         var endsAt = startsAt.AddMinutes(30);
         var reservedAt = ReservedAt.AddDays(1);
 
-        var result = _sut.Update(9, 1500m, startsAt, endsAt, reservedAt);
+        var result = _sut.Update("Updated class", 9, 1500m, startsAt, endsAt, reservedAt);
 
         result.IsSuccess.Should().BeTrue();
         result.Payload.Should().BeSameAs(_sut);
+        _sut.Name.Should().Be("Updated class");
         _sut.SubjectId.Should().Be(9);
         _sut.Price.Should().Be(1500m);
         _sut.StartsAt.Should().Be(startsAt);
@@ -151,12 +177,32 @@ public class ClassTests
 
     [Fact]
     public void Update_WithSameValues_ShouldSucceed()
-        => _sut.Update(SubjectId, Price, StartsAt, EndsAt, ReservedAt).IsSuccess.Should().BeTrue();
+        => _sut.Update(Name, SubjectId, Price, StartsAt, EndsAt, ReservedAt).IsSuccess.Should().BeTrue();
+
+    [Fact]
+    public void Update_WithEmptyName_ShouldReturnEmptyNameAndKeepValues()
+    {
+        var result = _sut.Update(" ", SubjectId, Price, StartsAt, EndsAt, ReservedAt);
+
+        AssertFails(result, ClassError.EmptyName());
+        AssertUnchanged();
+    }
+
+    [Fact]
+    public void Update_WithNameOverMaxLength_ShouldReturnNameTooLongAndKeepValues()
+    {
+        var name = new string('a', ClassConstants.MaxNameLength + 1);
+
+        var result = _sut.Update(name, SubjectId, Price, StartsAt, EndsAt, ReservedAt);
+
+        AssertFails(result, ClassError.NameTooLong(name));
+        AssertUnchanged();
+    }
 
     [Fact]
     public void Update_WithInvalidSubjectId_ShouldReturnSubjectNotFoundAndKeepValues()
     {
-        var result = _sut.Update(0, 1500m, StartsAt, EndsAt, ReservedAt);
+        var result = _sut.Update(Name, 0, 1500m, StartsAt, EndsAt, ReservedAt);
 
         AssertFails(result, SubjectError.NotFound(0));
         AssertUnchanged();
@@ -165,7 +211,7 @@ public class ClassTests
     [Fact]
     public void Update_WithInvalidPrice_ShouldReturnInvalidPriceAndKeepValues()
     {
-        var result = _sut.Update(9, 0, StartsAt, EndsAt, ReservedAt);
+        var result = _sut.Update(Name, 9, 0, StartsAt, EndsAt, ReservedAt);
 
         AssertFails(result, ClassError.InvalidPrice(0));
         AssertUnchanged();
@@ -174,7 +220,7 @@ public class ClassTests
     [Fact]
     public void Update_WithInvalidSchedule_ShouldReturnInvalidScheduleAndKeepValues()
     {
-        var result = _sut.Update(SubjectId, Price, EndsAt, StartsAt, ReservedAt);
+        var result = _sut.Update(Name, SubjectId, Price, EndsAt, StartsAt, ReservedAt);
 
         AssertFails(result, ClassError.InvalidSchedule(EndsAt, StartsAt));
         AssertUnchanged();
@@ -183,7 +229,7 @@ public class ClassTests
     [Fact]
     public void Update_WithDurationOverLimit_ShouldReturnInvalidDurationAndKeepValues()
     {
-        var result = _sut.Update(SubjectId, Price, StartsAt, StartsAt.AddMinutes(ClassConstants.MaxDurationInMinutes + 1), ReservedAt);
+        var result = _sut.Update(Name, SubjectId, Price, StartsAt, StartsAt.AddMinutes(ClassConstants.MaxDurationInMinutes + 1), ReservedAt);
 
         AssertFails(result, ClassError.InvalidDuration());
         AssertUnchanged();
@@ -192,7 +238,7 @@ public class ClassTests
     [Fact]
     public void Update_WithReservedAtAfterClassDay_ShouldReturnInvalidReservationDateAndKeepValues()
     {
-        var result = _sut.Update(SubjectId, Price, StartsAt, EndsAt, DateOnly.FromDateTime(StartsAt).AddDays(1));
+        var result = _sut.Update(Name, SubjectId, Price, StartsAt, EndsAt, DateOnly.FromDateTime(StartsAt).AddDays(1));
 
         AssertFails(result, ClassError.InvalidReservationDate());
         AssertUnchanged();
@@ -203,7 +249,7 @@ public class ClassTests
     {
         _sut.Delete();
 
-        _sut.Update(SubjectId, 1500m, StartsAt, EndsAt, ReservedAt).IsSuccess.Should().BeTrue();
+        _sut.Update(Name, SubjectId, 1500m, StartsAt, EndsAt, ReservedAt).IsSuccess.Should().BeTrue();
         _sut.Price.Should().Be(1500m);
     }
 
@@ -213,7 +259,7 @@ public class ClassTests
         _sut.Delete();
         var deletedAt = _sut.DeletedAt;
 
-        _sut.Update(SubjectId, 1500m, StartsAt, EndsAt, ReservedAt);
+        _sut.Update(Name, SubjectId, 1500m, StartsAt, EndsAt, ReservedAt);
 
         _sut.IsDeleted.Should().BeTrue();
         _sut.DeletedAt.Should().Be(deletedAt);
@@ -290,15 +336,17 @@ public class ClassTests
     }
 
     private static API.Common.Results.Result<Class> CreateValid(
+        string name = Name,
         int subjectId = SubjectId,
         decimal price = Price,
         DateTime? startsAt = null,
         DateTime? endsAt = null,
         DateOnly? reservedAt = null)
-        => Class.Create(subjectId, price, startsAt ?? StartsAt, endsAt ?? EndsAt, reservedAt ?? ReservedAt);
+        => Class.Create(name, subjectId, price, startsAt ?? StartsAt, endsAt ?? EndsAt, reservedAt ?? ReservedAt);
 
     private void AssertUnchanged()
     {
+        _sut.Name.Should().Be(Name);
         _sut.SubjectId.Should().Be(SubjectId);
         _sut.Price.Should().Be(Price);
         _sut.StartsAt.Should().Be(StartsAt);
