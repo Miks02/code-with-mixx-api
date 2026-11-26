@@ -15,6 +15,7 @@ public record CreateClassReservationResponse
     public record ClassDto
     {
         public int Id { get; init; }
+        public string Name { get; init; } = null!;
         public int SubjectId { get; init; }
         public decimal Price { get; init; }
         public DateTime StartsAt { get; init; }

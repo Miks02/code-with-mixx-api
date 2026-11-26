@@ -97,6 +97,7 @@ public class UpdateClassReservationHandler(AppDbContext context, IUserClock cloc
             .Select(c => new ClassUpdateData
             {
                 Id = c.Id,
+                Name = c.Name,
                 SubjectId = c.SubjectId,
                 Price = c.Price,
                 StartsAt = c.StartsAt,
@@ -123,6 +124,7 @@ public class UpdateClassReservationHandler(AppDbContext context, IUserClock cloc
         var createData = classesToAdd
             .Select(c => new ClassCreateData
             {
+                Name = c.Name,
                 SubjectId = c.SubjectId,
                 Price = c.Price,
                 StartsAt = c.StartsAt,

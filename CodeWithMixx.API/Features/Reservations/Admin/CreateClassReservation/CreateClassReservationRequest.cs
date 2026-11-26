@@ -14,6 +14,7 @@ public record CreateClassReservationRequest
 
     public record ClassItemRequest
     {
+        public string Name { get; init; } = null!;
         public int SubjectId { get; init; }
         public decimal Price { get; init; }
         public DateTime StartsAt { get; init; }

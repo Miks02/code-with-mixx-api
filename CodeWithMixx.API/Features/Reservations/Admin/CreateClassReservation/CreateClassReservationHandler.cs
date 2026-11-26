@@ -33,6 +33,7 @@ public class CreateClassReservationHandler(AppDbContext context, IUserProvider u
         var classes = request.Classes
             .Select(c => new ClassCreateData
             {
+                Name = c.Name,
                 SubjectId = c.SubjectId,
                 Price = c.Price,
                 StartsAt = c.StartsAt,
@@ -71,6 +72,7 @@ public class CreateClassReservationHandler(AppDbContext context, IUserProvider u
             Classes = reservationResult.Payload.Classes.Select(c => new CreateClassReservationResponse.ClassDto
             {
                 Id = c.Id,
+                Name = c.Name,
                 SubjectId = c.SubjectId,
                 Price = c.Price,
                 StartsAt = c.StartsAt,

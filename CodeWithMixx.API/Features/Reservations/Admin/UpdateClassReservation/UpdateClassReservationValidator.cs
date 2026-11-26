@@ -44,6 +44,10 @@ public class ClassItemValidator : AbstractValidator<ClassItem>
 {
     public ClassItemValidator()
     {
+        RuleFor(x => x.Name)
+            .NotEmpty().WithMessage("Class name is required.")
+            .MaximumLength(ClassConstants.MaxNameLength).WithMessage($"Class name must not be more than {ClassConstants.MaxNameLength} characters.");
+
         RuleFor(x => x.SubjectId)
             .GreaterThan(0).WithMessage("SubjectId must be a valid identifier.");
 
