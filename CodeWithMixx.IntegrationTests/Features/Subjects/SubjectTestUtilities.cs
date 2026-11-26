@@ -75,6 +75,7 @@ public static class SubjectTestUtilities
             [
                 new ClassCreateData
                 {
+                    Name = "Test class",
                     SubjectId = subjectId,
                     Price = 1300m,
                     StartsAt = startsAt,

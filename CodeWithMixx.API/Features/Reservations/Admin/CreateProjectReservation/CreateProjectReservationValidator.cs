@@ -1,0 +1,92 @@
+using CodeWithMixx.API.Common.Interfaces;
+using CodeWithMixx.API.Domain.Entities.Projects;
+using CodeWithMixx.API.Domain.Entities.Reservations;
+using FluentValidation;
+
+namespace CodeWithMixx.API.Features.Reservations.Admin.CreateProjectReservation;
+
+public class CreateProjectReservationValidator : AbstractValidator<CreateProjectReservationRequest>
+{
+    public CreateProjectReservationValidator(IUserClock clock)
+    {
+        RuleFor(x => x.StudentId)
+            .NotEmpty().WithMessage("StudentId is required.");
+
+        RuleFor(x => x.TotalPrice)
+            .GreaterThanOrEqualTo(0).WithMessage("Total price cannot be negative.")
+            .When(x => x.TotalPrice is not null);
+
+        RuleFor(x => x.ReservedAt)
+            .NotEmpty().WithMessage("Reservation date is required.")
+            .LessThanOrEqualTo(x => clock.Today).WithMessage("Reservation date cannot be in the future");
+
+        RuleFor(x => x.Description)
+            .MaximumLength(ReservationConstants.MaxDescriptionLength).WithMessage($"Description cannot exceed {ReservationConstants.MaxDescriptionLength} characters.");
+
+        RuleFor(x => x.ReservationStatus)
+            .IsInEnum().WithMessage("Invalid reservation status.");
+
+        RuleFor(x => x.Projects)
+            .NotEmpty().WithMessage("At least one project is required for a reservation.");
+
+        RuleForEach(x => x.Projects)
+            .SetValidator((request, _) => new ProjectItemValidator(clock, request.ReservedAt));
+    }
+}
+
+internal class ProjectItemValidator : AbstractValidator<CreateProjectReservationRequest.ProjectItem>
+{
+    public ProjectItemValidator(IUserClock clock, DateOnly reservationReservedAt)
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty().WithMessage("Project name is required.")
+            .MaximumLength(100).WithMessage("Project name must not be more than 100 characters.");
+
+        RuleFor(x => x.SubjectId)
+            .GreaterThan(0).WithMessage("SubjectId must be a valid identifier.");
+
+        RuleFor(x => x.Price)
+            .GreaterThanOrEqualTo(0).WithMessage("Project price cannot be negative.");
+
+        RuleFor(x => x.ProjectType)
+            .IsInEnum().WithMessage("Invalid project type.");
+
+        RuleFor(x => x.Progress)
+            .InclusiveBetween(0, 100).WithMessage("Progress must be between 0 and 100.");
+
+        RuleFor(x => x.StartDate)
+            .NotEmpty().WithMessage("Start date is required.")
+            .GreaterThan(ProjectConstants.MinStartDate).WithMessage($"Start date must be after {ProjectConstants.MinStartDate:yyyy-MM-dd}.")
+            .GreaterThanOrEqualTo(x => x.ReservedAt).WithMessage("Start date cannot be before reservation date of a project.")
+            .GreaterThanOrEqualTo(reservationReservedAt).WithMessage("Start date cannot be before reservation date.");
+
+        RuleFor(x => x.EndDate)
+            .NotEmpty().WithMessage("End date is required.")
+            .GreaterThanOrEqualTo(x => x.StartDate).WithMessage("End date cannot be before start date.");
+        
+        RuleFor(x => x.ReservedAt)
+            .NotEmpty().WithMessage("Reservation date is required.")
+            .LessThanOrEqualTo(clock.Today).WithMessage("Reservation date cannot be in the future.");
+
+        RuleFor(x => x.GithubLink)
+            .MaximumLength(ProjectConstants.MaxLinkLength).WithMessage($"GitHub link must be less than {ProjectConstants.MaxLinkLength} characters.")
+            .When(x => x.GithubLink is not null);
+
+        RuleFor(x => x.DownloadLink)
+            .MaximumLength(ProjectConstants.MaxLinkLength).WithMessage($"Download link must be less than {ProjectConstants.MaxLinkLength} characters.")
+            .When(x => x.DownloadLink is not null);
+
+        RuleForEach(x => x.Notes)
+            .SetValidator(new ProjectNoteValidator());
+    }
+}
+
+public class ProjectNoteValidator : AbstractValidator<CreateProjectReservationRequest.ProjectNoteItem>
+{
+    public ProjectNoteValidator()
+    {
+        RuleFor(x => x.Content)
+            .NotEmpty().WithMessage("Project note content cannot be empty.")
+            .MaximumLength(ProjectConstants.MaxNoteLength).WithMessage($"Project note cannot exceed {ProjectConstants.MaxNoteLength} characters.");
+    }
+}

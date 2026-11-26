@@ -18,6 +18,7 @@ public record GetAnalyticsForAdminResponse
     public record UpcomingClass
     {
         public int ReservationId { get; init; }
+        public string ClassName { get; init; } = null!;
         public string SubjectName { get; init; } = null!;
         public string StudentName { get; init; } = null!;
         public DateTime StartsAt { get; init; }

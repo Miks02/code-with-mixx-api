@@ -52,6 +52,7 @@ public static class PaymentTransactionTestUtilities
             [
                 new ClassCreateData
                 {
+                    Name = "Test class",
                     SubjectId = subject.Id,
                     Price = 1300m,
                     StartsAt = startsAt,

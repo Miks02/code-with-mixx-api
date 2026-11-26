@@ -16,6 +16,7 @@ public class ReservationTests
     private const string StudentId = "student-1";
     private const string AdminId = "admin-1";
     private const int SubjectId = 3;
+    private const string ClassName = "Uvod u C#";
     private const int ReservationId = 11;
     private const decimal ClassPrice = ClassConstants.DefaultPrice;
     private const decimal ProjectPrice = 25000m;
@@ -1039,6 +1040,7 @@ public class ReservationTests
 
     private static ClassCreateData ClassData(DateTime startsAt, decimal price = ClassPrice, DateOnly? reservedAt = null) => new()
     {
+        Name = ClassName,
         SubjectId = SubjectId,
         Price = price,
         StartsAt = startsAt,
@@ -1049,6 +1051,7 @@ public class ReservationTests
     private static ClassUpdateData ClassUpdate(int id, DateTime startsAt, decimal price) => new()
     {
         Id = id,
+        Name = ClassName,
         SubjectId = SubjectId,
         Price = price,
         StartsAt = startsAt,

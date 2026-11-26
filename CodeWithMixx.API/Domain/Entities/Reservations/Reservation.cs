@@ -244,7 +244,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                 if (existingClass is null)
                     return Result.Failure(ClassError.NotFound(classUpdate.Id));
 
-                var updateResult = existingClass.Update(classUpdate.SubjectId, classUpdate.Price, classUpdate.StartsAt, classUpdate.EndsAt, classUpdate.ReservedAt);
+                var updateResult = existingClass.Update(classUpdate.Name, classUpdate.SubjectId, classUpdate.Price, classUpdate.StartsAt, classUpdate.EndsAt, classUpdate.ReservedAt);
 
                 if (!updateResult.IsSuccess)
                     return Result.Failure(updateResult.Errors[0]);
@@ -285,7 +285,7 @@ namespace CodeWithMixx.API.Domain.Entities.Reservations
                                                                             
             foreach (var classData in classesToAdd)
             {
-                var classResult = Class.Create(classData.SubjectId, classData.Price, classData.StartsAt, classData.EndsAt, classData.ReservedAt);
+                var classResult = Class.Create(classData.Name, classData.SubjectId, classData.Price, classData.StartsAt, classData.EndsAt, classData.ReservedAt);
 
                 if (!classResult.IsSuccess)
                     return Result.Failure(classResult.Errors[0]);

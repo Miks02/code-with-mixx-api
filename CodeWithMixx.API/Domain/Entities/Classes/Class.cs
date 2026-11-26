@@ -7,6 +7,7 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
     public class Class : IAuditable, ISoftDeletable
     {
         public int Id { get; private set; }
+        public string Name { get; private set; } = null!;
         public decimal Price { get; private set; }
         public DateTime StartsAt { get; private set; }
         public DateTime EndsAt { get; private set; }
@@ -25,14 +26,15 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
         
         private Class() {}
 
-        public static Result<Class> Create(int subjectId, decimal price, DateTime startsAt, DateTime endsAt, DateOnly reservedAt)
+        public static Result<Class> Create(string name, int subjectId, decimal price, DateTime startsAt, DateTime endsAt, DateOnly reservedAt)
         {
-            var validationResult = Validate(subjectId, price, startsAt, endsAt, reservedAt);
+            var validationResult = Validate(name, subjectId, price, startsAt, endsAt, reservedAt);
             if(!validationResult.IsSuccess)
                 return Result<Class>.Failure(validationResult.Errors[0]);
             
             var newClass = new Class
             {
+                Name = name,
                 SubjectId = subjectId,
                 Price = price,
                 StartsAt = startsAt,
@@ -43,12 +45,13 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
             return Result<Class>.Success(newClass);
         }
         
-        public Result<Class> Update(int subjectId, decimal price, DateTime startsAt, DateTime endsAt, DateOnly reservedAt)
+        public Result<Class> Update(string name, int subjectId, decimal price, DateTime startsAt, DateTime endsAt, DateOnly reservedAt)
         {
-            var validationResult = Validate(subjectId, price, startsAt, endsAt, reservedAt);
+            var validationResult = Validate(name, subjectId, price, startsAt, endsAt, reservedAt);
             if(!validationResult.IsSuccess)
                 return Result<Class>.Failure(validationResult.Errors[0]);
 
+            Name = name;
             SubjectId = subjectId;
             Price = price;
             StartsAt = startsAt;
@@ -80,8 +83,12 @@ namespace CodeWithMixx.API.Domain.Entities.Classes
             return Result.Success();
         }
         
-        private static Result Validate(int subjectId, decimal price, DateTime startsAt, DateTime endsAt, DateOnly reservedAt)
+        private static Result Validate(string name, int subjectId, decimal price, DateTime startsAt, DateTime endsAt, DateOnly reservedAt)
         {
+            if(string.IsNullOrWhiteSpace(name))
+                return Result.Failure(ClassError.EmptyName());
+            if(name.Length > ClassConstants.MaxNameLength)
+                return Result.Failure(ClassError.NameTooLong(name));
             if(subjectId <= 0)
                 return Result<Class>.Failure(SubjectError.NotFound(subjectId));
             if(price <= 0)

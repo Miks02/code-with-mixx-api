@@ -1,0 +1,183 @@
+using CodeWithMixx.API.Common.Interfaces;
+using CodeWithMixx.API.Common.Results;
+using CodeWithMixx.API.Domain.Entities.Projects;
+using CodeWithMixx.API.Domain.Entities.Reservations;
+using CodeWithMixx.API.Domain.Entities.Students;
+using CodeWithMixx.API.Domain.Entities.Subjects;
+using CodeWithMixx.API.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+
+namespace CodeWithMixx.API.Features.Reservations.Admin.UpdateProjectReservation;
+
+public class UpdateProjectReservationHandler(AppDbContext context, IUserClock clock)
+    : IHandler<UpdateProjectReservationRequest, Result<UpdateProjectReservationResponse>>
+{
+    public async Task<Result<UpdateProjectReservationResponse>> HandleAsync(UpdateProjectReservationRequest request, CancellationToken ct = default)
+    {
+        var reservation = await context.Reservations
+            .Include(r => r.Projects)
+                .ThenInclude(p => p.ProjectNotes)
+            .FirstOrDefaultAsync(r => r.Id == request.Id, ct);
+
+        if (reservation is null)
+            return Result<UpdateProjectReservationResponse>.Failure(ReservationError.NotFound(request.Id));
+
+        if (!string.Equals(reservation.StudentId, request.StudentId, StringComparison.Ordinal))
+        {
+            var studentExists = await context.Students.AnyAsync(s => s.UserId == request.StudentId, ct);
+
+            if (!studentExists)
+                return Result<UpdateProjectReservationResponse>.Failure(StudentError.NotFound(request.StudentId));
+
+            reservation.ChangeStudent(request.StudentId);
+        }
+
+        if (request.ProjectsToDelete.Count > 0)
+        {
+            var deleteResult = reservation.DeleteProjects(request.ProjectsToDelete);
+
+            if (!deleteResult.IsSuccess)
+                return Result<UpdateProjectReservationResponse>.Failure(deleteResult.Errors[0]);
+        }
+
+        var updateResult = await UpdateExistingProjectsAsync(reservation, request.Projects, ct);
+
+        if (!updateResult.IsSuccess)
+            return Result<UpdateProjectReservationResponse>.Failure(updateResult.Errors[0]);
+        
+        var reservedAtResult = reservation.UpdateReservedAt(request.ReservedAt, clock.Today);
+
+        if (!reservedAtResult.IsSuccess)
+            return Result<UpdateProjectReservationResponse>.Failure(reservedAtResult.Errors[0]);
+
+        var addResult = await AddNewProjectsAsync(reservation, request.Projects, ct);
+
+        if (!addResult.IsSuccess)
+            return Result<UpdateProjectReservationResponse>.Failure(addResult.Errors[0]);
+
+        reservation.UpdateReservationStatus(request.ReservationStatus);
+
+        var descriptionResult = reservation.UpdateDescription(request.Description);
+
+        if (!descriptionResult.IsSuccess)
+            return Result<UpdateProjectReservationResponse>.Failure(descriptionResult.Errors[0]);
+
+        var today = clock.Today;
+        
+        var totalPriceResult = reservation.UpdateTotalPrice(request.TotalPrice, today);
+
+        if (!totalPriceResult.IsSuccess)
+            return Result<UpdateProjectReservationResponse>.Failure(totalPriceResult.Errors[0]);
+        
+        await context.SaveChangesAsync(ct);
+
+        var response = new UpdateProjectReservationResponse
+        {
+            Id = reservation.Id,
+            StudentId = reservation.StudentId,
+            ReservationStatus = reservation.ReservationStatus,
+            PaymentStatus = reservation.PaymentStatus,
+            TotalPrice = reservation.TotalPrice,
+            PaidAmount = reservation.PaidAmount,
+            DiscountRate = reservation.DiscountRate,
+            Bonus = reservation.Bonus,
+            Description = reservation.Description,
+            ReservedAt = reservation.ReservedAt,
+            UpdatedAt = reservation.UpdatedAt
+        };
+
+        return Result<UpdateProjectReservationResponse>.Success(response);
+    }
+    
+    private async Task<Result> UpdateExistingProjectsAsync(Reservation reservation, IReadOnlyList<UpdateProjectReservationRequest.ProjectItem> projects, CancellationToken ct)
+    {
+        var projectsToUpdate = projects.Where(p => p.Id != 0).ToList();
+
+        if (projectsToUpdate.Count == 0)
+            return Result.Success();
+
+        var subjectsResult = await EnsureSubjectsExistAsync(projectsToUpdate.Select(p => p.SubjectId), ct);
+
+        if (!subjectsResult.IsSuccess)
+            return subjectsResult;
+
+        var updateData = projectsToUpdate
+            .Select(p => new ProjectUpdateData
+            {
+                Id = p.Id,
+                Name = p.Name,
+                SubjectId = p.SubjectId,
+                ProjectType = p.ProjectType,
+                StartDate = p.StartDate,
+                EndDate = p.EndDate,
+                ReservedAt = p.ReservedAt,
+                Today = clock.Today,
+                GithubLink = p.GithubLink,
+                DownloadLink = p.DownloadLink,
+                Price = p.Price,
+                Progress = p.Progress,
+                NotesToDelete = p.NotesToDelete,
+                Notes = p.Notes.Select(n => new ProjectUpdateData.ProjectNoteData
+                {
+                    Id = n.Id,
+                    Content = n.Content
+                }).ToList()
+            })
+            .ToList();
+
+        return reservation.UpdateProjects(updateData, clock.Today);
+    }
+
+    private async Task<Result> AddNewProjectsAsync(Reservation reservation, IReadOnlyList<UpdateProjectReservationRequest.ProjectItem> projects, CancellationToken ct)
+    {
+        var projectsToAdd = projects.Where(p => p.Id == 0).ToList();
+
+        if (projectsToAdd.Count == 0)
+            return Result.Success();
+
+        var subjectsResult = await EnsureSubjectsExistAsync(projectsToAdd.Select(p => p.SubjectId), ct);
+
+        if (!subjectsResult.IsSuccess)
+            return subjectsResult;
+
+        var createData = projectsToAdd
+            .Select(p => new ProjectCreateData
+            {
+                SubjectId = p.SubjectId,
+                Name = p.Name,
+                ProjectType = p.ProjectType,
+                StartDate = p.StartDate,
+                EndDate = p.EndDate,
+                ReservedAt = p.ReservedAt,
+                Today = clock.Today,
+                GithubLink = p.GithubLink,
+                DownloadLink = p.DownloadLink,
+                Price = p.Price,
+                Progress = p.Progress,
+                Notes = p.Notes.Select(n => new ProjectCreateData.ProjectNoteData
+                {
+                    Content = n.Content
+                }).ToList()
+            })
+            .ToList();
+
+        return reservation.AddProjects(createData);
+    }
+
+    private async Task<Result> EnsureSubjectsExistAsync(IEnumerable<int> subjectIds, CancellationToken ct)
+    {
+        var distinctSubjectIds = subjectIds.Distinct().ToList();
+
+        var existingSubjectIds = await context.Subjects
+            .Where(s => distinctSubjectIds.Contains(s.Id))
+            .Select(s => s.Id)
+            .ToListAsync(ct);
+
+        if (existingSubjectIds.Count == distinctSubjectIds.Count)
+            return Result.Success();
+
+        var missingSubjectIds = distinctSubjectIds.Except(existingSubjectIds).ToList();
+
+        return Result.Failure(SubjectError.MultipleSubjectsMissing(missingSubjectIds));
+    }
+}

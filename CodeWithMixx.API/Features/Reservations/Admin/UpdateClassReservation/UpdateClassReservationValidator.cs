@@ -1,0 +1,66 @@
+using CodeWithMixx.API.Domain.Entities.Classes;
+using CodeWithMixx.API.Features.Reservations.Common;
+using CodeWithMixx.API.Domain.Entities.Reservations;
+using FluentValidation;
+
+namespace CodeWithMixx.API.Features.Reservations.Admin.UpdateClassReservation;
+
+public class UpdateClassReservationRequestValidator : AbstractValidator<UpdateClassReservationRequest>
+{
+    public UpdateClassReservationRequestValidator()
+    {
+        RuleFor(x => x.StudentId)
+            .NotEmpty().WithMessage("StudentId is required.");
+
+        RuleFor(x => x.TotalPrice)
+            .GreaterThanOrEqualTo(0).WithMessage("Total price cannot be negative.");
+
+        RuleFor(x => x.PaidAmount)
+            .GreaterThanOrEqualTo(0).WithMessage("Paid amount cannot be negative.");
+        
+        RuleFor(x => x.Description)
+            .MaximumLength(ReservationConstants.MaxDescriptionLength).WithMessage($"Description cannot exceed {ReservationConstants.MaxDescriptionLength} characters.");
+
+        RuleFor(x => x.ReservationStatus)
+            .IsInEnum().WithMessage("Invalid reservation status.");
+
+        RuleFor(x => x.ClassesToDelete)
+            .Must(list => list.All(id => id > 0)).WithMessage("All class IDs to delete must be valid identifiers.");
+
+        RuleFor(x => x.Classes)
+            .NotEmpty().WithMessage("At least one class is required for a valid reservation");
+
+        RuleForEach(x => x.Classes)
+            .SetValidator(new ClassItemValidator());
+
+        RuleFor(x => x)
+            .Must(x => !x.ClassesToDelete.Intersect(x.Classes.Select(c => c.Id)).Any())
+            .WithMessage("A class cannot be both updated and deleted in the same request.")
+            .WithName(nameof(UpdateClassReservationRequest.ClassesToDelete));
+    }
+}
+
+public class ClassItemValidator : AbstractValidator<ClassItem>
+{
+    public ClassItemValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty().WithMessage("Class name is required.")
+            .MaximumLength(ClassConstants.MaxNameLength).WithMessage($"Class name must not be more than {ClassConstants.MaxNameLength} characters.");
+
+        RuleFor(x => x.SubjectId)
+            .GreaterThan(0).WithMessage("SubjectId must be a valid identifier.");
+
+        RuleFor(x => x.Price)
+            .GreaterThan(0).WithMessage("Class price cannot be negative or zero.");
+
+        RuleFor(x => x.StartsAt)
+            .NotEmpty().WithMessage("Start time is required.");
+
+        RuleFor(x => x.EndsAt)
+            .NotEmpty().WithMessage("End time is required.")
+            .GreaterThan(x => x.StartsAt).WithMessage("End time must be after start time.")
+            .Must((x, endsAt) => endsAt - x.StartsAt <= TimeSpan.FromMinutes(ClassConstants.MaxDurationInMinutes))
+            .WithMessage($"Class duration cannot exceed {ClassConstants.MaxDurationInMinutes} minutes.");
+    }
+}
