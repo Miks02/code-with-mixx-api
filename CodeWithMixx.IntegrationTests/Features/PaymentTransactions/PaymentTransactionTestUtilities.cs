@@ -117,6 +117,17 @@ public static class PaymentTransactionTestUtilities
         await context.SaveChangesAsync();
     }
 
+    public static async Task<List<PaymentTransaction>> GetTransactionsAsync(this IntegrationTestFactory factory, int reservationId)
+    {
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        return await context.PaymentTransactions
+            .AsNoTracking()
+            .Where(pt => pt.ReservationId == reservationId)
+            .ToListAsync();
+    }
+
     public static async Task<Reservation> FindReservationAsync(this IntegrationTestFactory factory, int reservationId)
     {
         using var scope = factory.Services.CreateScope();
