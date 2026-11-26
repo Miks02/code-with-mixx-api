@@ -1,0 +1,3 @@
+namespace CodeWithMixx.API.Features.PaymentTransactions.Student.GetPaymentsByReservationIdForStudent;
+
+public record GetPaymentsByReservationIdForStudentRequest(int ReservationId);
