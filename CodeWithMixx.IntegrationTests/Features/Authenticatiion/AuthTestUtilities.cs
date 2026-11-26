@@ -20,7 +20,15 @@ public static class AuthTestUtilities
         var existingStudent = await userManager.FindByEmailAsync(TestConstants.StudentEmail);
 
         if (existingStudent is not null)
+        {
+            if (!await context.Students.AnyAsync(s => s.UserId == existingStudent.Id))
+            {
+                context.Add(Student.Create(existingStudent.Id, TestConstants.StudentUniversity).Payload!);
+                await context.SaveChangesAsync();
+            }
+
             return existingStudent;
+        }
 
         var user = User.CreateUser(TestConstants.StudentFirstName, TestConstants.StudentLastName,
             TestConstants.StudentEmail, TestConstants.StudentLastName);

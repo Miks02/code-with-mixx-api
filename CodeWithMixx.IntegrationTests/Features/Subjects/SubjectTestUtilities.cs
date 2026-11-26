@@ -44,15 +44,24 @@ public static class SubjectTestUtilities
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+        var studentUser = User.CreateUser("Student", "Test", $"{Guid.NewGuid()}@test.com", "0600000001");
+        context.Users.Add(studentUser);
+        context.Students.Add(Student.Create(studentUser.Id, null).Payload!);
+        await context.SaveChangesAsync();
+
+        await factory.CreateClassReservationAsync(subjectId, studentUser.Id);
+    }
+
+    public static async Task CreateClassReservationAsync(this IntegrationTestFactory factory, int subjectId, string studentId)
+    {
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
         var adminUser = await context.Users.FirstAsync(u => u.Email == TestConstants.AdminEmail);
 
         var adminExists = await context.Admins.AnyAsync(a => a.UserId == adminUser.Id);
         if (!adminExists)
             context.Admins.Add(Admin.Create(adminUser.Id));
-
-        var studentUser = User.CreateUser("Student", "Test", $"{Guid.NewGuid()}@test.com", "0600000001");
-        context.Users.Add(studentUser);
-        context.Students.Add(Student.Create(studentUser.Id, null).Payload!);
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var startsAt = DateTime.UtcNow.Date.AddDays(1).AddHours(10);
@@ -60,7 +69,7 @@ public static class SubjectTestUtilities
         var reservation = Reservation.CreateClassReservation(new ReservationCreateData
         {
             AdminId = adminUser.Id,
-            StudentId = studentUser.Id,
+            StudentId = studentId,
             ReservedAt = today,
             Classes =
             [

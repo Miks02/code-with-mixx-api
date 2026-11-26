@@ -7,6 +7,7 @@ using CodeWithMixx.API.Domain.Entities.Users;
 using CodeWithMixx.API.Features.Authentication.Login;
 using CodeWithMixx.API.Infrastructure.Security;
 using CodeWithMixx.IntegrationTests.Common;
+using CodeWithMixx.IntegrationTests.Features.Authenticatiion;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Identity;
@@ -99,19 +100,26 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
     
     public async Task<HttpClient> CreateAdminClientAsync()
     {
-        _adminAccessToken = await LoginAndGetAccessTokenAsync();
+        _adminAccessToken = await LoginAndGetAccessTokenAsync(TestConstants.AdminEmail);
         return CreateClientWithAuthCookies(_adminAccessToken, CurrentRefreshToken);
     }
+
+    public async Task<HttpClient> CreateStudentClientAsync()
+    {
+        await this.GetOrCreateStudentAsync();
+        var accessToken = await LoginAndGetAccessTokenAsync(TestConstants.StudentEmail);
+        return CreateClientWithAuthCookies(accessToken, CurrentRefreshToken);
+    }
     
-    private async Task<string> LoginAndGetAccessTokenAsync()
+    private async Task<string> LoginAndGetAccessTokenAsync(string email)
     {
         using var scope = Services.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
         var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
 
-        var admin = await userManager.FindByEmailAsync(TestConstants.AdminEmail);
+        var user = await userManager.FindByEmailAsync(email);
         var sessionId = RefreshToken.GenerateSessionId();
-        var tokens = await tokenService.AssignAuthTokens(admin!, "User-Agent", sessionId);
+        var tokens = await tokenService.AssignAuthTokens(user!, "User-Agent", sessionId);
 
         var accessCookie = tokens.AccessToken;
 

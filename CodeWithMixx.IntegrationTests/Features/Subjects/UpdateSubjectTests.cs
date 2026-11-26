@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using AwesomeAssertions;
-using CodeWithMixx.API.Features.Subjects.UpdateSubject;
+using CodeWithMixx.API.Features.Subjects.Admin.UpdateSubject;
 using CodeWithMixx.IntegrationTests.Common;
 
 namespace CodeWithMixx.IntegrationTests.Features.Subjects;

@@ -1,0 +1,28 @@
+using CodeWithMixx.API.Common.Interfaces;
+using CodeWithMixx.API.Common.Results;
+using CodeWithMixx.API.Domain.Entities.Subjects;
+using CodeWithMixx.API.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+
+namespace CodeWithMixx.API.Features.Subjects.Admin.DeleteSubject;
+
+public class DeleteSubjectHandler(AppDbContext context) : IHandler<DeleteSubjectRequest, Result>
+{
+    public async Task<Result> HandleAsync(DeleteSubjectRequest request, CancellationToken ct = default)
+    {
+        var subject = await context.Subjects
+            .Include(s => s.Classes)
+            .FirstOrDefaultAsync(s => s.Id == request.Id, ct);
+
+        if (subject is null)
+            return Result.Failure(SubjectError.NotFound(request.Id));
+
+        if (subject.Classes.Any())
+            return Result.Failure(SubjectError.HasAssociatedClasses(request.Id));
+        
+        context.Subjects.Remove(subject);
+        await context.SaveChangesAsync(ct);
+
+        return Result.Success();
+    }
+}

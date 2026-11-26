@@ -1,7 +1,7 @@
 using System.Net;
 using AwesomeAssertions;
 using CodeWithMixx.API.Common.Results;
-using CodeWithMixx.API.Features.Subjects.GetPagedSubjectsForAdmin;
+using CodeWithMixx.API.Features.Subjects.Admin.GetPagedSubjectsForAdmin;
 using CodeWithMixx.IntegrationTests.Common;
 
 namespace CodeWithMixx.IntegrationTests.Features.Subjects;
