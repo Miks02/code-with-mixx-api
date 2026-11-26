@@ -1,6 +1,6 @@
 using System.Net;
 using AwesomeAssertions;
-using CodeWithMixx.API.Features.Subjects.GetSubjectsSummaryForAdmin;
+using CodeWithMixx.API.Features.Subjects.Admin.GetSubjectsSummaryForAdmin;
 using CodeWithMixx.IntegrationTests.Common;
 
 namespace CodeWithMixx.IntegrationTests.Features.Subjects;
