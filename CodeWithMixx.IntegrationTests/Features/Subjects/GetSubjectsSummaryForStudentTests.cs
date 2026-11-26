@@ -132,6 +132,7 @@ public class GetSubjectsSummaryForStudentTests : IClassFixture<IntegrationTestFa
         response.Data.Should().NotBeNull();
         response.Data.PagedSubjects.Items.Should().ContainSingle()
             .Which.Id.Should().Be(web.Id);
+        response.Data.TotalSubjects.Should().Be(2);
         response.Data.UntaughtSubjects.Should().Be(2);
     }
 

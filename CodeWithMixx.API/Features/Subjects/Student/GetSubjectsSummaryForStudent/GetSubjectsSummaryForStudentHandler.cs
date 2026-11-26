@@ -60,6 +60,7 @@ public class GetSubjectsSummaryForStudentHandler(AppDbContext context, IUserProv
             .GroupBy(s => 1)
             .Select(g => new
             {
+                TotalSubjects = g.Count(),
                 TaughtSubjects = g.Count(s => s.Classes.Any(c => c.Reservation.StudentId == studentId)),
                 UntaughtSubjects = g.Count(s => !s.Classes.Any(c => c.Reservation.StudentId == studentId))
             })
@@ -78,7 +79,7 @@ public class GetSubjectsSummaryForStudentHandler(AppDbContext context, IUserProv
         return new GetSubjectsSummaryForStudentResponse
         {
             PagedSubjects = pagedSubjects,
-            TotalSubjects = pagedSubjects.TotalCount,
+            TotalSubjects = stats?.TotalSubjects ?? 0,
             TaughtSubjects = stats?.TaughtSubjects ?? 0,
             UntaughtSubjects = stats?.UntaughtSubjects ?? 0,
             MostPopularSubject = mostPopularSubject,

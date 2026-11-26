@@ -72,6 +72,7 @@ public class GetSubjectsSummaryForAdminHandler(AppDbContext context) : IHandler<
             .GroupBy(s => 1)
             .Select(g => new
             {
+                TotalSubjects = g.Count(),
                 TaughtSubjects = g.Count(s => s.Classes.Count != 0),
                 UntaughtSubjects = g.Count(s => s.Classes.Count == 0)
             })
@@ -79,6 +80,7 @@ public class GetSubjectsSummaryForAdminHandler(AppDbContext context) : IHandler<
         
         var statsResult = stats ?? new
         {
+            TotalSubjects = 0,
             TaughtSubjects = 0,
             UntaughtSubjects = 0
         };
@@ -86,7 +88,7 @@ public class GetSubjectsSummaryForAdminHandler(AppDbContext context) : IHandler<
         return new GetSubjectsSummaryForAdminResponse
         {
             PagedSubjects = pagedSubjects,
-            TotalSubjects = pagedSubjects.TotalCount,
+            TotalSubjects = statsResult.TotalSubjects,
             TaughtSubjects = statsResult.TaughtSubjects,
             UntaughtSubjects = statsResult.UntaughtSubjects,
             MostPopularSubject = mostPopularSubject
