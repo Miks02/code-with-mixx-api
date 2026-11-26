@@ -71,6 +71,7 @@ public class LoginHandler(
             Email = user.Email!,
             PhoneNumber = user.PhoneNumber!,
             AccountStatus = user.AccountStatus,
+            University = user.Student?.University,
             LastLogin = (DateTime) user.LastLoginAt!,
             Roles = userRoles,
             ActiveSessions = activeSessions
