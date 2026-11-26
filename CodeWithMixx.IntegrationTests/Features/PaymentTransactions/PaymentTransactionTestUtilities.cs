@@ -1,7 +1,7 @@
-using CodeWithMixx.API.Domain.Entities.Admins;
+using AdminEntity = CodeWithMixx.API.Domain.Entities.Admins.Admin;
 using CodeWithMixx.API.Domain.Entities.PaymentTransactions;
 using CodeWithMixx.API.Domain.Entities.Reservations;
-using CodeWithMixx.API.Domain.Entities.Students;
+using StudentEntity = CodeWithMixx.API.Domain.Entities.Students.Student;
 using CodeWithMixx.API.Domain.Entities.Subjects;
 using CodeWithMixx.API.Domain.Entities.Users;
 using CodeWithMixx.API.Infrastructure.Persistence;
@@ -20,7 +20,7 @@ public static class PaymentTransactionTestUtilities
 
         var studentUser = User.CreateUser("Other", "Student", $"{Guid.NewGuid()}@test.com", "0600000002");
         context.Users.Add(studentUser);
-        context.Students.Add(Student.Create(studentUser.Id, null).Payload!);
+        context.Students.Add(StudentEntity.Create(studentUser.Id, null).Payload!);
         await context.SaveChangesAsync();
 
         return studentUser.Id;
@@ -34,7 +34,7 @@ public static class PaymentTransactionTestUtilities
         var adminUser = await context.Users.FirstAsync(u => u.Email == TestConstants.AdminEmail);
 
         if (!await context.Admins.AnyAsync(a => a.UserId == adminUser.Id))
-            context.Admins.Add(Admin.Create(adminUser.Id));
+            context.Admins.Add(AdminEntity.Create(adminUser.Id));
 
         var subject = Subject.Create($"Subject {Guid.NewGuid()}", "Description").Payload!;
         context.Subjects.Add(subject);
