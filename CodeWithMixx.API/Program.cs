@@ -8,20 +8,17 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration));
 
-builder.Services.Configure<JsonOptions>(options =>
-    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
-
-
 var app = builder.Build();
 await app.MapSeeders();
+
+app.UseForwardedHeaders();
 app.UseExceptionHandler();
 
-
 app.MapEndpoints();
-
 
 if (app.Environment.IsDevelopment())
 {
@@ -33,7 +30,6 @@ else
 {
     app.UseCors("ProdCors");
 }
-app.UseForwardedHeaders();
 app.UseRateLimiter();
 
 app.UseSerilogRequestLogging(options =>
@@ -49,6 +45,5 @@ app.UseSerilogRequestLogging(options =>
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseHttpsRedirection();
 
 app.Run();
