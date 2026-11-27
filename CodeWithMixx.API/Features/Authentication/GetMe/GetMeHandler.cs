@@ -26,6 +26,7 @@ public class GetMeHandler(IUserProvider userProvider, Parser uaParser, AppDbCont
                 Email = u.Email!,
                 PhoneNumber = u.PhoneNumber!,
                 AccountStatus = u.AccountStatus,
+                WasLoggedBefore = u.LastLoginAt != null,
                 LastLogin = (DateTime) u.LastLoginAt!,
                 Roles = userProvider.GetUserRoles(),
                 University = u.Student != null ? u.Student.University : null,

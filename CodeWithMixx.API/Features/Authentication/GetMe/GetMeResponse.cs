@@ -11,6 +11,7 @@ public record GetMeResponse
     public string PhoneNumber { get; init; } = null!;
     public string? University { get; init; }
     public DateTime LastLogin { get; init; }
+    public bool WasLoggedBefore { get; init; }
     public AccountStatus AccountStatus { get; init; }
     public IReadOnlyList<string> Roles { get; init; } = [];
     public IReadOnlyList<ActiveSessionItem> ActiveSessions { get; init; } = [];

@@ -44,6 +44,8 @@ public class LoginHandler(
         cookieProvider.SetRefreshTokenCookie(tokens.RefreshToken);
         cookieProvider.SetSessionCookie();
         
+        var wasLoggedBefore = user.LastLoginAt != null;
+        
         user.UpdateLastLogin();
         await userManager.UpdateAsync(user);
         
@@ -69,6 +71,7 @@ public class LoginHandler(
             FirstName = user.FirstName,
             LastName = user.LastName,
             Email = user.Email!,
+            WasLoggedBefore = wasLoggedBefore,
             PhoneNumber = user.PhoneNumber!,
             AccountStatus = user.AccountStatus,
             University = user.Student?.University,
