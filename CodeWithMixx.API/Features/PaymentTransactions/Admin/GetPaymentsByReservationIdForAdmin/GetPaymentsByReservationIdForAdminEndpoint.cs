@@ -15,7 +15,7 @@ public class GetPaymentsByReservationIdForAdminEndpoint : IEndpoint
                 var result = await handler.HandleAsync(new GetPaymentsByReservationIdForAdminRequest(reservationId), ct);
                 return result.ToTypedResult();
             })
-            .RequireAuthorization()
+            .RequireAuthorization("AdminOnly")
             .WithTags("Payments")
             .Produces<GetPaymentsByReservationIdForAdminResponse>()
             .Produces(StatusCodes.Status404NotFound);
