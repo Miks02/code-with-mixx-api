@@ -9,6 +9,7 @@ namespace CodeWithMixx.API.Features.Account.RequestEmailUpdate;
 
 public class RequestEmailUpdateHandler(
     UserManager<User> userManager,
+    SignInManager<User> signInManager,
     IUserProvider userProvider,
     IAuthEmailSender emailSender) : IHandler<RequestEmailUpdateRequest, Result>
 {
@@ -26,9 +27,11 @@ public class RequestEmailUpdateHandler(
         if(await userManager.Users.AnyAsync(u => u.Email == request.NewEmail, ct))
             return Result.Failure(AuthError.EmailAlreadyInUse(user.Id, request.NewEmail));
 
-        var passwordCheck = await userManager.CheckPasswordAsync(user, request.Password);
+        var passwordCheck = await signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
+        if (passwordCheck.IsLockedOut)
+            return Result.Failure(AuthError.AccountLocked());
 
-        if (!passwordCheck)
+        if (!passwordCheck.Succeeded)
             return Result.Failure(AuthError.InvalidCurrentPassword());
         
         var token = await userManager.GenerateChangeEmailTokenAsync(user, request.NewEmail);

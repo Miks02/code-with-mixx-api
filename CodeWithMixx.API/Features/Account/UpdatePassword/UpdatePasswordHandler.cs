@@ -8,6 +8,7 @@ namespace CodeWithMixx.API.Features.Account.UpdatePassword;
 
 public class UpdatePasswordHandler(
     UserManager<User> userManager,
+    SignInManager<User> signInManager,
     ITokenService tokenService,
     ICookieProvider cookieProvider,
     IUserProvider userProvider,
@@ -19,8 +20,11 @@ public class UpdatePasswordHandler(
         if (user is null)
             return Result.Failure(UserError.NotFound(userProvider.GetUserId()));
         
-        var isCurrentPasswordValid = await userManager.CheckPasswordAsync(user, request.CurrentPassword);
-        if (!isCurrentPasswordValid)
+        var passwordCheck = await signInManager.CheckPasswordSignInAsync(user, request.CurrentPassword, lockoutOnFailure: true);
+        if (passwordCheck.IsLockedOut)
+            return Result.Failure(AuthError.AccountLocked());
+
+        if (!passwordCheck.Succeeded)
             return Result.Failure(AuthError.InvalidCurrentPassword());
         
         var changePasswordResult = await userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
