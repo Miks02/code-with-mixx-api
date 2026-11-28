@@ -96,7 +96,7 @@ public class GetPaymentsByReservationIdForAdminTests : IClassFixture<Integration
 
     private async Task<EndpointResponse<GetPaymentsByReservationIdForAdminResponse>> GetPaymentsAsync(int reservationId)
     {
-        var response = await _httpClient.GetAsync($"/api/reservations/{reservationId}/payments");
+        var response = await _httpClient.GetAsync($"/api/admin/reservations/{reservationId}/payments");
         return await response.ToEndpointResponse<GetPaymentsByReservationIdForAdminResponse>();
     }
 }
