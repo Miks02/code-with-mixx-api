@@ -31,6 +31,17 @@ public class GetPaymentsByReservationIdForAdminTests : IClassFixture<Integration
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         response.Data.Should().BeNull();
     }
+    
+    [Fact]
+    public async Task GetPayments_WhenUserIsNotAdmin_ShouldReturnForbidden()
+    {
+        _httpClient = await _factory.CreateStudentClientAsync();
+
+        var response = await GetPaymentsAsync(1);
+
+        response.Response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response.Data.Should().BeNull();
+    }
 
     [Fact]
     public async Task GetPayments_WhenReservationDoesNotExist_ShouldReturnNotFound()

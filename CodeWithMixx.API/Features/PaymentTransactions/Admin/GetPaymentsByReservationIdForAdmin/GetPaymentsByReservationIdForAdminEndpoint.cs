@@ -7,7 +7,7 @@ public class GetPaymentsByReservationIdForAdminEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/reservations/{reservationId:int}/payments", async (
+        app.MapGet("admin/reservations/{reservationId:int}/payments", async (
                 IHandler<GetPaymentsByReservationIdForAdminRequest, Result<GetPaymentsByReservationIdForAdminResponse>> handler,
                 CancellationToken ct,
                 int reservationId) =>
