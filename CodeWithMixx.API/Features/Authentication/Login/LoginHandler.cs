@@ -23,7 +23,10 @@ public class LoginHandler(
 
     public async Task<Result<LoginResponse>> HandleAsync(LoginRequest request, CancellationToken ct = default)
     {
-        var user = await userManager.Users.FirstOrDefaultAsync(u => u.Email == request.Email, ct);
+        var user = await userManager.Users
+            .Include(u => u.Student)
+            .FirstOrDefaultAsync(u => u.Email == request.Email, ct);
+        
         if (user is null)
             return Result<LoginResponse>.Failure(AuthError.LoginFailed($"User with email {request.Email} has not been found."));
 
