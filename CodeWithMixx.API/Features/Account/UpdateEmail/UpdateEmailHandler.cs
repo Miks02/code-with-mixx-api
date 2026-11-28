@@ -10,14 +10,13 @@ namespace CodeWithMixx.API.Features.Account.UpdateEmail;
 
 public class UpdateEmailHandler(
     UserManager<User> userManager,
+    SignInManager<User> signInManager,
     AppDbContext context,
     IUserProvider userProvider,
     IAuthEmailSender emailSender) : IHandler<UpdateEmailRequest, Result<UpdateEmailResponse>>
 {
     public async Task<Result<UpdateEmailResponse>> HandleAsync(UpdateEmailRequest request, CancellationToken ct = default)
     {
-        await using var transaction = await context.Database.BeginTransactionAsync(ct);
-
         var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userProvider.GetUserId(), ct);
         if(user is null)
             return Result<UpdateEmailResponse>.Failure(UserError.NotFound());
@@ -27,8 +26,14 @@ public class UpdateEmailHandler(
         if(string.Compare(user.Email, request.NewEmail, StringComparison.OrdinalIgnoreCase) == 0)
             return Result<UpdateEmailResponse>.Failure(AuthError.CannotChangeEmailToSameEmail(user.Id));
 
-        if(!await userManager.CheckPasswordAsync(user, request.Password))
+        var passwordCheck = await signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
+        if (passwordCheck.IsLockedOut)
+            return Result<UpdateEmailResponse>.Failure(AuthError.AccountLocked());
+
+        if (!passwordCheck.Succeeded)
             return Result<UpdateEmailResponse>.Failure(AuthError.InvalidCurrentPassword());
+
+        await using var transaction = await context.Database.BeginTransactionAsync(ct);
 
         var emailUpdateResult = await userManager.ChangeEmailAsync(user, request.NewEmail, request.Token);
 

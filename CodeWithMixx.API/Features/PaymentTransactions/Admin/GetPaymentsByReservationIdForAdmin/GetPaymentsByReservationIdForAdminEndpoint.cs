@@ -7,7 +7,7 @@ public class GetPaymentsByReservationIdForAdminEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/reservations/{reservationId:int}/payments", async (
+        app.MapGet("admin/reservations/{reservationId:int}/payments", async (
                 IHandler<GetPaymentsByReservationIdForAdminRequest, Result<GetPaymentsByReservationIdForAdminResponse>> handler,
                 CancellationToken ct,
                 int reservationId) =>
@@ -15,7 +15,7 @@ public class GetPaymentsByReservationIdForAdminEndpoint : IEndpoint
                 var result = await handler.HandleAsync(new GetPaymentsByReservationIdForAdminRequest(reservationId), ct);
                 return result.ToTypedResult();
             })
-            .RequireAuthorization()
+            .RequireAuthorization("AdminOnly")
             .WithTags("Payments")
             .Produces<GetPaymentsByReservationIdForAdminResponse>()
             .Produces(StatusCodes.Status404NotFound);

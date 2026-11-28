@@ -31,6 +31,17 @@ public class GetPaymentsByReservationIdForAdminTests : IClassFixture<Integration
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         response.Data.Should().BeNull();
     }
+    
+    [Fact]
+    public async Task GetPayments_WhenUserIsNotAdmin_ShouldReturnForbidden()
+    {
+        _httpClient = await _factory.CreateStudentClientAsync();
+
+        var response = await GetPaymentsAsync(1);
+
+        response.Response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response.Data.Should().BeNull();
+    }
 
     [Fact]
     public async Task GetPayments_WhenReservationDoesNotExist_ShouldReturnNotFound()
@@ -85,7 +96,7 @@ public class GetPaymentsByReservationIdForAdminTests : IClassFixture<Integration
 
     private async Task<EndpointResponse<GetPaymentsByReservationIdForAdminResponse>> GetPaymentsAsync(int reservationId)
     {
-        var response = await _httpClient.GetAsync($"/api/reservations/{reservationId}/payments");
+        var response = await _httpClient.GetAsync($"/api/admin/reservations/{reservationId}/payments");
         return await response.ToEndpointResponse<GetPaymentsByReservationIdForAdminResponse>();
     }
 }

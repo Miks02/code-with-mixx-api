@@ -13,6 +13,7 @@ namespace CodeWithMixx.API.Features.Authentication.Login;
 
 public class LoginHandler(
     UserManager<User> userManager,
+    SignInManager<User> signInManager,
     ITokenService tokenService,
     AppDbContext context,
     ICookieProvider cookieProvider,
@@ -22,18 +23,21 @@ public class LoginHandler(
 
     public async Task<Result<LoginResponse>> HandleAsync(LoginRequest request, CancellationToken ct = default)
     {
-        await using var transaction = await context.Database.BeginTransactionAsync(ct);
-
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.Email == request.Email, ct);
         if (user is null)
             return Result<LoginResponse>.Failure(AuthError.LoginFailed($"User with email {request.Email} has not been found."));
 
-        var isPasswordValid = await userManager.CheckPasswordAsync(user, request.Password);
-        if (!isPasswordValid)
+        var passwordCheck = await signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
+        if (passwordCheck.IsLockedOut)
+            return Result<LoginResponse>.Failure(AuthError.AccountLocked());
+
+        if (!passwordCheck.Succeeded)
             return Result<LoginResponse>.Failure(AuthError.LoginFailed("Invalid password."));
 
         if (user.AccountStatus == AccountStatus.Deactivated)
             return Result<LoginResponse>.Failure(AuthError.AccountDeactivated(user.Id));
+
+        await using var transaction = await context.Database.BeginTransactionAsync(ct);
 
         var sessionId = RefreshToken.GenerateSessionId();
         var userAgent = userProvider.GetUserAgent();

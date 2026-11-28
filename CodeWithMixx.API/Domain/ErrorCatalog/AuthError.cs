@@ -39,7 +39,7 @@ public class AuthError
         => new("Auth.PasswordRequiresNonAlphanumeric", message, ErrorType.Validation);
 
     public static Error AccountLocked(string message = "Account is locked")
-        => new("Auth.AccountLocked", message, ErrorType.Unauthorized);
+        => new("Auth.AccountLocked", message, ErrorType.TooManyRequests);
     
     public static Error ExpiredToken(string message = "Refresh token has expired")
         => new("Auth.ExpiredToken", message, ErrorType.Unauthorized);

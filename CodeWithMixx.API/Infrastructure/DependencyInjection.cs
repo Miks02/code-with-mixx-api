@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using CodeWithMixx.API.Common.Interfaces;
 using CodeWithMixx.API.Infrastructure.BackgroundServices;
 using CodeWithMixx.API.Infrastructure.Cors;
@@ -10,6 +11,8 @@ using CodeWithMixx.API.Infrastructure.RateLimiting;
 using CodeWithMixx.API.Infrastructure.Security;
 using CodeWithMixx.API.Infrastructure.Utility;
 using FluentValidation;
+using Microsoft.AspNetCore.Http.Json;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using UAParser;
 
@@ -44,6 +47,16 @@ public static class DependencyInjection
         services.AddCustomProblemDetails();
         services.AddSingleton(Parser.GetDefault(new ParserOptions { UseCompiledRegex = true }));
         
+        services.Configure<JsonOptions>(options =>
+            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+        services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+
+            options.KnownIPNetworks.Clear();
+            options.KnownProxies.Clear();
+        });
         
         services.Scan(scan => scan.FromAssemblyOf<Program>()
             .AddClasses(classes => classes.AssignableTo(typeof(IHandler<,>)))
